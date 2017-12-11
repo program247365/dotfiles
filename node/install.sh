@@ -1,4 +1,5 @@
-if test ! $(which spoof)
-then
-  sudo npm install spoof -g
-fi
+# TODO: Install commonly used global modules here.
+# if test ! $(which spoof)
+# then
+#   sudo npm install spoof -g
+# fi
