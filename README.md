@@ -1,12 +1,14 @@
-# Dotfiles
+# Dotfiles 🦄 💻
 
-How I'm doing dotfiles.
+> How I'm doing dotfiles.
 
 ## Setup
 
-`git clone https://github.com/holman/dotfiles.git ~/.dotfiles`
-`cd ~/.dotfiles`
-`script/bootstrap`
+```
+git clone https://github.com/holman/dotfiles.git ~/.dotfiles
+cd ~/.dotfiles
+script/bootstrap
+```
 
 ## Update
 
