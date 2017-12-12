@@ -1,9 +1,11 @@
 cask_args appdir: '/Applications'
 
 tap 'homebrew/bundle'
+tap 'git-time-metric/gtm'
 
 brew 'doctl'
 brew 'git'
+brew 'gtm'
 brew 'hub'
 brew 'jq'
 brew 'm-cli'
