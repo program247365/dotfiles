@@ -1,12 +1,21 @@
 # Dotfiles
 
 How I'm doing dotfiles.
+
+## Setup
+
+`git clone https://github.com/holman/dotfiles.git ~/.dotfiles`
+`cd ~/.dotfiles`
+`script/bootstrap`
+
+## Update
+
+`~/.dotfiles/bin/dot`
 ## Todo
 
-* change zsh to bash
-* go through ComputerSetupNotes and convert to this repo
-* Setup scripts to install hyper plugins
-* install apps through `mas` app
-  * `mas install 1091189122 # (Bear writer)`
-  * `mas install 878995413 # outlineedit`
-  * `mas install 1278508951 # Trello Desktop app`
+* add script that will install sketch plugins
+   * may have to do this manually for now https://github.com/buzzfeed/Sketch-Toolbox/issues/19
+* update prompt.sh to work with bash
+* look at more things want to incorporate from https://github.com/mathiasbynens/dotfiles/blob/master/.macos
+* backup/restore settings for Visual Studio Code here - https://marketplace.visualstudio.com/items?itemName=Shan.code-settings-sync
+* hyper.is app doesn't like it's hyper.js config file symlinked, so need to awk in changes to that file after installation
