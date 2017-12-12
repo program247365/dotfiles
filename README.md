@@ -16,7 +16,7 @@ script/bootstrap
 ## Todo
 
 * add script that will install sketch plugins
-   * may have to do this manually for now https://github.com/buzzfeed/Sketch-Toolbox/issues/19
+  * may have to do this manually for now https://github.com/buzzfeed/Sketch-Toolbox/issues/19
 * update prompt.sh to work with bash
 * look at more things want to incorporate from https://github.com/mathiasbynens/dotfiles/blob/master/.macos
 * backup/restore settings for Visual Studio Code here - https://marketplace.visualstudio.com/items?itemName=Shan.code-settings-sync
