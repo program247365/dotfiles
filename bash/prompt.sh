@@ -57,7 +57,7 @@ directory_name() {
 battery_status() {
   if [[ $(sysctl -n hw.model) == *"Book"* ]]
   then
-    $ZSH/bin/battery-status
+    $BASH/bin/battery-status
   fi
 }
 
@@ -67,6 +67,6 @@ set_prompt () {
 }
 
 precmd() {
-  title "zsh" "%m" "%55<...<%~"
+  title "bash" "%m" "%55<...<%~"
   set_prompt
 }
