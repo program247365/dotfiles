@@ -1,4 +1,13 @@
 #!/bin/bash
+
+echo "Installing NVM..."
+
+curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.7/install.sh | bash
+
+echo "Installing the latest version of Node.js..."
+
+nvm install node
+
 ## Common Global Node modules
 
 echo "Installing global node modules..."
