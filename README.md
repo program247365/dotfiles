@@ -5,7 +5,7 @@
 ## Setup
 
 ```
-git clone https://github.com/holman/dotfiles.git ~/.dotfiles
+git clone https://github.com/program247365/dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
 script/bootstrap
 ```
