@@ -8,32 +8,34 @@ echo "Installing the latest version of Node.js..."
 
 nvm install node
 
+source ~/.bashrc
+
 ## Common Global Node modules
 
 echo "Installing global node modules..."
 
 declare -a modules=(
-    'awesome-lint',
-    'create-react-app',
-    'ember-cli',
-    'emoji-cli',
-    'express-generator',
-    'fkill-cli',
-    'gatsby-cli',
-    'generator-awesome-list',
-    'graphcool',
-    'hexo-cli',
+    'awesome-lint'
+    'create-react-app'
+    'ember-cli'
+    'emoji-cli'
+    'express-generator'
+    'fkill-cli'
+    'gatsby-cli'
+    'generator-awesome-list'
+    'graphcool'
+    'hexo-cli'
     'how2'
-    'hpm-cli',
-    'http-console',
-    'nativefier',
-    'node-inspector',
-    'nodemon',
-    'now',
-    'npm-check',
-    'soundscrape',
-    'speed-test',
-    'tiny-care-terminal',
+    'hpm-cli'
+    'http-console'
+    'nativefier'
+    'nodemon'
+    'now'
+    'npm-check'
+    'soundscrape'
+    'speed-test'
+    'git-standup'
+    'tiny-care-terminal'
     'tldr'
     'vtop'
     'yo'
