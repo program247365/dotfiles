@@ -12,6 +12,7 @@ brew 'jq'
 brew 'keith/formulae/reminders-cli'
 brew 'm-cli'
 brew 'mas'
+brew 'multimarkdown'
 brew 'ripgrep'
 brew 'unrar'
 brew 'wget'
@@ -32,11 +33,7 @@ cask 'font-source-sans-pro'
 cask 'google-chrome'
 cask 'grammarly'
 cask 'hyper'
-<<<<<<< HEAD
-cask 'iterm'
-=======
 cask 'iterm2'
->>>>>>> 5858eabb3af5149e2052546ed5b6a7c79a123e0e
 cask 'kap'
 cask 'skitch'
 cask 'plug'
@@ -55,10 +52,6 @@ cask 'slack'
 cask 'spectacle'
 cask 'steam'
 cask 'suspicious-package'
-<<<<<<< HEAD
-cask 'transmission'
-=======
->>>>>>> 5858eabb3af5149e2052546ed5b6a7c79a123e0e
 cask 'transmit'
 cask 'virtualbox'
 cask 'visual-studio-code'
