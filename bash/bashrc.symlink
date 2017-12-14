@@ -1,5 +1,57 @@
-# shortcut to this dotfiles path is $ZSH
+# shortcut to this dotfiles path is $BASH
 export BASH=$HOME/.dotfiles
+
+## Better Bash History https://coderwall.com/p/jdvura/preserve-bash-history-across-multiple-sessions
+export HISTCONTROL=ignoreboth:erasedups # no duplicate entries
+export HISTSIZE=100000                  # big big history
+export HISTFILESIZE=100000              # big big history
+shopt -s histappend                     # append to history, don't overwrite it
+
+# Save and reload the history after each command finishes
+export PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND"
+
+### NVM
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" # This loads nvm
+
+### Tiny Care Terminal
+# List of accounts to read the last tweet from, comma separated
+# The first in the list is read by the party parrot.
+export TTC_BOTS='tinycarebot,selfcare_bot,magicrealismbot'
+
+# Use this to have a different animal say a message in the big box.
+export TTC_SAY_BOX='parrot'
+
+# List of folders to look into for `git` commits, comma separated.
+export TTC_REPOS=~/Code
+
+# The max directory-depth to look for git repositories in
+# the directories defined with `TTC_REPOS`. Note that the deeper
+# the directory depth, the slower the results will be fetched.
+export TTC_REPOS_DEPTH=3
+
+# Which method is to be used to read the git commits ('gitstandup' | 'gitlog').
+# If you're having problems seeing your commits in the dahsboard, set
+# this value to gitlog.
+export TTC_GITBOT='gitlog'
+
+# Location/zip code to check the weather for. Both 90210 and "San Francisco, CA"
+# _should_ be ok (the zip code doesn't always work -- use a location
+# first, if you can). It's using weather.service.msn.com behind the curtains.
+export TTC_WEATHER='Buffalo'
+
+# Set to false if you're an imperial lover <3
+export TTC_CELSIUS=false
+
+# Unset this if you _don't_ want to use Twitter keys and want to
+# use web scraping instead.
+# export TTC_APIKEYS=false
+
+# Refresh the dashboard every 20 minutes.
+export TTC_UPDATE_INTERVAL=20
+
+# Turn off terminal title
+export TTC_TERMINAL_TITLE=false
 
 # Stash your environment variables in ~/.localrc. This means they'll stay out
 # of your main dotfiles repository (which may be public, like this one), but
@@ -9,6 +61,7 @@ then
   source ~/.localrc
 fi
 
+<<<<<<< HEAD
 # all of our zsh files
 typeset -U config_files
 config_files=($BASH/**/*.sh)
@@ -108,3 +161,40 @@ fi
 . /usr/local/etc/profile.d/z.sh
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
+=======
+# all of our bash files
+typeset config_files
+config_files=($BASH/**/*.sh)
+
+# TODO FIX THIS FOR BASH
+# load the path files
+# for file in ${(M)config_files:#*/path.sh}
+# do
+#   source $file
+# done
+
+# TODO FIX THIS FOR BASH
+# load everything but the path and completion files
+# for file in ${${config_files:#*/path.sh}:#*/completion.sh}
+# do
+#   source $file
+# done
+
+# TODO FIX THIS FOR BASH
+# initialize autocomplete here, otherwise functions won't be loaded
+# autoload -U compinit
+# compinit
+
+# TODO ADD COMPLETION FILES LATER
+# load every completion after autocomplete loads
+# for file in ${(M)config_files:#*/completion.sh}
+# do
+#   source $file
+# done
+
+unset config_files
+
+# https://github.com/rupa/z
+. /usr/local/etc/profile.d/z.sh
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+>>>>>>> 5858eabb3af5149e2052546ed5b6a7c79a123e0e
