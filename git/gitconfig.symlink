@@ -13,6 +13,20 @@
         ui = true
 [core]
         excludesfile = ~/.gitignore
-        editor = code
+        editor = code --wait --new-window
 [help]
         autocorrect = 1
+[diff]
+        tool = default-difftool
+[difftool "default-difftool"]
+        cmd = code --wait --diff $LOCAL $REMOTE
+[merge]
+        tool = vscode
+[mergetool "vscode"]
+        cmd = code --wait --new-window $MERGED
+[filter "lfs"]
+        smudge = git-lfs smudge -- %f
+        process = git-lfs filter-process
+        required = true
+        clean = git-lfs clean -- %f
+

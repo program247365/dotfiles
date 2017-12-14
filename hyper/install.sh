@@ -9,13 +9,21 @@ echo "Installing Hyper Terminal..."
 brew cask install hyper
 npm install -g hpm-cli
 
-hpm i hyperterm-tab-icons
-hpm i hypercwd
-hpm i hyperterm-tabs
-hpm i hyperlinks
-hpm i hyperterm-firewatch
+hpm i hyper-quit
+hpm i hyper-tab-icons-plus
+hpm i hyperterm-clicky
+hpm i hyperterm-copy
+hpm i hyperterm-crosshair
 hpm i hyperborder
 hpm i hyperclick
+hpm i hypercwd
+hpm i hyperlinks
+hpm i hyperpanic
+hpm i hyperterm-firewatch
+hpm i hyperterm-tab-icons
+hpm i hyperterm-tabs
+hpm i hypercwd
+hpm i hyper-statuslin
 
 cat > ~/.hyper.js <<'EOF'
 // Future versions of Hyper may add additional config options,
@@ -136,13 +144,21 @@ module.exports = {
 	//   `@company/project`
 	//   `project#1.0.1`
 	plugins: [
-		'hyperterm-tab-icons',
-		'hypercwd',
-		'hyperterm-tabs',
-		'hyperlinks',
-		'hyperterm-firewatch',
+		'hyper-quit',
+		'hyper-tab-icons-plus',
+		'hyperterm-clicky',
+		'hyperterm-copy',
+		'hyperterm-crosshair',
 		'hyperborder',
-		'hyperclick'
+		'hyperclick',
+		'hypercwd',
+		'hyperlinks',
+		'hyperpanic',
+		'hyperterm-firewatch',
+		'hyperterm-tab-icons',
+		'hyperterm-tabs',
+		'hypercwd',
+		'hyper-statusline'
 	],
 
 	// in development, you can create a directory under
