@@ -1,29 +1,3 @@
-## Installing My Hyper things... http://hyper.is/
-
-# TODO: The config file is a bit heavy-handed, should probably
-# awk the parts of the config file after it's installed that I
-# want changed.
-
-echo "Installing Hyper Terminal..."
-
-brew cask install hyper
-npm install -g hpm-cli
-
-hpm i hyper-quit
-hpm i hyper-tab-icons-plus
-hpm i hyperterm-clicky
-hpm i hyperterm-copy
-hpm i hyperborder
-hpm i hyperclick
-hpm i hypercwd
-hpm i hyperlinks
-hpm i hyperpanic
-hpm i hyperterm-tab-icons
-hpm i hyperterm-tabs
-hpm i hypercwd
-hpm i hyper-statusline
-
-cat > ~/.hyper.js <<'EOF'
 // Future versions of Hyper may add additional config options,
 // which will not automatically be merged into this file.
 // See https://hyper.is#cfg for all currently supported options.
@@ -142,20 +116,20 @@ module.exports = {
 	//   `@company/project`
 	//   `project#1.0.1`
 	plugins: [
-		'hyper-quit',
-		'hyper-tab-icons-plus',
-		'hyperterm-clicky',
-		'hyperterm-copy',
-		'hyperborder',
-		'hyperclick',
-		'hypercwd',
-		'hyperlinks',
-		'hyperpanic',
-		'hyperterm-tab-icons',
-		'hyperterm-tabs',
-		'hypercwd',
-		'hyper-statusline'
-	],
+        'hyper-quit',
+        'hyper-tab-icons-plus',
+        'hyperterm-clicky',
+        'hyperterm-copy',
+        'hyperborder',
+        'hyperclick',
+        'hypercwd',
+        'hyperlinks',
+        'hyperpanic',
+        'hyperterm-tab-icons',
+        'hyperterm-tabs',
+        'hypercwd',
+        'hyper-statusline'
+    ],
 
 	// in development, you can create a directory under
 	// `~/.hyper_plugins/local/` and include it here
@@ -167,4 +141,3 @@ module.exports = {
 		// 'window:devtools': 'cmd+alt+o',
 	}
 };
-EOF

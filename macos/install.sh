@@ -29,4 +29,4 @@ xcode-select --install
 
 echo "Updating homebrew, and checking it..."
 ## Update homebrew
-brew update && brew update && brew prune && brew doctor
+brew update && brew prune && brew doctor
