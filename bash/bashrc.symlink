@@ -62,32 +62,37 @@ then
 fi
 
 # all of our bash files
-typeset -U config_files
+typeset config_files
 config_files=($BASH/**/*.sh)
 
+# TODO FIX THIS FOR BASH
 # load the path files
-for file in ${(M)config_files:#*/path.sh}
-do
-  source $file
-done
+# for file in ${(M)config_files:#*/path.sh}
+# do
+#   source $file
+# done
 
+# TODO FIX THIS FOR BASH
 # load everything but the path and completion files
-for file in ${${config_files:#*/path.sh}:#*/completion.sh}
-do
-  source $file
-done
+# for file in ${${config_files:#*/path.sh}:#*/completion.sh}
+# do
+#   source $file
+# done
 
+# TODO FIX THIS FOR BASH
 # initialize autocomplete here, otherwise functions won't be loaded
-autoload -U compinit
-compinit
+# autoload -U compinit
+# compinit
 
+# TODO ADD COMPLETION FILES LATER
 # load every completion after autocomplete loads
-for file in ${(M)config_files:#*/completion.sh}
-do
-  source $file
-done
+# for file in ${(M)config_files:#*/completion.sh}
+# do
+#   source $file
+# done
 
 unset config_files
 
 # https://github.com/rupa/z
 . /usr/local/etc/profile.d/z.sh
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
