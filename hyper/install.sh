@@ -13,17 +13,15 @@ hpm i hyper-quit
 hpm i hyper-tab-icons-plus
 hpm i hyperterm-clicky
 hpm i hyperterm-copy
-hpm i hyperterm-crosshair
 hpm i hyperborder
 hpm i hyperclick
 hpm i hypercwd
 hpm i hyperlinks
 hpm i hyperpanic
-hpm i hyperterm-firewatch
 hpm i hyperterm-tab-icons
 hpm i hyperterm-tabs
 hpm i hypercwd
-hpm i hyper-statuslin
+hpm i hyper-statusline
 
 cat > ~/.hyper.js <<'EOF'
 // Future versions of Hyper may add additional config options,
@@ -148,13 +146,11 @@ module.exports = {
 		'hyper-tab-icons-plus',
 		'hyperterm-clicky',
 		'hyperterm-copy',
-		'hyperterm-crosshair',
 		'hyperborder',
 		'hyperclick',
 		'hypercwd',
 		'hyperlinks',
 		'hyperpanic',
-		'hyperterm-firewatch',
 		'hyperterm-tab-icons',
 		'hyperterm-tabs',
 		'hypercwd',
