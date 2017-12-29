@@ -23,7 +23,6 @@
 [merge]
         tool = vscode
 [mergetool "vscode"]
-        cmd = code --wait --new-window $MERGED
 [filter "lfs"]
         smudge = git-lfs smudge -- %f
         process = git-lfs filter-process
