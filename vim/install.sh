@@ -1,2 +1,4 @@
-echo 'Installing SpaceVim...'
-bash <(curl -fsSL https://raw.githubusercontent.com/liuchengxu/space-vim/master/install.sh)
+#!/bin/sh
+
+echo 'Installing SpaceVim...';
+curl -sLf https://spacevim.org/install.sh | bash
