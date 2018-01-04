@@ -1,12 +1,10 @@
 cask_args appdir: '/Applications'
 
 tap 'homebrew/bundle'
-tap 'git-time-metric/gtm'
 tap 'caskroom/fonts'
 
 brew 'doctl'
 brew 'git'
-brew 'gtm'
 brew 'hub'
 brew 'jq'
 brew 'keith/formulae/reminders-cli'
