@@ -121,7 +121,6 @@ module.exports = {
         'hyperterm-clicky',
         'hyperterm-copy',
         'hyperborder',
-        'hyperclick',
         'hypercwd',
         'hyperlinks',
         'hyperpanic',
