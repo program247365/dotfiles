@@ -96,3 +96,5 @@ unset config_files
 
 # https://github.com/rupa/z
 . /usr/local/etc/profile.d/z.sh
+
+source ~/.dotfiles/bash/bashrc.local.symlink
