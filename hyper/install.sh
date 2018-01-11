@@ -14,7 +14,6 @@ hpm i hyper-tab-icons-plus
 hpm i hyperterm-clicky
 hpm i hyperterm-copy
 hpm i hyperborder
-hpm i hyperclick
 hpm i hypercwd
 hpm i hyperlinks
 hpm i hyperpanic
@@ -147,7 +146,6 @@ module.exports = {
 		'hyperterm-clicky',
 		'hyperterm-copy',
 		'hyperborder',
-		'hyperclick',
 		'hypercwd',
 		'hyperlinks',
 		'hyperpanic',
