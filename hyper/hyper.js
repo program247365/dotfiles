@@ -124,7 +124,6 @@ module.exports = {
         'hypercwd',
         'hyperlinks',
         'hyperpanic',
-        'hyperterm-tab-icons',
         'hyperterm-tabs',
         'hypercwd',
         'hyper-statusline'
