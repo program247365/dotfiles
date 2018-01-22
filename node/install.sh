@@ -15,6 +15,8 @@ source ~/.bashrc
 echo "Installing global node modules..."
 
 declare -a modules=(
+    '@alexlafroscia/tldr-alfred-workflow'
+    'alfred-npms'
     'awesome-lint'
     'create-react-app'
     'ember-cli'
