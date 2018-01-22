@@ -19,6 +19,7 @@ brew 'youtube-dl'
 brew 'z'
 
 cask '1password'
+cask 'alfred'
 cask 'appcleaner'
 cask 'betterzipql'
 cask 'caffeine'
