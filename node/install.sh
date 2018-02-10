@@ -28,6 +28,7 @@ declare -a modules=(
     'gatsby-cli'
     'generator-awesome-list'
     'generator-alfred'
+    'git-standup' #required by tiny-care-terminal
     'graphcool'
     'hexo-cli'
     'how2'
