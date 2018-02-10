@@ -16,7 +16,9 @@ echo "Installing global node modules..."
 
 declare -a modules=(
     '@alexlafroscia/tldr-alfred-workflow'
+    'alfred-messages'
     'alfred-npms'
+    'alfred-updater'
     'awesome-lint'
     'create-react-app'
     'ember-cli'
@@ -25,6 +27,7 @@ declare -a modules=(
     'fkill-cli'
     'gatsby-cli'
     'generator-awesome-list'
+    'generator-alfred'
     'graphcool'
     'hexo-cli'
     'how2'
@@ -36,7 +39,6 @@ declare -a modules=(
     'npm-check'
     'soundscrape'
     'speed-test'
-    'git-standup'
     'tiny-care-terminal'
     'tldr'
     'vtop'
