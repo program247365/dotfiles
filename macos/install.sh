@@ -13,6 +13,7 @@ declare -a modules=(
     '878995413'  # OutlineEdit
     '1278508951' # Trello
     '1176895641' # Spark Email Client
+    '1351639930' # Gifski
 )
 
 if test $(which mas)
