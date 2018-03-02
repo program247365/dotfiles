@@ -38,6 +38,7 @@ declare -a modules=(
     'nodemon'
     'now'
     'npm-check'
+    'polymer-cli'
     'soundscrape'
     'speed-test'
     'tiny-care-terminal'
