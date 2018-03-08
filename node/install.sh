@@ -43,6 +43,7 @@ declare -a modules=(
     'speed-test'
     'tiny-care-terminal'
     'tldr'
+    'vsce'
     'vtop'
     'yo'
 )
