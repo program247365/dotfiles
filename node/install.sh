@@ -20,6 +20,7 @@ declare -a modules=(
     'alfred-npms'
     'alfred-updater'
     'awesome-lint'
+    'clinic' # node trace tool
     'create-react-app'
     'ember-cli'
     'emoji-cli'
