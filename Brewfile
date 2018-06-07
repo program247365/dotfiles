@@ -5,6 +5,7 @@ tap 'caskroom/fonts'
 
 brew 'doctl'
 brew 'git'
+brew 'golang'
 brew 'hub'
 brew 'jq'
 brew 'keith/formulae/reminders-cli'
