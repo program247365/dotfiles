@@ -3,3 +3,4 @@
 alias reload!='. ~/.bashrc'
 alias cls='clear' # Good 'ol Clear Screen command
 alias startday='tiny-care-terminal'
+alias pup='~/go/bin/pup'
