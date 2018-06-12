@@ -3,6 +3,7 @@ cask_args appdir: '/Applications'
 tap 'homebrew/bundle'
 tap 'caskroom/fonts'
 
+brew 'csvkit'
 brew 'doctl'
 brew 'git'
 brew 'hub'
