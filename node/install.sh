@@ -8,6 +8,9 @@ echo "Installing the latest version of Node.js..."
 
 nvm install node
 
+echo 'Lets Update NPM...'
+npm i npm@latest -g
+
 source ~/.bashrc
 
 ## Common Global Node modules
@@ -27,8 +30,8 @@ declare -a modules=(
     'express-generator'
     'fkill-cli'
     'gatsby-cli'
-    'generator-awesome-list'
     'generator-alfred'
+    'generator-awesome-list'
     'generator-code'
     'git-standup' #required by tiny-care-terminal
     'graphcool'
@@ -37,7 +40,9 @@ declare -a modules=(
     'hpm-cli'
     'http-console'
     'licensed'
+    'multi-git'
     'nativefier'
+    'node-notifier-cli'
     'nodemon'
     'now'
     'np'
@@ -55,10 +60,13 @@ declare -a modules=(
 ## now loop through the above array
 for i in "${modules[@]}"
 do
-    if test ! $(which $i)
+    if test ! "$(command -v "$i")"
     then
-        npm i -g $i
+        npm i -g "$i"
     else
-        echo $i "already installed."
+        echo "$i" "already installed."
+        echo "Updating..." "$i"
+        npm update -g "$i"
     fi
 done
+notify -t '.dotfiles Node Modules' -m 'All installed now!'
