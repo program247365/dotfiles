@@ -39,6 +39,7 @@ declare -a modules=(
     'how2'
     'hpm-cli'
     'http-console'
+    'multi-git'
     'nativefier'
     'node-notifier-cli'
     'nodemon'
