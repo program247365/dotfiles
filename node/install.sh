@@ -54,6 +54,7 @@ declare -a modules=(
     'tldr'
     'vsce'
     'vtop'
+    'yarn'
     'yo'
 )
 
