@@ -126,7 +126,8 @@ module.exports = {
         'hyperpanic',
         'hyperterm-tabs',
         'hypercwd',
-        'hyper-statusline'
+        'hyper-statusline',
+        'hyperterm-summon'
     ],
 
 	// in development, you can create a directory under
