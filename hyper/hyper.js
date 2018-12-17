@@ -127,7 +127,8 @@ module.exports = {
         'hyperterm-tabs',
         'hypercwd',
         'hyper-statusline',
-        'hyperterm-summon'
+		'hyperterm-summon',
+		'hyper-search'
     ],
 
 	// in development, you can create a directory under
