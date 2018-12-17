@@ -39,6 +39,7 @@ declare -a modules=(
     'how2'
     'hpm-cli'
     'http-console'
+    'hyper-search'
     'licensed'
     'multi-git'
     'nativefier'
