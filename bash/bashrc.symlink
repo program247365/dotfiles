@@ -7,6 +7,11 @@ export HISTSIZE=100000                  # big big history
 export HISTFILESIZE=100000              # big big history
 shopt -s histappend                     # append to history, don't overwrite it
 
+## Bash completion# Bash completion
+if [ -f "$(brew --prefix)/etc/bash_completion" ]; then
+. "$(brew --prefix)/etc/bash_completion"
+fi
+
 # Save and reload the history after each command finishes
 export PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND"
 
@@ -109,6 +114,9 @@ function parse_git_branch() {
 		echo ""
 	fi
 }
+
+### Personal URL Shortener
+shorten() { node ~/Code/url-shortener/node_modules/.bin/netlify-shortener "$1" "$2"; }
 
 # get current status of git repo
 function parse_git_dirty {
