@@ -24,7 +24,8 @@ declare -a modules=(
     'alfred-updater'
     'awesome-lint'
     'clinic' # node trace tool
-    'create-react-app'
+    'create-react-app',
+    'create-next-app',
     'ember-cli'
     'emoji-cli'
     'express-generator'
