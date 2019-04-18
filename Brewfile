@@ -2,9 +2,11 @@ cask_args appdir: '/Applications'
 
 tap 'homebrew/bundle'
 tap 'caskroom/fonts'
+tap 'chclaus/dt git@github.com:chclaus/dt.git'
 
 brew 'bat'
 brew 'csvkit'
+brew 'dt'
 brew 'doctl'
 brew 'git'
 brew 'golang'
