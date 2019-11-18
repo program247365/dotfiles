@@ -1,19 +1,16 @@
-# shortcut to this dotfiles path is $BASH
+# shortcu to this dotfiles path is $BASH
 export BASH=$HOME/.dotfiles
 
 ## Better Bash History https://coderwall.com/p/jdvura/preserve-bash-history-across-multiple-sessions
 export HISTCONTROL=ignoreboth:erasedups # no duplicate entries
 export HISTSIZE=100000                  # big big history
 export HISTFILESIZE=100000              # big big history
-shopt -s histappend                     # append to history, don't overwrite it
+export APPEND_HISTORY=true              # append to history, don't overwrite it
 
 ## Bash completion# Bash completion
-if [ -f "$(brew --prefix)/etc/bash_completion" ]; then
-. "$(brew --prefix)/etc/bash_completion"
-fi
-
-# Save and reload the history after each command finishes
-export PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND"
+# if [ -f "$(brew --prefix)/etc/bash_completion" ]; then
+#. "$(brew --prefix)/etc/bash_completion"
+#fi
 
 ### NVM
 export NVM_DIR="$HOME/.nvm"
@@ -157,3 +154,5 @@ export PS1="\u@\h:[\W]\`parse_git_branch\` "
 ### CUSTOM PROMPT
 
 source ~/.dotfiles/bash/bashrc.local.symlink
+
+export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
