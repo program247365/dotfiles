@@ -7,7 +7,7 @@
 
 set -e
 
-parentDirectory="$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd -P)"
+parentDirectory="$(cd "$( dirname "${ZSH_SOURCE[0]}" )" && pwd -P)"
 dotfilesDirectory="$(cd "$( dirname "$parentDirectory" )" && pwd -P)"
 
 displayUsageAndExit() {
@@ -38,18 +38,18 @@ while test $# -gt 0; do
 	shift
 done
 
-export BASH=$HOME/.dotfiles
+export ZSH=$HOME/.dotfiles
 
 # Set macOS defaults
-$BASH/macos/set-defaults.sh
+$ZSH/macos/set-defaults.sh
 
 # Install homebrew
-$BASH/homebrew/install.sh 2>&1
+$ZSH/homebrew/install.sh 2>&1
 
 # Upgrade homebrew
 echo "› brew update"
 brew update
 
 # Install software
-echo "› $BASH/script/install"
-$BASH/script/install
+echo "› $ZSH/script/install"
+$ZSH/script/install
