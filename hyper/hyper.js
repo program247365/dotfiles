@@ -84,7 +84,7 @@ module.exports = {
 		//
 		// Powershell on Windows
 		// - Example: `C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe`
-		shell: '',
+		shell: '/bin/zsh',
 
 		// for setting shell arguments (i.e. for using interactive shellArgs: ['-i'])
 		// by default ['--login'] will be used
@@ -116,20 +116,20 @@ module.exports = {
 	//   `@company/project`
 	//   `project#1.0.1`
 	plugins: [
-        'hyper-quit',
-        'hyper-tab-icons-plus',
-        'hyperterm-clicky',
-        'hyperterm-copy',
-        'hyperborder',
-        'hypercwd',
-        'hyperlinks',
-        'hyperpanic',
-        'hyperterm-tabs',
-        'hypercwd',
-        'hyper-statusline',
+		'hyper-quit',
+		'hyper-tab-icons-plus',
+		'hyperterm-clicky',
+		'hyperterm-copy',
+		'hyperborder',
+		'hypercwd',
+		'hyperlinks',
+		'hyperpanic',
+		'hyperterm-tabs',
+		'hypercwd',
+		'hyper-statusline',
 		'hyperterm-summon',
-		'hyper-search'
-    ],
+		"hyper-search"
+	],
 
 	// in development, you can create a directory under
 	// `~/.hyper_plugins/local/` and include it here

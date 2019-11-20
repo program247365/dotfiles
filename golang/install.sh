@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/bin/sh
 
-source ~/.bashrc
+source ~/.zshrc
 
 ## Common Global Node packages
 
