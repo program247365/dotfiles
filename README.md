@@ -4,7 +4,7 @@
 
 ## Setup
 
-```bash
+```zsh
 git clone https://github.com/program247365/dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
 script/bootstrap
