@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 echo "Installing NVM..."
 
@@ -11,7 +11,7 @@ nvm install node
 echo 'Lets Update NPM...'
 npm i npm@latest -g
 
-source ~/.bashrc
+source ~/.zshrc
 
 ## Common Global Node modules
 
