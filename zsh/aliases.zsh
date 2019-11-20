@@ -1,6 +1,5 @@
-#!/bin/bash
-
-alias reload!='. ~/.bashrc'
+alias reload!='. ~/.zshrc'
+alias cls='clear' # Good 'ol Clear Screen command
 alias ll="ls -1a"
 alias cls='clear' # Good 'ol Clear Screen command
 alias startday='tiny-care-terminal'

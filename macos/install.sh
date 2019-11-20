@@ -17,7 +17,7 @@ declare -a modules=(
     '955297617'  # Coderunner 3
 )
 
-if test $(which mas)
+if test $(command -v mas)
 then
     for i in "${modules[@]}"
     do
