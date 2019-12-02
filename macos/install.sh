@@ -15,6 +15,7 @@ declare -a modules=(
     '1176895641' # Spark Email Client
     '1351639930' # Gifski
     '955297617'  # Coderunner 3
+    '1423210932' # Flow - Focus and Break timer
 )
 
 if test $(command -v mas)
