@@ -8,8 +8,8 @@ echo "Installing the latest version of Node.js..."
 
 nvm install node
 
-echo 'Lets Update NPM...'
-npm i npm@latest -g
+echo 'Lets Update Yarn...'
+brew upgrade yarn
 
 source ~/.zshrc
 
@@ -52,6 +52,7 @@ declare -a modules=(
     'polymer-cli'
     'soundscrape'
     'speed-test'
+    'terser'
     'tiny-care-terminal'
     'tldr'
     'vsce'
@@ -65,11 +66,11 @@ for i in "${modules[@]}"
 do
     if test ! "$(command -v "$i")"
     then
-        npm i -g "$i"
+        yarn global add "$i"
     else
         echo "$i" "already installed."
         echo "Updating..." "$i"
-        npm update -g "$i"
+        yarn global upgrade "$i"
     fi
 done
 notify -t '.dotfiles Node Modules' -m 'All installed now!'
