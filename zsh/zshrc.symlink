@@ -7,9 +7,9 @@ export PROJECTS=~/Code
 # Stash your environment variables in ~/.localrc. This means they'll stay out
 # of your main dotfiles repository (which may be public, like this one), but
 # you'll have access to them in your scripts.
-if [[ -a ~/.localrc ]]
+if [[ -a $ZSH/zsh/zshrc.local.symlink ]]
 then
-  source ~/.localrc
+  source $ZSH/zsh/zshrc.local.symlink
 fi
 
 # all of our zsh files
@@ -51,5 +51,7 @@ bindkey "^[[B" down-line-or-beginning-search # Down
 
 # For Z command registering
 . $(brew --prefix)/etc/profile.d/z.sh
+
+sleep 0.4;
 
 clear
