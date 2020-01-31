@@ -2,7 +2,7 @@
 
 source ~/.zshrc
 
-## Common Global Node packages
+## Common Global Golang packages
 
 echo "Installing golang packages..."
 
