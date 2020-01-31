@@ -97,7 +97,13 @@ module.exports = {
 		bell: 'SOUND',
 
 		// if true, selected text will automatically be copied to the clipboard
-		copyOnSelect: false
+		copyOnSelect: false,
+
+		summon: {
+			hideDock: true,
+			hideOnBlur: true,
+			hotkey: 'Alt+Super+Z',
+    	},
 
 		// if true, on right click selected text will be copied or pasted if no
 		// selection is present (true by default on Windows)
@@ -116,20 +122,17 @@ module.exports = {
 	//   `@company/project`
 	//   `project#1.0.1`
 	plugins: [
-		'hyper-quit',
-		'hyper-tab-icons-plus',
-		'hyperterm-clicky',
-		'hyperterm-copy',
-		'hyperborder',
-		'hypercwd',
-		'hyperlinks',
-		'hyperpanic',
-		'hyperterm-tabs',
-		'hypercwd',
-		'hyper-statusline',
-		'hyperterm-summon',
-		"hyper-search"
-	],
+        "hyper-quit",
+        "hyper-tab-icons-plus",
+        "hyperterm-clicky",
+        "hyperborder",
+        "hypercwd",
+        "hyperlinks",
+        "hyperterm-tabs",
+        "hyper-statusline",
+        "hyperterm-summon",
+        "hyper-search"
+    ],
 
 	// in development, you can create a directory under
 	// `~/.hyper_plugins/local/` and include it here
