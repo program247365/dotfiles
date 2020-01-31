@@ -122,7 +122,6 @@ module.exports = {
         "hyperborder",
         "hypercwd",
         "hyperlinks",
-        "hyperterm-tabs",
         "hyper-statusline",
         "hyper-search",
         "hyperterm-paste",
