@@ -55,5 +55,5 @@ bindkey "^[[B" down-line-or-beginning-search # Down
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
 
-sleep 0.4;
+sleep 0.1;
 clear

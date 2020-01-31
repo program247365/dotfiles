@@ -99,11 +99,7 @@ module.exports = {
 		// if true, selected text will automatically be copied to the clipboard
 		copyOnSelect: false,
 
-		summon: {
-			hideDock: true,
-			hideOnBlur: true,
-			hotkey: 'Alt+Super+Z',
-    	},
+		confirmQuit: true,
 
 		// if true, on right click selected text will be copied or pasted if no
 		// selection is present (true by default on Windows)
@@ -123,15 +119,15 @@ module.exports = {
 	//   `project#1.0.1`
 	plugins: [
         "hyper-quit",
-        "hyper-tab-icons-plus",
-        "hyperterm-clicky",
         "hyperborder",
         "hypercwd",
         "hyperlinks",
         "hyperterm-tabs",
         "hyper-statusline",
-        "hyperterm-summon",
-        "hyper-search"
+        "hyper-search",
+        "hyperterm-paste",
+        "hyper-confirm",
+        "hyper-tabs-enhanced"
     ],
 
 	// in development, you can create a directory under
