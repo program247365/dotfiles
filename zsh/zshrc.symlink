@@ -2,7 +2,7 @@
 export ZSH=$HOME/.dotfiles
 
 # your project folder that we can `c [tab]` to
-export PROJECTS=~/Code
+export PROJECTS=~/code
 
 # Stash your environment variables in ~/.localrc. This means they'll stay out
 # of your main dotfiles repository (which may be public, like this one), but
@@ -49,11 +49,23 @@ zle -N down-line-or-beginning-search
 bindkey "^[[A" up-line-or-beginning-search # Up
 bindkey "^[[B" down-line-or-beginning-search # Down
 
-# For Z command registering
-. $(brew --prefix)/etc/profile.d/z.sh
+## My custom things for things that are installed
 
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
+# https://starship.rs/guide/
+eval "$(starship init zsh)"
+
+# https://github.com/ajeetdsouza/zoxide
+export VOLTA_HOME="$HOME/.volta"
+export PATH="$VOLTA_HOME/bin:$PATH"
+
+# my custom bin files I may use a lot
+export PATH=$PATH:"$HOME/.kev/bin:$PATH"
+
+# https://github.com/ajeetdsouza/zoxide
+eval "$(zoxide init zsh)"
+
+# https://github.com/canop/broot
+source /Users/kevinridgway/.config/broot/launcher/bash/br
 
 sleep 0.1;
 clear
