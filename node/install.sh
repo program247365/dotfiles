@@ -1,15 +1,17 @@
 #!/bin/sh
 
-echo "Installing NVM..."
+echo "Installing Volta..."
 
-curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.7/install.sh | bash
+# install Volta
+curl https://get.volta.sh | bash
 
 echo "Installing the latest version of Node.js..."
 
-nvm install node
+# install Node
+volta install node
 
-echo 'Lets Update Yarn...'
-brew upgrade yarn
+echo 'Lets Install Yarn...'
+volta install yarn@latest
 
 source ~/.zshrc
 
@@ -18,47 +20,23 @@ source ~/.zshrc
 echo "Installing global node modules..."
 
 declare -a modules=(
-    '@alexlafroscia/tldr-alfred-workflow'
-    'alfred-messages'
-    'alfred-npms'
-    'alfred-updater'
     'awesome-lint'
     'clinic' # node trace tool
     'create-react-app',
     'create-next-app',
-    'ember-cli'
     'emoji-cli'
-    'express-generator'
-    'fkill-cli'
     'gatsby-cli'
-    'generator-alfred'
     'generator-awesome-list'
-    'generator-code'
-    'git-standup' #required by tiny-care-terminal
-    'graphcool'
-    'hexo-cli'
-    'how2'
-    'hpm-cli'
-    'http-console'
-    'hyper-search'
     'licensed'
     'multi-git'
-    'nativefier'
     'node-notifier-cli'
-    'nodemon'
-    'now'
     'np'
     'npm-check'
-    'polymer-cli'
-    'soundscrape'
     'speed-test'
     'terser'
-    'tiny-care-terminal'
     'tldr'
     'vsce'
-    'vtop'
     'yarn'
-    'yo'
 )
 
 ## now loop through the above array
