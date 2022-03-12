@@ -117,7 +117,7 @@ defaults write com.apple.dock orientation left
 defaults write com.apple.screensaver askForPassword -int 1
 defaults write com.apple.screensaver askForPasswordDelay -int 0
 
-# Save screenshots to the desktop
+# Save screenshots to my custom folder
 defaults write com.apple.screencapture location -string "${HOME}/.kevin/screenshots"
 
 # Disable shadow in screenshots

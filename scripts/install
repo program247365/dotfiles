@@ -1,5 +1,4 @@
-#!/usr/bin/env zsh
-#
+#!/usr/bin/env sh
 # Run all dotfiles installers.
 
 set -e
@@ -11,3 +10,6 @@ echo "› brew bundle"
 brew bundle
 # find the installers and run them iteratively
 find . -name install.zsh | while read installer ; do sh -c "${installer}" ; done
+
+# Creat my custom dirs
+exec $ZSH/install/custom_dirs.sh
