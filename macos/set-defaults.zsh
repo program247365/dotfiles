@@ -4,8 +4,18 @@
 #
 # The original idea (and a couple settings) were grabbed from:
 #   https://github.com/mathiasbynens/dotfiles/blob/master/.macos
+# ~/.macos — https://mths.be/macos
 #
 # Run ./set-defaults.sh and you'll be good to go.
+# Close any open System Preferences panes, to prevent them from overriding
+# settings we’re about to change
+osascript -e 'tell application "System Preferences" to quit'
+
+# Ask for the administrator password upfront
+sudo -v
+
+# Keep-alive: update existing `sudo` time stamp until `.macos` has finished
+while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
 
 ###############################################################################
 # General UI/UX                                                               #
@@ -133,7 +143,7 @@ defaults write NSGlobalDomain AppleFontSmoothing -int 1
 
 for app in "Activity Monitor" \
 	"Dock" \
-	"Finder" \
+	"Finder"; do
 	killall "${app}" &> /dev/null
 done
-echo "Done."
+echo "Updated macos Defaults! Done."
