@@ -59,7 +59,7 @@ export VOLTA_HOME="$HOME/.volta"
 export PATH="$VOLTA_HOME/bin:$PATH"
 
 # my custom bin files I may use a lot
-export PATH=$PATH:"$HOME/.kev/bin:$PATH"
+export PATH=$PATH:"$HOME/.kevin/bin:$PATH"
 
 # https://github.com/ajeetdsouza/zoxide
 eval "$(zoxide init zsh)"
