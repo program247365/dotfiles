@@ -7,7 +7,7 @@ gcode() {
 }
 
 mzk () {
-  find $HOME/.kev/listen -type f | sk --height 40% --reverse | tr '\n' '\0' | xargs -0 $HOME/.kev/bin/looper play --url
+  find $HOME/.kevin/listen -type f | sk --height 40% --reverse | tr '\n' '\0' | xargs -0 $HOME/.kevin/bin/looper play --url
 }
 
 npmr() {
