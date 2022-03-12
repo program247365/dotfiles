@@ -1,0 +1,59 @@
+add_newline = false
+command_timeout = 1000000
+
+[character]
+# Prompt format
+vicmd_symbol = "[V](bold green) "
+format = """
+[┌──────────────────────────────────────────────](fg:#ff7840)
+[└─>](fg:#ff7840) """
+
+[username]
+style_user = "fg:#ff9823"
+style_root = "white"
+format = " [$user]($style)[@](bold yellow)"
+disabled = false
+show_always = true
+
+[hostname]
+ssh_only = true
+format =  "[$hostname](bold fg:#CC59B0): "
+disabled = false
+
+[directory]
+read_only = "🔒"
+read_only_style= "bold white"
+style = "fg:#A7F3E4"
+
+[docker_context]
+format = "via [🐋 $context](blue bold)"
+
+[cmd_duration]
+disabled = true
+
+[aws]
+format = "on [$symbol$profile]($style) "
+style = "bold cyan"
+symbol = "🅰 "
+
+[aws.region_aliases]
+us-east-1 = "est-1"
+
+# Git
+[git_branch]
+style = "fg:white bg:black"
+
+[git_status]
+style = "fg:#E29191"
+
+# Language Environments
+[package]
+style = "bold fg:#5E5E5E"
+
+[python]
+style = "bold fg:#5E5E5E"
+symbol = "[](bold yellow) "
+
+[nodejs]
+style = "bold fg:#5E5E5E"
+symbol = "[⬢](bold green) "
