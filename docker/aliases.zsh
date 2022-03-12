@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/bin/sh
 
 alias d='docker'
 alias dc='docker-compose'
