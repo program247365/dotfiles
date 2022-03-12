@@ -25,7 +25,6 @@ declare -a modules=(
     'create-react-app',
     'create-next-app',
     'emoji-cli'
-    'gatsby-cli'
     'generator-awesome-list'
     'licensed'
     'multi-git'
