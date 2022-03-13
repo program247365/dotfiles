@@ -21,4 +21,10 @@ then
 
 fi
 
+## Install the brew packages
+# TODO: I have no idea how his original scripts correctly brew installed? on first run
+
+echo " Installing brews for you!"
+brew bundle
+
 exit 0
