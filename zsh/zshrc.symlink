@@ -1,42 +1,79 @@
+
 # shortcut to this dotfiles path is $ZSH
-export ZSH=$HOME/.dotfiles
+export ZSH="$HOME/.dotfiles"
 
 # your project folder that we can `c [tab]` to
-export PROJECTS=~/code
+export PROJECTS=~/.kevin/code
 
 # Stash your environment variables in ~/.localrc. This means they'll stay out
 # of your main dotfiles repository (which may be public, like this one), but
 # you'll have access to them in your scripts.
-if [[ -a $ZSH/zsh/zshrc.local.symlink ]]
+if [[ -a ~/.localrc ]]
 then
-  source $ZSH/zsh/zshrc.local.symlink
+  source ~/.localrc
 fi
+
+## Temp fix
 
 # all of our zsh files
 typeset -U config_files
 config_files=($ZSH/**/*.zsh)
 
+declare -a TMP_FIX
+TMP_FIX=(
+'/Users/kevin/.dotfiles/docker/aliases.zsh'
+'/Users/kevin/.dotfiles/functions/functions.zsh'
+'/Users/kevin/.dotfiles/git/aliases.zsh'
+'/Users/kevin/.dotfiles/git/completion.zsh'
+# '/Users/kevin/.dotfiles/homebrew/install.zsh'
+# '/Users/kevin/.dotfiles/macos/install.zsh'
+# '/Users/kevin/.dotfiles/macos/set-defaults.zsh'
+# '/Users/kevin/.dotfiles/node/install.zsh'
+# '/Users/kevin/.dotfiles/scripts/custom_dirs.zsh'
+# '/Users/kevin/.dotfiles/starship/install.zsh'
+'/Users/kevin/.dotfiles/system/env.zsh'
+# '/Users/kevin/.dotfiles/vim/install.zsh'
+'/Users/kevin/.dotfiles/xcode/aliases.zsh'
+'/Users/kevin/.dotfiles/yarn/path.zsh'
+'/Users/kevin/.dotfiles/zsh/aliases.zsh'
+'/Users/kevin/.dotfiles/zsh/completion.zsh'
+'/Users/kevin/.dotfiles/zsh/config.zsh'
+'/Users/kevin/.dotfiles/zsh/fpath.zsh'
+)
 # load the path files
-for file in ${(M)config_files:#*/path.zsh}
+for file in $TMP_FIX
 do
   source $file
 done
 
-# load everything but the path and completion files
-for file in ${${config_files:#*/path.zsh}:#*/completion.zsh}
-do
-  source $file
-done
+## /Temp Fix
 
-# initialize autocomplete here, otherwise functions won't be loaded
-autoload -U compinit
-compinit
+## TODO: This isn't working suddenly... I broke some thing. Fix this
+# all of our zsh files
+# typeset -U config_files
+# config_files=($ZSH/**/*.zsh)
 
-# load every completion after autocomplete loads
-for file in ${(M)config_files:#*/completion.zsh}
-do
-  source $file
-done
+# # load the path files
+# for file in ${(M)config_files:#*/path.zsh}
+# do
+#   source $file
+# done
+
+# # load everything but the path and completion files
+# for file in ${${config_files:#*/path.zsh}:#*/completion.zsh}
+# do
+#   source $file
+# done
+
+# # initialize autocomplete here, otherwise functions won't be loaded
+# autoload -U compinit
+# compinit
+
+# # load every completion after autocomplete loads
+# for file in ${(M)config_files:#*/completion.zsh}
+# do
+#   source $file
+# done
 
 unset config_files
 
@@ -49,6 +86,7 @@ zle -N down-line-or-beginning-search
 bindkey "^[[A" up-line-or-beginning-search # Up
 bindkey "^[[B" down-line-or-beginning-search # Down
 
+
 ## My custom things for things that are installed
 
 # https://starship.rs/guide/
@@ -59,13 +97,10 @@ export VOLTA_HOME="$HOME/.volta"
 export PATH="$VOLTA_HOME/bin:$PATH"
 
 # my custom bin files I may use a lot
-export PATH=$PATH:"$HOME/.kevin/bin:$PATH"
+export PATH="$PATH":"$HOME/.kevin/bin:$PATH"
 
 # https://github.com/ajeetdsouza/zoxide
 eval "$(zoxide init zsh)"
 
 # https://github.com/canop/broot
-source /Users/kevinridgway/.config/broot/launcher/bash/br
-
-sleep 0.1;
-clear
+. /Users/kevin/.config/broot/launcher/bash/br
