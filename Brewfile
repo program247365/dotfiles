@@ -8,6 +8,7 @@ brew 'bat'
 brew 'broot'
 brew 'bottom' # 'btm' is the cli binary
 brew 'csvkit'
+brew 'diskonaut' # https://github.com/imsnif/diskonaut
 brew 'dust' # https://github.com/bootandy/dust
 brew 'fd'
 brew 'fx'
