@@ -13,32 +13,22 @@ volta install node
 echo 'Lets Install Yarn...'
 volta install yarn@latest
 
-source ~/.zshrc
-
 ## Common Global Node modules
 
 echo "Installing global node modules..."
-
-declare -a modules=(
-    'awesome-lint'
+declare -a PKGS
+PKGS=(
     'clinic' # node trace tool
-    'create-react-app',
-    'create-next-app',
-    'emoji-cli'
-    'generator-awesome-list'
+    'create-react-app'
+    'create-next-app'
     'licensed'
-    'multi-git'
     'node-notifier-cli'
     'np'
     'npm-check'
-    'speed-test'
-    'terser'
-    'tldr'
     'vsce'
-    'yarn'
 )
+declare -r PKGS
 
-## now loop through the above array
 for i in "${modules[@]}"
 do
     if test ! "$(command -v "$i")"
