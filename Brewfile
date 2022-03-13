@@ -2,16 +2,20 @@ cask_args appdir: '/Applications'
 
 tap 'homebrew/bundle'
 tap 'homebrew/cask-fonts'
+tap 'cjbassi/ytop'
 
 brew 'bat'
 brew 'broot'
 brew 'bottom' # 'btm' is the cli binary
 brew 'csvkit'
+brew 'dust' # https://github.com/bootandy/dust
 brew 'fd'
 brew 'fx'
 brew 'gh'
 brew 'git'
-brew 'git delta'
+brew 'git-delta' # https://github.com/dandavison/delta
+brew 'grex' # https://github.com/pemistahl/grex
+brew 'hyperfine' # https://github.com/sharkdp/hyperfine
 brew 'jq'
 brew 'keith/formulae/reminders-cli'
 brew 'lazydocker'
@@ -27,8 +31,11 @@ brew 'sk'
 brew 'so'
 brew 'starship'
 brew 'svn' #omg I need this to get the fonts
+brew 'tokei'
 brew 'wget'
+brew 'xh' # https://github.com/ducaale/xh
 brew 'yt-dlp'
+brew 'ytop' # https://github.com/cjbassi/ytop
 brew 'zoxide'
 
 cask '1password'
