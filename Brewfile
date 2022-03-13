@@ -14,6 +14,7 @@ brew 'lazydocker'
 brew 'lsd'
 brew 'm-cli'
 brew 'mas'
+brew 'onefetch'
 brew 'ripgrep'
 brew 'sk'
 brew 'svn' #omg I need this to get the fonts
