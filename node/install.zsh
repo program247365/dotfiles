@@ -21,6 +21,7 @@ PKGS=(
     'clinic' # node trace tool
     'create-react-app'
     'create-next-app'
+    'emma-cli'
     'licensed'
     'node-notifier-cli'
     'np'
