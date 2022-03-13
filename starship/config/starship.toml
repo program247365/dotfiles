@@ -1,0 +1,88 @@
+add_newline = false
+command_timeout = 1000000
+
+## FIRST LINE/ROW: Info & Status
+# First param ─┌
+[username]
+style_user = "fg:#ff9823"
+style_root = "white"
+format = " [╭─$user]($style)[@](bold yellow)"
+disabled = false
+show_always = true
+
+# Second param
+[hostname]
+format = "[$hostname]($style) in "
+style = "bold dimmed green"
+trim_at = "."
+ssh_only = false
+disabled = false
+
+# Third param
+[directory]
+style = "purple"
+truncation_length = 0
+truncate_to_repo = true
+truncation_symbol = "repo: "
+
+# Before all the version info (python, nodejs, php, etc.)
+[git_status]
+style = "white"
+ahead = "⇡${count}"
+diverged = "⇕⇡${ahead_count}⇣${behind_count}"
+behind = "⇣${count}"
+deleted = "x"
+
+# Last param in the first line/row
+[cmd_duration]
+min_time = 1
+format = "took [$duration]($style)"
+disabled = false
+
+[battery]
+full_symbol = "🔋"
+charging_symbol = "⚡️"
+discharging_symbol = "💀"
+
+[[battery.display]]  # "bold red" style when capacity is between 0% and 10%
+threshold = 10
+style = "bold red"
+
+[[battery.display]]  # "bold yellow" style when capacity is between 10% and 30%
+threshold = 30
+style = "bold yellow"
+
+# env variable
+[env_var]
+variable = "SHELL"
+default = "unknown shell"
+
+[docker_context]
+format = "via [🐋 $context](blue bold)"
+
+# [cmd_duration]
+# disabled = true
+
+[aws]
+format = "on [$symbol$profile]($style) "
+style = "bold cyan"
+symbol = "🅰 "
+
+[aws.region_aliases]
+us-east-1 = "est-1"
+
+# Git
+[git_branch]
+style = "fg:white bg:black"
+
+# Language Environments
+[package]
+style = "bold fg:#5E5E5E"
+
+[nodejs]
+style = "bold fg:#5E5E5E"
+symbol = "[⬢](bold green) "
+
+[rust]
+symbol="🦀 "
+format = "[$symbol](red bold)"

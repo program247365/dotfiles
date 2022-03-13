@@ -1,15 +1,10 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
+#
 # Run all dotfiles installers.
 
 set -e
 
-cd "$(dirname $0)"/..
+cd "$(dirname "$0")"/..
 
-# Run Homebrew through the Brewfile
-echo "› brew bundle"
-brew bundle
 # find the installers and run them iteratively
-find . -name install.zsh | while read installer ; do sh -c "${installer}" ; done
-
-# Creat my custom dirs
-exec $ZSH/install/custom_dirs.sh
+find . -name install.sh | while read installer ; do sh -c "${installer}" ; done
