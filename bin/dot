@@ -51,5 +51,5 @@ echo "› brew update"
 brew update
 
 # Install software
-echo "› $ZSH/scripts/install"
-$ZSH/scripts/install
+echo "› $ZSH/script/install"
+$ZSH/script/install
