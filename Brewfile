@@ -2,7 +2,6 @@ cask_args appdir: '/Applications'
 
 tap 'homebrew/bundle'
 tap 'homebrew/cask-fonts'
-tap 'cjbassi/ytop'
 
 brew 'bat'
 brew 'broot'
@@ -36,7 +35,6 @@ brew 'tokei'
 brew 'wget'
 brew 'xh' # https://github.com/ducaale/xh
 brew 'yt-dlp'
-brew 'ytop' # https://github.com/cjbassi/ytop
 brew 'zoxide'
 
 cask '1password'
