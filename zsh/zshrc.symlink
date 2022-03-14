@@ -86,9 +86,7 @@ zle -N down-line-or-beginning-search
 bindkey "^[[A" up-line-or-beginning-search # Up
 bindkey "^[[B" down-line-or-beginning-search # Down
 
-
 ## My custom things for things that are installed
-
 # https://starship.rs/guide/
 eval "$(starship init zsh)"
 
@@ -103,4 +101,4 @@ export PATH="$PATH":"$HOME/.kevin/bin:$PATH"
 eval "$(zoxide init zsh)"
 
 # https://github.com/canop/broot
-. /Users/kevin/.config/broot/launcher/bash/br
+source /Users/kevin/.config/broot/launcher/bash/br
