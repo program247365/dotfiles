@@ -32,7 +32,7 @@ brew 'sk'
 brew 'so'
 brew 'starship'
 brew 'svn' #omg I need this to get the fonts
-brew 'tealdeer'
+brew 'tealdeer' # https://github.com/dbrgn/tealdeer
 brew 'tokei'
 brew 'wget'
 brew 'xh' # https://github.com/ducaale/xh
