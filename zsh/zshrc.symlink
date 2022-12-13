@@ -32,7 +32,7 @@ TMP_FIX=(
 # '/Users/kevin/.dotfiles/script/custom_dirs.zsh'
 # '/Users/kevin/.dotfiles/starship/install.zsh'
 '/Users/kevin/.dotfiles/system/env.zsh'
-# '/Users/kevin/.dotfiles/vim/install.zsh'
+ '/Users/kevin/.dotfiles/nvim/install.zsh'
 '/Users/kevin/.dotfiles/xcode/aliases.zsh'
 '/Users/kevin/.dotfiles/yarn/path.zsh'
 '/Users/kevin/.dotfiles/zsh/aliases.zsh'
