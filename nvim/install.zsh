@@ -10,6 +10,3 @@ sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.
 
 echo 'Symlinking Config File from .dotfiles to root...'
 ln -s $HOME/.dotfiles/nvim/init.vim $HOME/.config/nvim/init.vim
-
-echo 'Symlinking ~/.vimrc...'
-ln -s $HOME/.dotfiles/nvim/.vimrc $HOME/.vimrc
