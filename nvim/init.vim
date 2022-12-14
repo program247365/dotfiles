@@ -34,6 +34,11 @@ call plug#begin()
   " VSCode like autocompletion - https://github.com/neoclide/coc.nvim/
   Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
+  " coc for tslinting, auto complete and prettier
+  " Plug 'neoclide/coc.nvim', {'do': 'yarn install --frozen-lockfile'}
+  " coc extensions
+  let g:coc_global_extensions = ['coc-tslint-plugin', 'coc-tsserver', 'coc-emmet', 'coc-css', 'coc-html', 'coc-json', 'coc-yank', 'coc-prettier']
+
   " Rust for file detection, syntax highlighting, formatting, Syntastic integration, and more - [GitHub - rust-lang/rust.vim: Vim configuration for Rust.](https://github.com/rust-lang/rust.vim)
   Plug 'rust-lang/rust.vim'
 
