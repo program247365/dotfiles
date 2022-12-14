@@ -37,6 +37,7 @@ brew 'tokei'
 brew 'wget'
 brew 'xh' # https://github.com/ducaale/xh
 brew 'yt-dlp'
+brew 'warp'
 brew 'zoxide'
 
 cask '1password'
