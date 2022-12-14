@@ -56,6 +56,9 @@ call plug#begin()
   " https://github.com/folke/which-key.nvim
   Plug 'folke/which-key.nvim'
 
+  " https://github.com/norcalli/nvim-colorizer.lua
+  Plug 'norcalli/nvim-colorizer.lua'
+
 call plug#end()
 
 " -----------------------------------------
@@ -145,4 +148,8 @@ lua << EOF
   require("which-key").setup {}
 EOF
 
+" Setup nvim-colorizer plugin
+lua require'colorizer'.setup()
+
+" Initialize the colorscheme
 colorscheme synthwave84
