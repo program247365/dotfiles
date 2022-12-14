@@ -7,9 +7,6 @@ call plug#begin()
   " Synthwave Theme - https://github.com/artanikin/vim-synthwave84
   Plug 'artanikin/vim-synthwave84'
 
-  " Set Colorscheme proper
-  colorscheme synthwave84
-
   Plug 'tpope/vim-sensible'
   " [GitHub - nvim-telescope/telescope.nvim: Find, Filter, Preview, Pick. All lua, all the time.](https://github.com/nvim-telescope/telescope.nvim)
   Plug 'nvim-lua/plenary.nvim'
@@ -22,10 +19,6 @@ call plug#begin()
   Plug 'lewis6991/gitsigns.nvim'
 
   "" On demand loading of plugins
-  " NERD tree will be loaded on the first invocation of NERDTreeToggle command
-  " toggling - [How to jump back to NERDTree from file in tab? | Gang of Coders](https://www.gangofcoders.net/solution/how-to-jump-back-to-nerdtree-from-file-in-tab/)
-  Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
-
   " Loaded when clojure file is opened
   Plug 'tpope/vim-fireplace', { 'for': 'clojure' }
 
