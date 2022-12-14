@@ -2,6 +2,9 @@
 " config file for Neovim
 " assumes using [GitHub - junegunn/vim-plug: Minimalist Vim Plugin Manager](https://github.com/junegunn/vim-plug)
 
+" Get ALE and CoC working together
+let g:ale_disable_lsp = 1
+
 call plug#begin()
 
   " Synthwave Theme - https://github.com/artanikin/vim-synthwave84
@@ -104,6 +107,10 @@ nmap <silent> gy <Plug>(coc-type-definition)
 nmap <silent> gi <Plug>(coc-implementation)
 nmap <silent> gr <Plug>(coc-references)
 
+" Keyboard shortcut for ALE error/warning navigation
+nmap <silent> <C-k> <Plug>(ale_previous_wrap)
+nmap <silent> <C-j> <Plug>(ale_next_wrap)
+
 " Keyboard shortcut for ChadOpen
 nnoremap <leader>v <cmd>CHADopen<cr>
 
@@ -125,15 +132,16 @@ nnoremap <esc>^[ <esc>^[
 
 " Ale config - https://github.com/dense-analysis/ale
 " ESlint Config for w0rp/ale plugin
-let g:ale_fixers = {
+let g:ale_linters = {
  \ 'javascript': ['eslint']
  \ }
-
 let g:ale_sign_error = '❌'
 let g:ale_sign_warning = '⚠️'
-
 let g:ale_fix_on_save = 1
+" Map , d to fix the things ale shows
+nmap <leader>d <Plug>(ale_fix)
 let g:ale_fixers = {
+    \ 'javascript': ['prettier', 'eslint'],
     \ '*': ['remove_trailing_lines', 'trim_whitespace'],
     \ 'rust': ['rustfmt'],
     \ }
