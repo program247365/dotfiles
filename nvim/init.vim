@@ -144,3 +144,5 @@ EOF
 lua << EOF
   require("which-key").setup {}
 EOF
+
+colorscheme synthwave84
