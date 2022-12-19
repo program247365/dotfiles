@@ -14,9 +14,13 @@ call plug#begin()
   " [GitHub - nvim-telescope/telescope.nvim: Find, Filter, Preview, Pick. All lua, all the time.](https://github.com/nvim-telescope/telescope.nvim)
   Plug 'nvim-lua/plenary.nvim'
   Plug 'nvim-telescope/telescope.nvim'
+  " https://github.com/nvim-telescope/telescope-file-browser.nvim
+  Plug 'nvim-telescope/telescope-file-browser.nvim'
   Plug 'mxw/vim-jsx'
   Plug 'pangloss/vim-javascript'
   Plug 'w0rp/ale'
+  " https://github.com/leafgarland/typescript-vim
+  Plug 'leafgarland/typescript-vim'
 
   " [GitHub - lewis6991/gitsigns.nvim: Git integration for buffers](https://github.com/lewis6991/gitsigns.nvim)
   Plug 'lewis6991/gitsigns.nvim'
@@ -41,6 +45,7 @@ call plug#begin()
   " Plug 'neoclide/coc.nvim', {'do': 'yarn install --frozen-lockfile'}
   " coc extensions
   let g:coc_global_extensions = ['coc-tslint-plugin', 'coc-tsserver', 'coc-emmet', 'coc-css', 'coc-html', 'coc-json', 'coc-yank', 'coc-prettier']
+  command! -nargs=0 Prettier :call CocAction('runCommand', 'prettier.formatFile')
 
   " Rust for file detection, syntax highlighting, formatting, Syntastic integration, and more - [GitHub - rust-lang/rust.vim: Vim configuration for Rust.](https://github.com/rust-lang/rust.vim)
   Plug 'rust-lang/rust.vim'
@@ -104,6 +109,7 @@ let mapleader = ","
 nnoremap <leader>ff <cmd>Telescope find_files<cr>
 nnoremap <leader>fg <cmd>Telescope live_grep<cr>
 nnoremap <leader>fb <cmd>Telescope buffers<cr>
+nnoremap <leader>fv <cmd>Telescope file_browser<cr>
 nnoremap <leader>fh <cmd>Telescope help_tags<cr>
 nnoremap <leader>f <cmd>Telescope current_buffer_fuzzy_find<cr>
 
@@ -167,11 +173,14 @@ EOF
 
 " For WhichKey plugin
 lua << EOF
-  require("which-key").setup {}
+  require("which-key").setup{}
 EOF
 
 " Setup nvim-colorizer plugin
-lua require'colorizer'.setup()
+lua = require "colorizer".setup()
+
+" Setup telescope-file-browser.nvim
+lua = require "telescope".extensions.file_browser.file_browser
 
 " Initialize the colorscheme
 colorscheme synthwave84
