@@ -90,6 +90,13 @@ syntax on
 " set spell " enable spell check (may need to download language package)
 set ttyfast " Speed up scrolling in Vim
 set encoding=utf-8
+" 2 spaces of indention
+set tabstop=2
+set shiftwidth=2
+set expandtab
+set smartindent
+" enable line numbers
+set number
 
 " Make <leader> be comma rather than \
 let mapleader = ","
@@ -113,6 +120,9 @@ nmap <silent> <C-j> <Plug>(ale_next_wrap)
 
 " Keyboard shortcut for ChadOpen
 nnoremap <leader>v <cmd>CHADopen<cr>
+
+" Keyboard shortcut for Prettier
+nnoremap <Leader>p :Prettier<CR>
 
 " Coc rust things
 function! s:check_back_space() abort
@@ -141,7 +151,7 @@ let g:ale_fix_on_save = 1
 " Map , d to fix the things ale shows
 nmap <leader>d <Plug>(ale_fix)
 let g:ale_fixers = {
-    \ 'javascript': ['prettier', 'eslint'],
+    \ 'javascript': ['eslint'],
     \ '*': ['remove_trailing_lines', 'trim_whitespace'],
     \ 'rust': ['rustfmt'],
     \ }
