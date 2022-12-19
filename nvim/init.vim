@@ -80,7 +80,6 @@ set hidden " Hide unused buffers
 set autoindent " Indent a new line
 set inccommand=split " Show replacements in a split screen
 set mouse=a " Allow to use the mouse in the editor
-set number " Shows the line numbers
 set splitbelow splitright " Change the split screen behavior
 set title " Show file title
 set wildmenu " Show a more advance menu
