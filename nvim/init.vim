@@ -41,6 +41,9 @@ call plug#begin()
   " VSCode like autocompletion - https://github.com/neoclide/coc.nvim/
   Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
+  " https://github.com/feline-nvim/feline.nvim
+  Plug 'feline-nvim/feline.nvim'
+
   " coc for tslinting, auto complete and prettier
   " Plug 'neoclide/coc.nvim', {'do': 'yarn install --frozen-lockfile'}
   " coc extensions
@@ -161,26 +164,15 @@ let g:ale_fixers = {
     \ 'rust': ['rustfmt'],
     \ }
 
-" For BufferLine plugin
-lua << EOF
-  require("bufferline").setup{}
-EOF
-
-" For GitSigns plugin
-lua << EOF
-  require('gitsigns').setup()
-EOF
-
-" For WhichKey plugin
-lua << EOF
-  require("which-key").setup{}
-EOF
-
-" Setup nvim-colorizer plugin
-lua = require "colorizer".setup()
-
-" Setup telescope-file-browser.nvim
-lua = require "telescope".extensions.file_browser.file_browser
-
 " Initialize the colorscheme
 colorscheme synthwave84
+
+lua << EOF
+require("bufferline").setup{}
+require("gitsigns").setup{}
+require("which-key").setup{}
+require("colorizer").setup{}
+require("telescope").load_extension "file_browser"
+require("feline").setup{}
+require"statusline"
+EOF
