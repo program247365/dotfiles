@@ -9,3 +9,4 @@ alias lr='exa -lha --tree'
 alias pubkey="more ~/.ssh/id_rsa.pub | pbcopy | echo '=> Public key copied to pasteboard.'"
 alias vim="nvim"
 alias v="nvim ."
+alias p="pnpm"
