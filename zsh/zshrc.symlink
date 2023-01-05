@@ -105,3 +105,8 @@ source /Users/kevin/.config/broot/launcher/bash/br
 export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
 
 $HOME/.kevin/bin/random-quotes
+
+# pnpm
+export PNPM_HOME="/Users/kevin/Library/pnpm"
+export PATH="$PNPM_HOME:$PATH"
+# pnpm end
