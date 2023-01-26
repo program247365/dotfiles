@@ -1,26 +1,30 @@
 # Local/private config goes in the include
 [include]
-        path = ~/.gitconfig.local
+    path = ~/.gitconfig.local
 [alias]
-        co = checkout
-        count   = !git shortlog -sn
+    co = checkout
+    count   = !git shortlog -sn
 [color]
-        diff = auto
-        status = auto
-        branch = auto
-        ui = true
+    diff = auto
+    status = auto
+    branch = auto
+    ui = true
 [core]
-        excludesfile = ~/.gitignore
-        editor = code --wait --new-window
+    excludesfile = ~/.gitignore
+    editor = nvim
 [help]
-        autocorrect = 1
+    autocorrect = 1
 [diff]
-        tool = default-difftool
+    tool = default-difftool
 [difftool "default-difftool"]
-        cmd = code --wait --diff $LOCAL $REMOTE
+    cmd = code --wait --diff $LOCAL $REMOTE
 [merge]
-        tool = vscode
-[mergetool "vscode"]
+    tool = nvim
+[mergetool "nvim"]
+[merge]
+    tool = nvim
+[mergetool "nvim"]
+    path = nvim
 [filter "lfs"]
     smudge = git-lfs smudge -- %f
     process = git-lfs filter-process
@@ -31,17 +35,14 @@
     log = delta
     reflog = delta
     show = delta
-
 [interactive]
     diffFilter = delta --color-only
-
 [delta]
     features = line-numbers decorations
     whitespace-error-style = 22 reverse
-
 [delta "decorations"]
     commit-decoration-style = bold yellow box ul
     file-style = bold yellow ul
     file-decoration-style = none
 [pull]
-	rebase = true
+    rebase = true
