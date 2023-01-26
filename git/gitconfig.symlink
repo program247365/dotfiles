@@ -17,7 +17,7 @@
 [diff]
     tool = default-difftool
 [difftool "default-difftool"]
-    cmd = code --wait --diff $LOCAL $REMOTE
+    cmd = nvim -d $LOCAL $REMOTE
 [merge]
     tool = nvim
 [mergetool "nvim"]
