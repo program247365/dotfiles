@@ -1,0 +1,23 @@
+#!/usr/bin/env zsh
+#
+# Called Remotely this first clones then runs bootstrap
+
+set -e
+
+echo "Installing Kevin Ridgway's Dotfiles..."
+
+echo "You're looking good today, btw."
+
+echo "Ok, enough small talk, let's go with the setup..."
+
+echo "Cloning from @program247365/dotfiles..."
+
+git clone https://github.com/program247365/dotfiles.git ~/.dotfiles
+
+echo "Finished cloning."
+
+cd ~/.dotfiles
+
+echo "Running bootstrap script..."
+
+bootstrap
