@@ -1,11 +1,11 @@
 # Called Remotely this first clones then runs bootstrap
 
 echo ""
-echo "Installing Kevin Ridgway's Dotfiles..."
+echo "Installing Kevin Ridgway Dotfiles..."
 echo ""
-echo "You're looking good today, btw."
+echo "Youre looking good today, btw."
 echo ""
-echo "Ok, enough small talk, let's go with the setup..."
+echo "Ok, enough small talk, lets go with the setup..."
 echo ""
 echo "Cloning from @program247365/dotfiles..."
 echo ""
