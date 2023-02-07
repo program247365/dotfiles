@@ -20,4 +20,4 @@ cd ~/.dotfiles
 
 echo "Running bootstrap script..."
 
-bootstrap
+~/.dotfiles/script/bootstrap
