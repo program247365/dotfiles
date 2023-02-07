@@ -21,23 +21,23 @@ config_files=($ZSH/**/*.zsh)
 
 declare -a TMP_FIX
 TMP_FIX=(
-'/Users/kevin/.dotfiles/docker/aliases.zsh'
-'/Users/kevin/.dotfiles/functions/functions.zsh'
-'/Users/kevin/.dotfiles/git/aliases.zsh'
-'/Users/kevin/.dotfiles/git/completion.zsh'
-# '/Users/kevin/.dotfiles/homebrew/install.zsh'
-# '/Users/kevin/.dotfiles/macos/install.zsh'
-# '/Users/kevin/.dotfiles/macos/set-defaults.zsh'
-# '/Users/kevin/.dotfiles/node/install.zsh'
-# '/Users/kevin/.dotfiles/script/custom_dirs.zsh'
-# '/Users/kevin/.dotfiles/starship/install.zsh'
-'/Users/kevin/.dotfiles/system/env.zsh'
-'/Users/kevin/.dotfiles/xcode/aliases.zsh'
-'/Users/kevin/.dotfiles/yarn/path.zsh'
-'/Users/kevin/.dotfiles/zsh/aliases.zsh'
-'/Users/kevin/.dotfiles/zsh/completion.zsh'
-'/Users/kevin/.dotfiles/zsh/config.zsh'
-'/Users/kevin/.dotfiles/zsh/fpath.zsh'
+'$HOME/.dotfiles/docker/aliases.zsh'
+'$HOME/.dotfiles/functions/functions.zsh'
+'$HOME/.dotfiles/git/aliases.zsh'
+'$HOME/.dotfiles/git/completion.zsh'
+# '$HOME/.dotfiles/homebrew/install.zsh'
+# '$HOME/.dotfiles/macos/install.zsh'
+# '$HOME/.dotfiles/macos/set-defaults.zsh'
+# '$HOME/.dotfiles/node/install.zsh'
+# '$HOME/.dotfiles/script/custom_dirs.zsh'
+# '$HOME/.dotfiles/starship/install.zsh'
+'$HOME/.dotfiles/system/env.zsh'
+'$HOME/.dotfiles/xcode/aliases.zsh'
+'$HOME/.dotfiles/yarn/path.zsh'
+'$HOME/.dotfiles/zsh/aliases.zsh'
+'$HOME/.dotfiles/zsh/completion.zsh'
+'$HOME/.dotfiles/zsh/config.zsh'
+'$HOME/.dotfiles/zsh/fpath.zsh'
 )
 # load the path files
 for file in $TMP_FIX
@@ -100,13 +100,11 @@ export PATH="$PATH":"$HOME/.kevin/bin:$PATH"
 eval "$(zoxide init zsh)"
 
 # https://github.com/canop/broot
-source /Users/kevin/.config/broot/launcher/bash/br
+source $HOME/.config/broot/launcher/bash/br
 
 export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
 
-$HOME/.kevin/bin/random-quotes
-
 # pnpm
-export PNPM_HOME="/Users/kevin/Library/pnpm"
+export PNPM_HOME="$HOME/Library/pnpm"
 export PATH="$PNPM_HOME:$PATH"
 # pnpm end
