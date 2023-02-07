@@ -21,8 +21,8 @@ then
 fi
 
 ## Update paths
-echo '# Set PATH, MANPATH, etc., for Homebrew.' >> "$HOME/.profile"
-echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> "$HOME/.zprofile"
+echo '# Set PATH, MANPATH, etc., for Homebrew.' >> "~/.profile"
+echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> "~/.zprofile"
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
 echo " Installing brews for you!"
