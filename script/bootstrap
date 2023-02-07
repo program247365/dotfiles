@@ -1,5 +1,5 @@
-#!/usr/bin/env zsh
 #autoload
+#!/usr/bin/env zsh
 #
 # bootstrap installs things.
 
