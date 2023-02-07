@@ -1,19 +1,22 @@
+#!/usr/bin/env bash
+#
 # Called Remotely this first clones then runs bootstrap
 
-echo ""
-echo "Installing Kevin Ridgway Dotfiles..."
-echo ""
-echo "Youre looking good today, btw."
-echo ""
-echo "Ok, enough small talk, lets go with the setup..."
-echo ""
+set -e
+
+echo "Installing Kevin Ridgway's Dotfiles..."
+
+echo "You're looking good today, btw."
+
+echo "Ok, enough small talk, let's go with the setup..."
+
 echo "Cloning from @program247365/dotfiles..."
-echo ""
 
 git clone https://github.com/program247365/dotfiles.git ~/.dotfiles
 
 echo "Finished cloning."
-echo ""
+
+cd ~/.dotfiles
 
 echo "Running bootstrap script..."
 
