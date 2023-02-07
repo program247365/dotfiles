@@ -18,11 +18,12 @@ then
   then
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install)"
   fi
-
 fi
 
-## Install the brew packages
-# TODO: I have no idea how his original scripts correctly brew installed? on first run
+## Update paths
+echo '# Set PATH, MANPATH, etc., for Homebrew.' >> $HOME + "/.profile"
+echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> $HOME + "/.zprofile"
+eval "$(/opt/homebrew/bin/brew shellenv)"
 
 echo " Installing brews for you!"
 brew update
