@@ -132,6 +132,20 @@ nnoremap <leader>v <cmd>CHADopen<cr>
 " Keyboard shortcut for Prettier
 nnoremap <Leader>p :Prettier<CR>
 
+" Keyboard shortcut for Commenting Out Code
+" Commenting blocks of code.
+autocmd FileType c,cpp,java,scala,rust,css,javascript,typescript let b:comment_leader = '//'
+autocmd FileType sh,ruby,python   let b:comment_leader = '#'
+autocmd FileType conf,fstab       let b:comment_leader = '#'
+autocmd FileType tex              let b:comment_leader = '%'
+autocmd FileType mail             let b:comment_leader = '>'
+autocmd FileType vim              let b:comment_leader = '"'
+function! CommentToggle()
+    execute ':silent! s/\([^ ]\)/' . escape(b:comment_leader,'\/') . ' \1/'
+    execute ':silent! s/^\( *\)' . escape(b:comment_leader,'\/') . ' \?' . escape(b:comment_leader,'\/') . ' \?/\1/'
+endfunction
+map <F7> :call CommentToggle()<CR>
+
 " Coc rust things
 function! s:check_back_space() abort
   let col = col('.') - 1
