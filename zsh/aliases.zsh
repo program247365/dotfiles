@@ -10,3 +10,4 @@ alias pubkey="more ~/.ssh/id_rsa.pub | pbcopy | echo '=> Public key copied to pa
 alias vim="nvim"
 alias v="nvim ."
 alias p="pnpm"
+alias vim-config="nvim ~/.config/nvim/init.vim"
