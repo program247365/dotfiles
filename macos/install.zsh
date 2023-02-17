@@ -11,13 +11,12 @@ echo "Installing Apple App Store apps..."
 declare -a modules=(
     '1091189122' # Bear Writer
     '1176895641' # Spark Email Client
-    '1351639930' # Gifski
     '955297617'  # Coderunner 3
     '1423210932' # Flow - Focus and Break timer
-    '1510445899' # Meeter
     '1502839586' # Handmirror
     '937984704'  # Amphetamine
     '497799835'  # Xcode
+    '1494023538' # Plash
 )
 
 if test $(command -v mas)
