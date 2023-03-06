@@ -115,6 +115,7 @@ nnoremap <leader>fb <cmd>Telescope buffers<cr>
 nnoremap <leader>fv <cmd>Telescope file_browser<cr>
 nnoremap <leader>fh <cmd>Telescope help_tags<cr>
 nnoremap <leader>f <cmd>Telescope current_buffer_fuzzy_find<cr>
+nnoremap <leader>fs <cmd>Telescope git_status<cr>
 
 " Keyboard shortcuts (rust debugging with coc)
 nmap <silent> gd <Plug>(coc-definition)
