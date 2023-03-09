@@ -27,6 +27,7 @@ brew 'navi'
 brew 'neofetch'
 brew 'neovim'
 brew 'nickgerace/gfold/gfold'
+brew 'nvm' # https://github.com/mhinz/neovim-remote
 brew 'onefetch'
 brew 'pnpm'
 brew 'ripgrep'
