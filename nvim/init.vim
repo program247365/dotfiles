@@ -110,7 +110,7 @@ let mapleader = ","
 
 " Keyboard shortcuts (telescope)
 nnoremap <leader>ff <cmd>Telescope find_files<cr>
-nnoremap <leader>ffh <cmd>Telescope find_files hidden=true<cr>
+nnoremap <leader>fhh <cmd>Telescope find_files hidden=true<cr>
 nnoremap <leader>fg <cmd>Telescope live_grep<cr>
 nnoremap <leader>fb <cmd>Telescope buffers<cr>
 nnoremap <leader>fv <cmd>Telescope file_browser<cr>
