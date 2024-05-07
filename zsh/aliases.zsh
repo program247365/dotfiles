@@ -10,6 +10,7 @@ alias pubkey="more ~/.ssh/id_rsa.pub | pbcopy | echo '=> Public key copied to pa
 alias vim="nvim"
 alias v="nvim ."
 alias p="pnpm"
+alias b="bun"
 alias vim-config="nvim ~/.config/nvim/init.vim"
 alias todo="reminders show todo"
 # GH CLI specific ones
