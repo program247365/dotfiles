@@ -13,6 +13,9 @@ call plug#begin()
   " https://github.com/tpope/vim-commentary
   Plug 'tpope/vim-commentary'
 
+  " Oil for Vim - https://github.com/stevearc/oil.nvim
+  Plug 'stevearc/oil.nvim'
+
   Plug 'tpope/vim-sensible'
   " [GitHub - nvim-telescope/telescope.nvim: Find, Filter, Preview, Pick. All lua, all the time.](https://github.com/nvim-telescope/telescope.nvim)
   Plug 'nvim-lua/plenary.nvim'
@@ -120,6 +123,10 @@ nnoremap <leader>fv <cmd>Telescope file_browser<cr>
 nnoremap <leader>fh <cmd>Telescope help_tags<cr>
 nnoremap <leader>f <cmd>Telescope current_buffer_fuzzy_find<cr>
 nnoremap <leader>fs <cmd>Telescope git_status<cr>
+
+" Keyboard shortcuts (Oil)
+nnoremap <leader>o <cmd>Oil<cr>
+nnoremap <leader>of<cmd>Oil --float<cr>
 
 " Keyboard shortcuts (rust debugging with coc)
 nmap <silent> gd <Plug>(coc-definition)
@@ -230,9 +237,22 @@ require('gitsigns').setup {
     enable = false
   },
 }
+
 require("which-key").setup()
 require("colorizer").setup()
 require("telescope").load_extension "file_browser"
+require("oil").setup({
+  -- Set to false if you still want to use netrw.
+ default_file_explorer = false,
+ columns = { "icon" },
+        keymaps = {
+          ["<C-h>"] = false,
+          ["<M-h>"] = "actions.select_split",
+        },
+        view_options = {
+          show_hidden = true,
+        },
+})
 require("feline").setup()
 require"statusline"
 EOF
