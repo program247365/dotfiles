@@ -10,6 +10,9 @@ call plug#begin()
   " Synthwave Theme - https://github.com/artanikin/vim-synthwave84
   Plug 'artanikin/vim-synthwave84'
 
+  " https://github.com/tpope/vim-commentary
+  Plug 'tpope/vim-commentary'
+
   Plug 'tpope/vim-sensible'
   " [GitHub - nvim-telescope/telescope.nvim: Find, Filter, Preview, Pick. All lua, all the time.](https://github.com/nvim-telescope/telescope.nvim)
   Plug 'nvim-lua/plenary.nvim'
