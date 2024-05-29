@@ -18,8 +18,23 @@ call plug#begin()
 
   Plug 'tpope/vim-sensible'
   " [GitHub - nvim-telescope/telescope.nvim: Find, Filter, Preview, Pick. All lua, all the time.](https://github.com/nvim-telescope/telescope.nvim)
+
+  " TypeScript!
+  " https://github.com/pmizio/typescript-tools.nvim
+  Plug 'pmizio/typescript-tools.nvim'
   Plug 'nvim-lua/plenary.nvim'
+  Plug 'neovim/nvim-lspconfig'
+
+" Optional: Configuration for typescript-tools
+  augroup typescript_tools_config
+    autocmd!
+    autocmd VimEnter * lua require('typescript-tools').setup {}
+  augroup END
+
   Plug 'nvim-telescope/telescope.nvim'
+  " https://github.com/nvim-telescope/telescope-github.nvim - requires Github
+  " CLI tool to be installed
+  Plug 'nvim-telescope/telescope-github.nvim'
   " https://github.com/nvim-telescope/telescope-file-browser.nvim
   Plug 'nvim-telescope/telescope-file-browser.nvim'
   Plug 'mxw/vim-jsx'
@@ -30,6 +45,12 @@ call plug#begin()
 
   " [GitHub - lewis6991/gitsigns.nvim: Git integration for buffers](https://github.com/lewis6991/gitsigns.nvim)
   Plug 'lewis6991/gitsigns.nvim'
+
+  " [GitHub - tpope/vim-fugitive: fugitive.vim: A Git wrapper so awesome, it should be illegal](
+  Plug 'tpope/vim-fugitive'
+  " [GitHub - tpope/vim-rhubarb: rhubarb.vim: GitHub extension for fugitive.vim](
+  " for GBrowse!
+  Plug 'tpope/vim-rhubarb'
 
   "" On demand loading of plugins
   " Loaded when clojure file is opened
@@ -44,16 +65,16 @@ call plug#begin()
   " Code to execute when the plugin is lazily loaded on demand
   Plug 'junegunn/goyo.vim', { 'for': 'markdown' }
 
-  " VSCode like autocompletion - https://github.com/neoclide/coc.nvim/
-  Plug 'neoclide/coc.nvim', {'branch': 'release'}
-
   " https://github.com/feline-nvim/feline.nvim
   Plug 'feline-nvim/feline.nvim'
 
+  Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+  " VSCode like autocompletion - https://github.com/neoclide/coc.nvim/
+  Plug 'neoclide/coc.nvim', {'branch': 'release'}
   " coc for tslinting, auto complete and prettier
   " Plug 'neoclide/coc.nvim', {'do': 'yarn install --frozen-lockfile'}
   " coc extensions
-  let g:coc_global_extensions = ['coc-tslint-plugin', 'coc-tsserver', 'coc-emmet', 'coc-css', 'coc-html', 'coc-json', 'coc-yank', 'coc-prettier']
+  let g:coc_global_extensions = ['coc-tslint-plugin', 'coc-tsserver', 'coc-emmet', 'coc-css', 'coc-html', 'coc-json', 'coc-yank', 'coc-prettier', 'coc-eslint', 'coc-fzf-preview']
   command! -nargs=0 Prettier :call CocAction('runCommand', 'prettier.formatFile')
 
   " Rust for file detection, syntax highlighting, formatting, Syntastic integration, and more - [GitHub - rust-lang/rust.vim: Vim configuration for Rust.](https://github.com/rust-lang/rust.vim)
@@ -81,6 +102,8 @@ call plug#begin()
   " https://github.com/norcalli/nvim-colorizer.lua
   Plug 'norcalli/nvim-colorizer.lua'
 
+  " Markdown preview in browser - https://github.com/iamcco/markdown-preview.nvim
+  Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && npx --yes yarn install' }
 call plug#end()
 
 " -----------------------------------------
@@ -143,6 +166,9 @@ nnoremap <leader>v <cmd>CHADopen<cr>
 
 " Keyboard shortcut for Prettier
 nnoremap <Leader>p :Prettier<CR>
+
+" Keyboard shortcut for Markdown Preview
+nmap <leader>m <Plug>MarkdownPreview
 
 " Keyboard shortcut for Commenting Out Code
 " Commenting blocks of code.
@@ -253,6 +279,7 @@ require("oil").setup({
           show_hidden = true,
         },
 })
+require("telescope").load_extension "gh"
 require("feline").setup()
-require"statusline"
+require("statusline")
 EOF
