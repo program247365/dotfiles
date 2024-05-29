@@ -11,6 +11,7 @@ alias vim="nvim"
 alias v="nvim ."
 alias p="pnpm"
 alias b="bun"
+alias bx="bunx"
 alias vim-config="nvim ~/.config/nvim/init.vim"
 alias todo="reminders show todo"
 # GH CLI specific ones
