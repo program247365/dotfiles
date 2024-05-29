@@ -21,23 +21,23 @@ config_files=($ZSH/**/*.zsh)
 
 declare -a TMP_FIX
 TMP_FIX=(
-'/Users/kevin/.dotfiles/docker/aliases.zsh'
-'/Users/kevin/.dotfiles/functions/functions.zsh'
-'/Users/kevin/.dotfiles/git/aliases.zsh'
-'/Users/kevin/.dotfiles/git/completion.zsh'
-# '/Users/kevin/.dotfiles/homebrew/install.zsh'
-# '/Users/kevin/.dotfiles/macos/install.zsh'
-# '/Users/kevin/.dotfiles/macos/set-defaults.zsh'
-# '/Users/kevin/.dotfiles/node/install.zsh'
-# '/Users/kevin/.dotfiles/script/custom_dirs.zsh'
-# '/Users/kevin/.dotfiles/starship/install.zsh'
-'/Users/kevin/.dotfiles/system/env.zsh'
-'/Users/kevin/.dotfiles/xcode/aliases.zsh'
-'/Users/kevin/.dotfiles/yarn/path.zsh'
-'/Users/kevin/.dotfiles/zsh/aliases.zsh'
-'/Users/kevin/.dotfiles/zsh/completion.zsh'
-'/Users/kevin/.dotfiles/zsh/config.zsh'
-'/Users/kevin/.dotfiles/zsh/fpath.zsh'
+'/Users/kridgway/.dotfiles/docker/aliases.zsh'
+'/Users/kridgway/.dotfiles/functions/functions.zsh'
+'/Users/kridgway/.dotfiles/git/aliases.zsh'
+'/Users/kridgway/.dotfiles/git/completion.zsh'
+# '/Users/kridgway/.dotfiles/homebrew/install.zsh'
+# '/Users/kridgway/.dotfiles/macos/install.zsh'
+# '/Users/kridgway/.dotfiles/macos/set-defaults.zsh'
+# '/Users/kridgway/.dotfiles/node/install.zsh'
+# '/Users/kridgway/.dotfiles/script/custom_dirs.zsh'
+# '/Users/kridgway/.dotfiles/starship/install.zsh'
+'/Users/kridgway/.dotfiles/system/env.zsh'
+'/Users/kridgway/.dotfiles/xcode/aliases.zsh'
+'/Users/kridgway/.dotfiles/yarn/path.zsh'
+'/Users/kridgway/.dotfiles/zsh/aliases.zsh'
+'/Users/kridgway/.dotfiles/zsh/completion.zsh'
+'/Users/kridgway/.dotfiles/zsh/config.zsh'
+'/Users/kridgway/.dotfiles/zsh/fpath.zsh'
 )
 # load the path files
 for file in $TMP_FIX
@@ -94,7 +94,7 @@ export VOLTA_HOME="$HOME/.volta"
 export PATH="$VOLTA_HOME/bin:$PATH"
 
 # my custom bin files I may use a lot
-export PATH="$PATH":"$HOME/.kevin/bin:$PATH"
+export PATH="$PATH":"$HOME/.kridgway/bin:$PATH"
 
 # https://github.com/ajeetdsouza/zoxide
 eval "$(zoxide init zsh)"
@@ -110,3 +110,14 @@ export PATH="$PNPM_HOME:$PATH"
 # pnpm end
 
 source $HOME/.zshrc.local
+
+# bun completions
+[ -s "/Users/kridgway/.bun/_bun" ] && source "/Users/kridgway/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+
+### MANAGED BY RANCHER DESKTOP START (DO NOT EDIT)
+export PATH="/Users/kridgway/.rd/bin:$PATH"
+### MANAGED BY RANCHER DESKTOP END (DO NOT EDIT)
