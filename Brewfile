@@ -35,7 +35,7 @@ brew 'sk'
 brew 'so'
 brew 'starship'
 brew 'svn' #omg I need this to get the fonts
-brew 'tealdeer' # https://github.com/dbrgn/tealdeer
+brew 'tlrc' # https://github.com/tldr-pages/tldr
 brew 'tokei'
 brew 'wget'
 brew 'xh' # https://github.com/ducaale/xh
