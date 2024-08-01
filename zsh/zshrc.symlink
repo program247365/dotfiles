@@ -109,8 +109,6 @@ export PNPM_HOME="$HOME/Library/pnpm"
 export PATH="$PNPM_HOME:$PATH"
 # pnpm end
 
-source $HOME/.zshrc.local
-
 # bun completions
 [ -s "/Users/kridgway/.bun/_bun" ] && source "/Users/kridgway/.bun/_bun"
 
@@ -118,6 +116,4 @@ source $HOME/.zshrc.local
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 
-### MANAGED BY RANCHER DESKTOP START (DO NOT EDIT)
-export PATH="/Users/kridgway/.rd/bin:$PATH"
-### MANAGED BY RANCHER DESKTOP END (DO NOT EDIT)
+source $HOME/.zshrc.local
