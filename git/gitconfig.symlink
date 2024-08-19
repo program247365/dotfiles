@@ -47,3 +47,5 @@
     file-decoration-style = none
 [pull]
     rebase = true
+[init]
+	defaultBranch = main
