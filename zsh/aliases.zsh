@@ -20,3 +20,14 @@ alias review-prs='gh pr list --search "is:open is:pr no:assignee"'
 # Jira CLI specifc
 alias j='jira sprint list --current -a$(jira me)'
 alias jsprint='jira sprint list --current'
+
+# Terraform specific
+alias tf='terraform'
+alias tfc='terraform console'
+alias tff='terraform fmt'
+alias tfg='terraform graph'
+alias tfi='terraform init'
+alias tfo='terraform output'
+alias tfp='terraform plan'
+alias tfr='terraform refresh'
+alias tfv='terraform validate'
