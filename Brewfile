@@ -18,6 +18,7 @@ brew 'git'
 brew 'git-delta' # https://github.com/dandavison/delta
 brew 'grex' # https://github.com/pemistahl/grex
 brew 'hyperfine' # https://github.com/sharkdp/hyperfine
+brew 'jless' # https://jless.io/
 brew 'jq'
 brew 'keith/formulae/reminders-cli'
 brew 'lazydocker'
