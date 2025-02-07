@@ -35,6 +35,7 @@ brew 'pnpm'
 brew 'ripgrep'
 brew 'sk'
 brew 'so'
+brew 'spotify_player' # https://github.com/aome510/spotify-player - Work demands music. On the CLI.
 brew 'starship'
 brew 'svn' #omg I need this to get the fonts
 brew 'tlrc' # https://github.com/tldr-pages/tldr
