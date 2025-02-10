@@ -6,6 +6,7 @@ tap 'homebrew/cask-fonts'
 brew 'bat'
 brew 'broot'
 brew 'bottom' # 'btm' is the cli binary
+brew 'cocogitto' # https://github.com/cocogitto/cocogitto
 brew 'csvkit'
 brew 'datasette' # https://github.com/simonw/datasette
 brew 'diskonaut' # https://github.com/imsnif/diskonaut
