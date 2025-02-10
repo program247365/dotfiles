@@ -11,6 +11,7 @@ brew 'datasette' # https://github.com/simonw/datasette
 brew 'diskonaut' # https://github.com/imsnif/diskonaut
 brew 'dust' # https://github.com/bootandy/dust
 brew 'eza' # https://github.com/eza-community/eza
+brew 'fastfetch' # https://github.com/fastfetch-cli/fastfetch
 brew 'fd'
 brew 'fx'
 brew 'gh'
@@ -26,7 +27,6 @@ brew 'lsd'
 brew 'm-cli'
 brew 'mas'
 brew 'navi'
-brew 'neofetch'
 brew 'neovim'
 brew 'nickgerace/gfold/gfold'
 brew 'nvm' # https://github.com/mhinz/neovim-remote
