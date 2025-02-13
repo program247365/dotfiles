@@ -32,6 +32,7 @@ brew 'neovim'
 brew 'nickgerace/gfold/gfold'
 brew 'nvm' # https://github.com/mhinz/neovim-remote
 brew 'onefetch'
+brew 'pyenv'
 brew 'pnpm'
 brew 'ripgrep'
 brew 'sk'
