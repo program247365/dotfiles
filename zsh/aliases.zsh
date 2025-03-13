@@ -18,7 +18,7 @@ alias todo="reminders show todo"
 alias review-prs='gh pr list --search "is:open is:pr no:assignee"'
 
 # Jira CLI specifc
-alias j='jira sprint list --current -a$(jira me)'
+alias j='jira sprint list --table --plain --current -a$(jira me)'
 alias jsprint='jira sprint list --current'
 
 # Terraform specific
