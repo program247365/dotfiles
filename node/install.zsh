@@ -22,7 +22,6 @@ PKGS=(
     'create-next-app'
     'emma-cli'
     'licensed'
-    'node-notifier-cli'
     'np'
     'npm-check'
     'vsce'
@@ -40,4 +39,6 @@ do
         yarn global upgrade "$i"
     fi
 done
-notify -t '.dotfiles Node Modules' -m 'All installed now!'
+
+# Note: macOS specific thing...
+osascript -e 'display notification "All installed now!" with title ".dotfiles Node Modules"'
