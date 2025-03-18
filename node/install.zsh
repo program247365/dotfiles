@@ -19,7 +19,6 @@ echo "Installing global node modules..."
 declare -a PKGS
 PKGS=(
     'clinic' # node trace tool
-    'create-react-app'
     'create-next-app'
     'emma-cli'
     'licensed'
