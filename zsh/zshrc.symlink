@@ -1,6 +1,5 @@
-
 # shortcut to this dotfiles path is $ZSH
-export ZSH="$HOME/.dotfiles"
+export ZSH=$HOME/.dotfiles
 
 # your project folder that we can `c [tab]` to
 export PROJECTS=~/.kevin/code
@@ -13,68 +12,44 @@ then
   source ~/.localrc
 fi
 
-## Temp fix
-
-# all of our zsh files
+# all of our zsh files - but exclude any install or set-defaults files
 typeset -U config_files
-config_files=($ZSH/**/*.zsh)
+config_files=($ZSH/*/*.zsh)
 
-declare -a TMP_FIX
-TMP_FIX=(
-'/Users/kridgway/.dotfiles/docker/aliases.zsh'
-'/Users/kridgway/.dotfiles/functions/functions.zsh'
-'/Users/kridgway/.dotfiles/git/aliases.zsh'
-'/Users/kridgway/.dotfiles/git/completion.zsh'
-# '/Users/kridgway/.dotfiles/homebrew/install.zsh'
-# '/Users/kridgway/.dotfiles/macos/install.zsh'
-# '/Users/kridgway/.dotfiles/macos/set-defaults.zsh'
-# '/Users/kridgway/.dotfiles/node/install.zsh'
-# '/Users/kridgway/.dotfiles/script/custom_dirs.zsh'
-# '/Users/kridgway/.dotfiles/starship/install.zsh'
-'/Users/kridgway/.dotfiles/system/env.zsh'
-'/Users/kridgway/.dotfiles/xcode/aliases.zsh'
-'/Users/kridgway/.dotfiles/yarn/path.zsh'
-'/Users/kridgway/.dotfiles/zsh/aliases.zsh'
-'/Users/kridgway/.dotfiles/zsh/completion.zsh'
-'/Users/kridgway/.dotfiles/zsh/config.zsh'
-'/Users/kridgway/.dotfiles/zsh/fpath.zsh'
-)
+# Explicitly filter out install.zsh and set-defaults.zsh files to prevent accidental sourcing
+filtered_files=()
+for file in $config_files; do
+  # Skip any file with install.zsh or set-defaults.zsh in the name
+  if [[ "$file" != *"install.zsh"* && "$file" != *"set-defaults.zsh"* ]]; then
+    filtered_files+=("$file")
+  fi
+done
+config_files=("${filtered_files[@]}")
+
 # load the path files
-for file in $TMP_FIX
+for file in ${(M)config_files:#*/path.zsh}
 do
-  source $file
+  source "$file"
 done
 
-## /Temp Fix
+# load everything but the path and completion files
+for file in ${${config_files:#*/path.zsh}:#*/completion.zsh}
+do
+  source "$file"
+done
 
-## TODO: This isn't working suddenly... I broke some thing. Fix this
-# all of our zsh files
-# typeset -U config_files
-# config_files=($ZSH/**/*.zsh)
+# initialize autocomplete here, otherwise functions won't be loaded
+autoload -U compinit
+compinit
 
-# # load the path files
-# for file in ${(M)config_files:#*/path.zsh}
-# do
-#   source $file
-# done
-
-# # load everything but the path and completion files
-# for file in ${${config_files:#*/path.zsh}:#*/completion.zsh}
-# do
-#   source $file
-# done
-
-# # initialize autocomplete here, otherwise functions won't be loaded
-# autoload -U compinit
-# compinit
-
-# # load every completion after autocomplete loads
-# for file in ${(M)config_files:#*/completion.zsh}
-# do
-#   source $file
-# done
+# load every completion after autocomplete loads
+for file in ${(M)config_files:#*/completion.zsh}
+do
+  source "$file"
+done
 
 unset config_files
+unset filtered_files
 
 # Better history
 # Credits to https://coderwall.com/p/jpj_6q/zsh-better-history-searching-with-arrow-keys
@@ -94,13 +69,15 @@ export VOLTA_HOME="$HOME/.volta"
 export PATH="$VOLTA_HOME/bin:$PATH"
 
 # my custom bin files I may use a lot
-export PATH="$PATH":"$HOME/.kridgway/bin:$PATH"
+export PATH="$PATH":"$HOME/.kevin/bin:$PATH"
 
 # https://github.com/ajeetdsouza/zoxide
 eval "$(zoxide init zsh)"
 
 # https://github.com/canop/broot
-source $HOME/.config/broot/launcher/bash/br
+if [[ -f "$HOME/.config/broot/launcher/bash/br" ]]; then
+  source "$HOME/.config/broot/launcher/bash/br"
+fi
 
 export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
 
@@ -110,10 +87,14 @@ export PATH="$PNPM_HOME:$PATH"
 # pnpm end
 
 # bun completions
-[ -s "/Users/kridgway/.bun/_bun" ] && source "/Users/kridgway/.bun/_bun"
+[ -s "/Users/kevin/.bun/_bun" ] && source "/Users/kevin/.bun/_bun"
 
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 
-source $HOME/.zshrc.local
+# Source local zshrc if it exists
+if [[ -f "$HOME/.zshrc.local" ]]; then
+  source "$HOME/.zshrc.local"
+fi
+source /Users/kevin/.config/broot/launcher/bash/br
