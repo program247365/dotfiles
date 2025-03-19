@@ -19,6 +19,7 @@ brew 'gh'
 brew 'git'
 brew 'git-delta' # https://github.com/dandavison/delta
 brew 'grex' # https://github.com/pemistahl/grex
+brew 'gfold' # https://github.com/nickgerace/gfold
 brew 'hyperfine' # https://github.com/sharkdp/hyperfine
 brew 'jless' # https://jless.io/
 brew 'jq'
@@ -29,7 +30,6 @@ brew 'm-cli'
 brew 'mas'
 brew 'navi'
 brew 'neovim'
-brew 'nickgerace/gfold/gfold'
 brew 'nvm' # https://github.com/mhinz/neovim-remote
 brew 'onefetch'
 brew 'pyenv'
