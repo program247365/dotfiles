@@ -31,3 +31,6 @@ alias tfo='terraform output'
 alias tfp='terraform plan'
 alias tfr='terraform refresh'
 alias tfv='terraform validate'
+
+# My Apps
+alias r='rem-tui'
