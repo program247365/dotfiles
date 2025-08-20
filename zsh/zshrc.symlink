@@ -97,7 +97,6 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 if [[ -f "$HOME/.zshrc.local" ]]; then
   source "$HOME/.zshrc.local"
 fi
-source /Users/kevin/.config/broot/launcher/bash/br
 
 alias claude="/Users/kevin/.claude/local/claude"
 export PATH="$HOME/bin:$PATH"
