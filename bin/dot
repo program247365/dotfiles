@@ -53,3 +53,12 @@ brew update
 # Install software
 echo "› $ZSH/script/install"
 $ZSH/script/install
+
+# Run migrations
+echo "› Running migrations"
+for script in "$ZSH/migrations"/*.zsh; do
+	if [ -f "$script" ]; then
+		echo "  Running migration: $(basename "$script")"
+		"$script"
+	fi
+done
