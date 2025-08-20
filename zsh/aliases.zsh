@@ -8,7 +8,7 @@ alias lr='eza -lha --tree'
 # Pipe my public key to my clipboard.
 alias pubkey="more ~/.ssh/id_rsa.pub | pbcopy | echo '=> Public key copied to pasteboard.'"
 alias vim="nvim"
-alias v="nvim ."
+alias n="nvim"
 alias p="pnpm"
 alias b="bun"
 alias bx="bunx"
