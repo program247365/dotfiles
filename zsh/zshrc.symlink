@@ -16,11 +16,11 @@ fi
 typeset -U config_files
 config_files=($ZSH/*/*.zsh)
 
-# Explicitly filter out install.zsh and set-defaults.zsh files to prevent accidental sourcing
+# Explicitly filter out install.zsh, set-defaults.zsh, and migration files to prevent accidental sourcing
 filtered_files=()
 for file in $config_files; do
-  # Skip any file with install.zsh or set-defaults.zsh in the name
-  if [[ "$file" != *"install.zsh"* && "$file" != *"set-defaults.zsh"* ]]; then
+  # Skip any file with install.zsh, set-defaults.zsh, or migrations in the path
+  if [[ "$file" != *"install.zsh"* && "$file" != *"set-defaults.zsh"* && "$file" != *"migrations/"* ]]; then
     filtered_files+=("$file")
   fi
 done
