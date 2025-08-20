@@ -25,6 +25,7 @@ brew 'jless' # https://jless.io/
 brew 'jq'
 brew 'keith/formulae/reminders-cli'
 brew 'lazydocker'
+brew 'lazygit'
 brew 'lsd'
 brew 'm-cli'
 brew 'mas'
