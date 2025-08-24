@@ -30,6 +30,7 @@ brew 'lsd'
 brew 'm-cli'
 brew 'mas'
 brew 'navi'
+brew 'noahgorstein/tap/jqp' #JQ playground: https://github.com/noahgorstein/jqp
 brew 'neovim'
 brew 'nvm' # https://github.com/mhinz/neovim-remote
 brew 'onefetch'
