@@ -42,6 +42,7 @@ brew 'so'
 brew 'spotify_player' # https://github.com/aome510/spotify-player - Work demands music. On the CLI.
 brew 'starship'
 brew 'svn' #omg I need this to get the fonts
+brew 'sqlite-utils' # https://sqlite-utils.datasette.io/en/stable
 brew 'tlrc' # https://github.com/tldr-pages/tldr
 brew 'tokei'
 brew 'wget'
