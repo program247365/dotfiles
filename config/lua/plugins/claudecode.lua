@@ -3,7 +3,7 @@ return {
   dependencies = { "folke/snacks.nvim" },
   config = function()
     require("claudecode").setup({
-      terminal_cmd = "~/.claude/local/claude",
+      terminal_cmd = vim.fn.exepath("claude") or "claude",
     })
   end,
   keys = {
@@ -11,3 +11,4 @@ return {
     { "<leader>as", "<cmd>ClaudeCodeSend<cr>", mode = "v", desc = "Send to Claude" },
   },
 }
+
