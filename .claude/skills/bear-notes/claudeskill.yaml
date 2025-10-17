@@ -1,0 +1,186 @@
+name: bear-notes
+version: 1.0.0
+description: Search, read, and create notes in Bear with full context
+author: Claude Code
+
+tools:
+  - name: search_notes
+    description: Search Bear notes by text and/or tags
+    parameters:
+      query:
+        type: string
+        description: Search query (searches title and content)
+        required: false
+      tag:
+        type: string
+        description: Filter by specific tag
+        required: false
+      limit:
+        type: number
+        description: Maximum number of results (default 20)
+        required: false
+    implementation: |
+      python3 ~/.dotfiles/.claude/skills/bear-notes/bear.py search "$query" ${tag:+--tag "$tag"} ${limit:+--limit $limit} --format json
+
+  - name: read_note
+    description: Read the full content of a specific Bear note
+    parameters:
+      note_id:
+        type: string
+        description: The ID of the note to read
+        required: true
+      format:
+        type: string
+        description: Output format (text, json, markdown)
+        required: false
+    implementation: |
+      python3 ~/.dotfiles/.claude/skills/bear-notes/bear.py read "$note_id" --format ${format:-text}
+
+  - name: create_note
+    description: Create a new note in Bear
+    parameters:
+      title:
+        type: string
+        description: Note title
+        required: false
+      text:
+        type: string
+        description: Note content
+        required: true
+      tags:
+        type: string
+        description: Comma-separated tags
+        required: false
+      pin:
+        type: boolean
+        description: Pin the note
+        required: false
+      open:
+        type: boolean
+        description: Open the note after creation
+        required: false
+    implementation: |
+      python3 ~/.dotfiles/.claude/skills/bear-notes/bear.py create \
+        ${title:+--title "$title"} \
+        --text "$text" \
+        ${tags:+--tags "$tags"} \
+        ${pin:+--pin} \
+        ${open:+--open}
+
+  - name: add_to_note
+    description: Add text to an existing Bear note
+    parameters:
+      note_id:
+        type: string
+        description: Note ID
+        required: false
+      title:
+        type: string
+        description: Note title (alternative to ID)
+        required: false
+      text:
+        type: string
+        description: Text to add
+        required: true
+      mode:
+        type: string
+        description: How to add text (append, prepend, replace)
+        required: false
+    implementation: |
+      python3 ~/.dotfiles/.claude/skills/bear-notes/bear.py add \
+        ${note_id:+--id "$note_id"} \
+        ${title:+--title "$title"} \
+        "$text" \
+        --mode ${mode:-append}
+
+  - name: list_tags
+    description: List all tags in Bear
+    parameters: {}
+    implementation: |
+      python3 ~/.dotfiles/.claude/skills/bear-notes/bear.py tags
+
+  - name: open_note
+    description: Open a note in the Bear application
+    parameters:
+      note_id:
+        type: string
+        description: Note ID
+        required: false
+      title:
+        type: string
+        description: Note title (alternative to ID)
+        required: false
+      edit:
+        type: boolean
+        description: Open in edit mode
+        required: false
+    implementation: |
+      python3 ~/.dotfiles/.claude/skills/bear-notes/bear.py open \
+        ${note_id:+--id "$note_id"} \
+        ${title:+--title "$title"} \
+        ${edit:+--edit}
+
+prompt: |
+  You are a Bear Notes assistant with full access to the user's notes.
+
+  # Available Tools
+
+  You have access to these Bear operations:
+
+  1. **search_notes** - Search notes by text and/or tags
+     - Returns JSON with note ID, title, text preview, tags, dates, pinned status
+     - Use this to find relevant notes when the user asks questions
+
+  2. **read_note** - Read full content of a specific note
+     - Use this to get complete note text after finding it via search
+     - Returns the full note content
+
+  3. **create_note** - Create new notes
+     - Can set title, content, tags, and pin status
+     - Use when user asks to create/save information
+
+  4. **add_to_note** - Append/prepend/replace text in existing notes
+     - Use to update existing notes
+
+  5. **list_tags** - Get all available tags
+     - Use to help users discover their tagging structure
+
+  6. **open_note** - Open a note in Bear
+     - Use when user wants to edit/view in the Bear app
+
+  # Workflow Guidelines
+
+  When answering questions:
+  1. **Search first**: Use search_notes to find relevant notes
+  2. **Read details**: If you need full content, use read_note with the note ID
+  3. **Synthesize**: Combine information from multiple notes to answer questions
+  4. **Cite sources**: Always mention which notes (by title or ID) you're referencing
+
+  When creating content:
+  1. Offer to save important information to Bear
+  2. Suggest relevant tags based on existing tags (use list_tags)
+  3. Ask if the user wants to open the note after creation
+
+  # Important Notes
+
+  - Bear uses a reference date of 2001-01-01 for timestamps
+  - Tags can be hierarchical using / (e.g., "work/projects/2025")
+  - The database is read-only; creating/modifying uses Bear's URL scheme
+  - Always search before claiming a note doesn't exist
+  - Be proactive about offering to save information to Bear
+
+  # Example Interactions
+
+  User: "What notes do I have about Python?"
+  → Use search_notes with query="Python", read relevant notes, summarize findings
+
+  User: "Show me all my work notes from this week"
+  → Use search_notes with tag="work", filter by modification date, summarize
+
+  User: "Create a note about today's meeting"
+  → Ask for details, then use create_note with appropriate tags
+
+  # Your Goal
+
+  Help the user leverage their Bear notes as a second brain. Proactively search
+  their notes to provide context-aware assistance based on their personal knowledge base.
