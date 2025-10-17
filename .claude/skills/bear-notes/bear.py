@@ -8,13 +8,14 @@ Based on the Bear x-callback-url API
 import argparse
 import json
 import os
+import re
 import sqlite3
 import subprocess
 import sys
 import urllib.parse
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Tuple
 
 
 class BearDB:
@@ -58,6 +59,111 @@ class BearDB:
         """Convert Bear's timestamp (seconds since 2001-01-01) to datetime"""
         return datetime.fromtimestamp(self.BEAR_EPOCH + timestamp)
 
+    def _datetime_to_bear_timestamp(self, dt: datetime) -> float:
+        """Convert datetime to Bear's timestamp (seconds since 2001-01-01)"""
+        return dt.timestamp() - self.BEAR_EPOCH
+
+    def _parse_date_operators(self, query: str) -> Tuple[str, Dict[str, any]]:
+        """
+        Parse Bear date operators from query string.
+        Returns (cleaned_query, date_filters) where date_filters contains SQL constraints.
+
+        Supported operators:
+        - @date(YYYY-MM-DD) or @date(>YYYY-MM-DD) or @date(<YYYY-MM-DD)
+        - @cdate(YYYY-MM-DD) or @cdate(>YYYY-MM-DD) or @cdate(<YYYY-MM-DD)
+        - @today, @yesterday, @ctoday
+        - @last7days, @created7days (any number)
+        """
+        date_filters = {}
+        cleaned_query = query
+
+        # Helper to parse date string
+        def parse_date(date_str: str) -> datetime:
+            # Support YYYY-MM-DD, YYYY-MM, or YYYY
+            if len(date_str) == 4:  # Year only
+                return datetime.strptime(date_str, "%Y")
+            elif len(date_str) == 7:  # Year-Month
+                return datetime.strptime(date_str, "%Y-%m")
+            else:  # Full date
+                return datetime.strptime(date_str, "%Y-%m-%d")
+
+        # @date operator (modification date)
+        date_pattern = r'@date\(([<>]?)(\d{4}(?:-\d{2})?(?:-\d{2})?)\)'
+        for match in re.finditer(date_pattern, query):
+            operator, date_str = match.groups()
+            dt = parse_date(date_str)
+            bear_ts = self._datetime_to_bear_timestamp(dt)
+
+            if operator == '<':
+                date_filters['modified_before'] = bear_ts
+            elif operator == '>':
+                date_filters['modified_after'] = bear_ts
+            else:
+                # Exact date - match the whole day
+                date_filters['modified_after'] = bear_ts
+                date_filters['modified_before'] = self._datetime_to_bear_timestamp(
+                    dt + timedelta(days=1)
+                )
+
+            cleaned_query = cleaned_query.replace(match.group(0), '')
+
+        # @cdate operator (creation date)
+        cdate_pattern = r'@cdate\(([<>]?)(\d{4}(?:-\d{2})?(?:-\d{2})?)\)'
+        for match in re.finditer(cdate_pattern, query):
+            operator, date_str = match.groups()
+            dt = parse_date(date_str)
+            bear_ts = self._datetime_to_bear_timestamp(dt)
+
+            if operator == '<':
+                date_filters['created_before'] = bear_ts
+            elif operator == '>':
+                date_filters['created_after'] = bear_ts
+            else:
+                # Exact date - match the whole day
+                date_filters['created_after'] = bear_ts
+                date_filters['created_before'] = self._datetime_to_bear_timestamp(
+                    dt + timedelta(days=1)
+                )
+
+            cleaned_query = cleaned_query.replace(match.group(0), '')
+
+        # @today (modified today)
+        if '@today' in query:
+            today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+            date_filters['modified_after'] = self._datetime_to_bear_timestamp(today)
+            cleaned_query = cleaned_query.replace('@today', '')
+
+        # @yesterday (modified yesterday)
+        if '@yesterday' in query:
+            yesterday = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=1)
+            date_filters['modified_after'] = self._datetime_to_bear_timestamp(yesterday)
+            date_filters['modified_before'] = self._datetime_to_bear_timestamp(yesterday + timedelta(days=1))
+            cleaned_query = cleaned_query.replace('@yesterday', '')
+
+        # @ctoday (created today)
+        if '@ctoday' in query:
+            today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+            date_filters['created_after'] = self._datetime_to_bear_timestamp(today)
+            cleaned_query = cleaned_query.replace('@ctoday', '')
+
+        # @lastXdays (modified in last X days)
+        last_days_pattern = r'@last(\d+)days'
+        for match in re.finditer(last_days_pattern, query):
+            days = int(match.group(1))
+            cutoff = datetime.now() - timedelta(days=days)
+            date_filters['modified_after'] = self._datetime_to_bear_timestamp(cutoff)
+            cleaned_query = cleaned_query.replace(match.group(0), '')
+
+        # @createdXdays (created in last X days)
+        created_days_pattern = r'@created(\d+)days'
+        for match in re.finditer(created_days_pattern, query):
+            days = int(match.group(1))
+            cutoff = datetime.now() - timedelta(days=days)
+            date_filters['created_after'] = self._datetime_to_bear_timestamp(cutoff)
+            cleaned_query = cleaned_query.replace(match.group(0), '')
+
+        return cleaned_query.strip(), date_filters
+
     def _format_tags(self, tags: List[str]) -> str:
         """Format tags in Bear's hashtag format"""
         if not tags:
@@ -71,9 +177,43 @@ class BearDB:
                 formatted.append(f"#{tag}")
         return " ".join(formatted)
 
-    def search_notes(self, query: str = "", tag: Optional[str] = None, limit: int = 20) -> List[Dict]:
-        """Search notes by text and/or tag"""
+    def search_notes(self, query: str = "", tag: Optional[str] = None, limit: int = 20,
+                    modified_after: Optional[str] = None, modified_before: Optional[str] = None,
+                    created_after: Optional[str] = None, created_before: Optional[str] = None) -> List[Dict]:
+        """
+        Search notes by text, tag, and/or date filters.
+
+        Args:
+            query: Search query (supports Bear date operators like @date, @last7days, etc.)
+            tag: Filter by specific tag
+            limit: Maximum number of results
+            modified_after: ISO date string for notes modified after this date
+            modified_before: ISO date string for notes modified before this date
+            created_after: ISO date string for notes created after this date
+            created_before: ISO date string for notes created before this date
+        """
         self.connect()
+
+        # Parse Bear date operators from query
+        cleaned_query, date_filters = self._parse_date_operators(query)
+
+        # Override with explicit parameters if provided
+        if modified_after:
+            date_filters['modified_after'] = self._datetime_to_bear_timestamp(
+                datetime.fromisoformat(modified_after)
+            )
+        if modified_before:
+            date_filters['modified_before'] = self._datetime_to_bear_timestamp(
+                datetime.fromisoformat(modified_before)
+            )
+        if created_after:
+            date_filters['created_after'] = self._datetime_to_bear_timestamp(
+                datetime.fromisoformat(created_after)
+            )
+        if created_before:
+            date_filters['created_before'] = self._datetime_to_bear_timestamp(
+                datetime.fromisoformat(created_before)
+            )
 
         if self.version == 2:
             sql = """
@@ -110,9 +250,25 @@ class BearDB:
             """
 
         params = []
-        if query:
+
+        # Apply date filters
+        if 'modified_after' in date_filters:
+            sql += " AND n.ZMODIFICATIONDATE >= ?"
+            params.append(date_filters['modified_after'])
+        if 'modified_before' in date_filters:
+            sql += " AND n.ZMODIFICATIONDATE < ?"
+            params.append(date_filters['modified_before'])
+        if 'created_after' in date_filters:
+            sql += " AND n.ZCREATIONDATE >= ?"
+            params.append(date_filters['created_after'])
+        if 'created_before' in date_filters:
+            sql += " AND n.ZCREATIONDATE < ?"
+            params.append(date_filters['created_before'])
+
+        # Apply text search on cleaned query (after removing date operators)
+        if cleaned_query:
             sql += " AND (n.ZTITLE LIKE ? OR n.ZTEXT LIKE ? OR n.Z_PK = ?)"
-            params.extend([f"%{query}%", f"%{query}%", query])
+            params.extend([f"%{cleaned_query}%", f"%{cleaned_query}%", cleaned_query])
 
         if tag:
             sql += " AND t.ZTITLE = ?"
@@ -223,7 +379,7 @@ class BearAPI:
         params['open_note'] = 'yes' if open_note else 'no'
         params['show_window'] = 'yes' if open_note else 'no'
 
-        query_string = urllib.parse.urlencode(params)
+        query_string = urllib.parse.urlencode(params, quote_via=urllib.parse.quote)
         url = f"bear://x-callback-url/create?{query_string}"
 
         BearAPI._execute_url(url)
@@ -244,7 +400,7 @@ class BearAPI:
         if edit:
             params['edit'] = 'yes'
 
-        query_string = urllib.parse.urlencode(params)
+        query_string = urllib.parse.urlencode(params, quote_via=urllib.parse.quote)
         url = f"bear://x-callback-url/open-note?{query_string}"
 
         BearAPI._execute_url(url)
@@ -268,7 +424,7 @@ class BearAPI:
         if timestamp:
             params['timestamp'] = 'yes'
 
-        query_string = urllib.parse.urlencode(params)
+        query_string = urllib.parse.urlencode(params, quote_via=urllib.parse.quote)
         url = f"bear://x-callback-url/add-text?{query_string}"
 
         BearAPI._execute_url(url)
@@ -286,7 +442,7 @@ class BearAPI:
 
         params['show_window'] = 'yes' if show_window else 'no'
 
-        query_string = urllib.parse.urlencode(params)
+        query_string = urllib.parse.urlencode(params, quote_via=urllib.parse.quote)
         url = f"bear://x-callback-url/search?{query_string}"
 
         BearAPI._execute_url(url)
@@ -298,11 +454,16 @@ def main():
 
     # Search command
     search_parser = subparsers.add_parser('search', help='Search notes')
-    search_parser.add_argument('query', nargs='?', default='', help='Search query')
+    search_parser.add_argument('query', nargs='?', default='',
+                              help='Search query (supports Bear operators like @date(>2024-01-01), @last7days, @today)')
     search_parser.add_argument('--tag', help='Filter by tag')
     search_parser.add_argument('--limit', type=int, default=20, help='Maximum number of results')
     search_parser.add_argument('--format', choices=['json', 'text', 'markdown'], default='json',
                               help='Output format')
+    search_parser.add_argument('--modified-after', help='Filter notes modified after this date (YYYY-MM-DD)')
+    search_parser.add_argument('--modified-before', help='Filter notes modified before this date (YYYY-MM-DD)')
+    search_parser.add_argument('--created-after', help='Filter notes created after this date (YYYY-MM-DD)')
+    search_parser.add_argument('--created-before', help='Filter notes created before this date (YYYY-MM-DD)')
 
     # Read command
     read_parser = subparsers.add_parser('read', help='Read a specific note')
@@ -347,7 +508,15 @@ def main():
         db = BearDB()
 
         if args.command == 'search':
-            notes = db.search_notes(args.query, args.tag, args.limit)
+            notes = db.search_notes(
+                args.query,
+                args.tag,
+                args.limit,
+                modified_after=getattr(args, 'modified_after', None),
+                modified_before=getattr(args, 'modified_before', None),
+                created_after=getattr(args, 'created_after', None),
+                created_before=getattr(args, 'created_before', None)
+            )
 
             if args.format == 'json':
                 print(json.dumps(notes, indent=2))
