@@ -5,11 +5,18 @@ author: Claude Code
 
 tools:
   - name: search_notes
-    description: Search Bear notes by text and/or tags
+    description: Search Bear notes by text, tags, and/or date filters
     parameters:
       query:
         type: string
-        description: Search query (searches title and content)
+        description: |
+          Search query (searches title and content). Supports Bear date operators:
+          - @date(2024-01-01) - exact date
+          - @date(>2024-01-01) - after date
+          - @date(<2024-01-01) - before date
+          - @cdate(...) - same but for creation date
+          - @today, @yesterday, @ctoday
+          - @last7days, @created7days (any number of days)
         required: false
       tag:
         type: string
@@ -19,8 +26,31 @@ tools:
         type: number
         description: Maximum number of results (default 20)
         required: false
+      modified_after:
+        type: string
+        description: Filter notes modified after this date (YYYY-MM-DD)
+        required: false
+      modified_before:
+        type: string
+        description: Filter notes modified before this date (YYYY-MM-DD)
+        required: false
+      created_after:
+        type: string
+        description: Filter notes created after this date (YYYY-MM-DD)
+        required: false
+      created_before:
+        type: string
+        description: Filter notes created before this date (YYYY-MM-DD)
+        required: false
     implementation: |
-      python3 ~/.dotfiles/.claude/skills/bear-notes/bear.py search "$query" ${tag:+--tag "$tag"} ${limit:+--limit $limit} --format json
+      python3 ~/.dotfiles/.claude/skills/bear-notes/bear.py search "$query" \
+        ${tag:+--tag "$tag"} \
+        ${limit:+--limit $limit} \
+        ${modified_after:+--modified-after "$modified_after"} \
+        ${modified_before:+--modified-before "$modified_before"} \
+        ${created_after:+--created-after "$created_after"} \
+        ${created_before:+--created-before "$created_before"} \
+        --format json
 
   - name: read_note
     description: Read the full content of a specific Bear note
@@ -127,8 +157,17 @@ prompt: |
 
   You have access to these Bear operations:
 
-  1. **search_notes** - Search notes by text and/or tags
+  1. **search_notes** - Search notes by text, tags, and/or date filters
      - Returns JSON with note ID, title, text preview, tags, dates, pinned status
+     - Supports Bear date operators in the query string:
+       * @date(2024-01-01) - exact modification date
+       * @date(>2024-01-01) - modified after date
+       * @date(<2024-01-01) - modified before date
+       * @cdate(...) - same operators for creation date
+       * @today, @yesterday - relative dates
+       * @last7days - modified in last 7 days (any number)
+       * @created7days - created in last 7 days (any number)
+     - Also accepts explicit date parameters: modified_after, modified_before, created_after, created_before
      - Use this to find relevant notes when the user asks questions
 
   2. **read_note** - Read full content of a specific note
@@ -169,13 +208,32 @@ prompt: |
   - Always search before claiming a note doesn't exist
   - Be proactive about offering to save information to Bear
 
+  # Bear Wiki Links
+
+  Bear supports internal note linking using wiki-style syntax:
+
+  - **Basic link**: `[[note title]]` - Links to a note by its title
+  - **Link with alias**: `[[note title|alias]]` - Displays "alias" but links to "note title"
+  - **Header link**: `[[note title/heading]]` - Links to a specific heading within a note
+  - **Header link with alias**: `[[note title/heading|alias]]` - Alias for a heading link
+  - **Current note heading**: `[[/heading]]` - Links to a heading in the current note
+
+  When creating notes with links to other notes, use the `[[note title]]` syntax.
+  The exact note title must match for the link to work correctly.
+
   # Example Interactions
 
   User: "What notes do I have about Python?"
   → Use search_notes with query="Python", read relevant notes, summarize findings
 
   User: "Show me all my work notes from this week"
-  → Use search_notes with tag="work", filter by modification date, summarize
+  → Use search_notes with query="@last7days", tag="work", summarize
+
+  User: "Find notes I created in January 2025"
+  → Use search_notes with query="@cdate(>2025-01-01) @cdate(<2025-02-01)"
+
+  User: "Show me notes modified today about meetings"
+  → Use search_notes with query="@today meetings"
 
   User: "Create a note about today's meeting"
   → Ask for details, then use create_note with appropriate tags
