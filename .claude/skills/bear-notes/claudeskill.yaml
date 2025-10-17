@@ -22,10 +22,6 @@ tools:
         type: string
         description: Filter by specific tag
         required: false
-      limit:
-        type: number
-        description: Maximum number of results (default 20)
-        required: false
       modified_after:
         type: string
         description: Filter notes modified after this date (YYYY-MM-DD)
@@ -45,7 +41,6 @@ tools:
     implementation: |
       python3 ~/.dotfiles/.claude/skills/bear-notes/bear.py search "$query" \
         ${tag:+--tag "$tag"} \
-        ${limit:+--limit $limit} \
         ${modified_after:+--modified-after "$modified_after"} \
         ${modified_before:+--modified-before "$modified_before"} \
         ${created_after:+--created-after "$created_after"} \
