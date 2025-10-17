@@ -177,7 +177,7 @@ class BearDB:
                 formatted.append(f"#{tag}")
         return " ".join(formatted)
 
-    def search_notes(self, query: str = "", tag: Optional[str] = None, limit: int = 20,
+    def search_notes(self, query: str = "", tag: Optional[str] = None, limit: Optional[int] = None,
                     modified_after: Optional[str] = None, modified_before: Optional[str] = None,
                     created_after: Optional[str] = None, created_before: Optional[str] = None) -> List[Dict]:
         """
@@ -186,7 +186,7 @@ class BearDB:
         Args:
             query: Search query (supports Bear date operators like @date, @last7days, etc.)
             tag: Filter by specific tag
-            limit: Maximum number of results
+            limit: Maximum number of results (default: no limit)
             modified_after: ISO date string for notes modified after this date
             modified_before: ISO date string for notes modified before this date
             created_after: ISO date string for notes created after this date
@@ -274,8 +274,11 @@ class BearDB:
             sql += " AND t.ZTITLE = ?"
             params.append(tag)
 
-        sql += " ORDER BY n.ZPINNED DESC, n.ZMODIFICATIONDATE DESC LIMIT ?"
-        params.append(limit)
+        sql += " ORDER BY n.ZPINNED DESC, n.ZMODIFICATIONDATE DESC"
+
+        if limit is not None:
+            sql += " LIMIT ?"
+            params.append(limit)
 
         cursor = self.conn.cursor()
         cursor.execute(sql, params)
@@ -457,7 +460,7 @@ def main():
     search_parser.add_argument('query', nargs='?', default='',
                               help='Search query (supports Bear operators like @date(>2024-01-01), @last7days, @today)')
     search_parser.add_argument('--tag', help='Filter by tag')
-    search_parser.add_argument('--limit', type=int, default=20, help='Maximum number of results')
+    search_parser.add_argument('--limit', type=int, default=None, help='Maximum number of results (default: no limit)')
     search_parser.add_argument('--format', choices=['json', 'text', 'markdown'], default='json',
                               help='Output format')
     search_parser.add_argument('--modified-after', help='Filter notes modified after this date (YYYY-MM-DD)')
