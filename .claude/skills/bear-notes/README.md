@@ -11,6 +11,7 @@ Transform your personal knowledge base into an AI-powered assistant. Search, rea
 ## ✨ Features
 
 - 🔍 **Search notes** by text and tags with fuzzy matching
+- 📅 **Filter by date** using Bear's native operators (@last7days, @today, @date(>2024-01-01), etc.)
 - 📖 **Read full note content** with proper formatting preserved
 - ✍️ **Create new notes** with tags and metadata
 - 🔄 **Update existing notes** (append/prepend/replace)
@@ -49,8 +50,46 @@ Once activated, Claude has full access to your Bear notes and can:
 **Search your notes:**
 > "What notes do I have about Python?"
 
+**Filter by date:**
+> "Show me my work notes from the last 7 days"
+> "Find notes I created today about meetings"
+> "What did I write about Docker in October 2024?"
+
 **Summarize notes:**
 > "Summarize my notes about dotfiles"
+
+### 📅 Date Filtering
+
+The skill supports Bear's native date operators, making it easy to find notes by modification or creation date:
+
+```bash
+# Recent notes
+python3 bear.py search "@last7days"
+python3 bear.py search "@today"
+python3 bear.py search "@yesterday"
+
+# Date comparisons
+python3 bear.py search "@date(>2024-10-01)"        # Modified after Oct 1
+python3 bear.py search "@date(<2024-10-31)"        # Modified before Oct 31
+python3 bear.py search "@date(2024-10-15)"         # Exact date
+
+# Creation date filters
+python3 bear.py search "@cdate(>2024-01-01)"       # Created in 2024
+python3 bear.py search "@created30days"            # Created in last 30 days
+
+# Combine with text and tags
+python3 bear.py search "@last7days python" --tag projects
+python3 bear.py search "@date(>2024-10-01) docker kubernetes"
+```
+
+You can also use explicit parameters instead of operators:
+
+```bash
+python3 bear.py search "kubernetes" \
+  --modified-after 2024-10-01 \
+  --modified-before 2024-10-31 \
+  --tag work
+```
 
 **Create from conversation:**
 > "Save this code snippet to Bear with tags programming and python"
@@ -84,6 +123,14 @@ The skill includes a standalone CLI tool at `bear.py` that can be used independe
 # Search notes
 python3 bear.py search "query" --tag work --format json
 
+# Search with date filters (Bear operators)
+python3 bear.py search "@last7days python"
+python3 bear.py search "@date(>2024-01-01) docker"
+python3 bear.py search "@today meetings"
+
+# Search with explicit date parameters
+python3 bear.py search "kubernetes" --modified-after 2024-10-01 --modified-before 2024-10-31
+
 # Read a specific note
 python3 bear.py read 12345 --format markdown
 
@@ -104,8 +151,23 @@ python3 bear.py open --id 12345 --edit
 
 **Search:**
 - `--tag TAG` - Filter by tag
-- `--format json|text` - Output format
+- `--format json|text|markdown` - Output format
 - `--limit N` - Limit results
+- `--modified-after YYYY-MM-DD` - Notes modified after date
+- `--modified-before YYYY-MM-DD` - Notes modified before date
+- `--created-after YYYY-MM-DD` - Notes created after date
+- `--created-before YYYY-MM-DD` - Notes created before date
+
+**Bear Date Operators (in query string):**
+- `@date(YYYY-MM-DD)` - Exact modification date
+- `@date(>YYYY-MM-DD)` - Modified after date
+- `@date(<YYYY-MM-DD)` - Modified before date
+- `@cdate(YYYY-MM-DD)` - Same operators for creation date
+- `@today` - Modified today
+- `@yesterday` - Modified yesterday
+- `@ctoday` - Created today
+- `@last7days` - Modified in last 7 days (any number)
+- `@created7days` - Created in last 7 days (any number)
 
 **Read:**
 - `--format text|markdown|json` - Output format
