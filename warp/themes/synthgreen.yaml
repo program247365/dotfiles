@@ -1,3 +1,8 @@
+name: "Synthgreen"
+accent: "#00ff61"
+details: "darker"
+foreground: "#ffffff"
+background: "#262335"
 terminal_colors:
   normal:
     white: "#f1f1f1"
@@ -17,7 +22,3 @@ terminal_colors:
     green: "#d6fcb9"
     white: "#feffff"
     red: "#ffc4bd"
-accent: "#00ff61"
-details: "darker"
-foreground: "#ffffff"
-background: "#262335"
