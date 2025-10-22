@@ -20,6 +20,7 @@ alias review-prs='gh pr list --search "is:open is:pr no:assignee"'
 # Jira CLI specifc
 alias j='jira sprint list --table --plain --current -a$(jira me)'
 alias jsprint='jira sprint list --current'
+alias tickets='jira sprint list --plain --current -a$(jira me) --columns key,summary --no-headers --order-by priority | tee >(pbcopy)'
 
 # Terraform specific
 alias tf='terraform'
