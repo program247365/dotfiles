@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "WebFetch(domain:www.lazyvim.org)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebSearch",
+      "WebFetch(domain:bear.app)",
+      "Read(//Users/kevin/.claude/**)",
+      "WebFetch(domain:www.anthropic.com)",
+      "Bash(python3:*)",
+      "Skill(bear-notes)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
