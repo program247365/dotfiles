@@ -15,6 +15,7 @@ brew 'eza' # https://github.com/eza-community/eza
 brew 'fastfetch' # https://github.com/fastfetch-cli/fastfetch
 brew 'fd'
 brew 'fx'
+brew 'fzf-make' # https://github.com/kyu08/fzf-make
 brew 'gh'
 brew 'git'
 brew 'git-delta' # https://github.com/dandavison/delta
