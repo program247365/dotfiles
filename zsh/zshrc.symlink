@@ -94,7 +94,7 @@ export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 
 # claude code
-alias claude="/Users/kevin/.claude/local/claude"
+alias claude="~/.local/bin/claude"
 
 # Source local zshrc if it exists
 if [[ -f "$HOME/.zshrc.local" ]]; then
