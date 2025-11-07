@@ -34,5 +34,10 @@ alias tfp='terraform plan'
 alias tfr='terraform refresh'
 alias tfv='terraform validate'
 
+# Fzf make
+alias fm='fzf-make'
+alias fr='fzf-make repeat'
+alias fh='fzf-make history'
+
 # My Apps
 alias r='rem-tui'
