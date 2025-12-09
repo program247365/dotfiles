@@ -3,6 +3,7 @@ cask_args appdir: '/Applications'
 tap 'homebrew/bundle'
 tap 'homebrew/cask-fonts'
 
+brew '1password-cli'
 brew 'bat'
 brew 'broot'
 brew 'bottom' # 'btm' is the cli binary
