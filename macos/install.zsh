@@ -31,5 +31,6 @@ echo "Installing Xcode..."
 xcode-select --install
 
 echo "Updating homebrew, and checking it..."
+
 ## Update homebrew
-brew update && brew prune && brew doctor
+brew upgrade && brew doctor
