@@ -1,6 +1,6 @@
-name: "Synthgreen"
+name: "Synthgreen Light"
 accent: "#00ff61"
-details: "darker"
+details: "lighter"
 foreground: "#ffffff"
 background: "#262335"
 terminal_colors:
