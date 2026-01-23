@@ -65,6 +65,17 @@ return {
           -- ClaudeCode highlights
           vim.api.nvim_set_hl(0, "FloatBorder", { bg = colors.bg_primary, fg = colors.magenta })
           vim.api.nvim_set_hl(0, "NormalFloat", { bg = colors.bg_primary, fg = colors.fg_primary })
+
+          -- Diff highlights (for git diffs, fugitive, diffview, etc.)
+          vim.api.nvim_set_hl(0, "DiffAdd", { bg = "#2D4A3E", fg = "NONE" })      -- Subtle green background
+          vim.api.nvim_set_hl(0, "DiffChange", { bg = "#3D3A50", fg = "NONE" })   -- Subtle purple background
+          vim.api.nvim_set_hl(0, "DiffDelete", { bg = "#4A2D3E", fg = colors.fg_muted })  -- Subtle red background
+          vim.api.nvim_set_hl(0, "DiffText", { bg = "#4A4070", fg = "NONE" })     -- Highlighted changed text
+
+          -- Added/Removed line indicators (for plugins like gitsigns)
+          vim.api.nvim_set_hl(0, "diffAdded", { fg = colors.green })
+          vim.api.nvim_set_hl(0, "diffRemoved", { fg = colors.red })
+          vim.api.nvim_set_hl(0, "diffChanged", { fg = colors.yellow })
         end,
       })
     end,
