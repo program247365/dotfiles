@@ -58,7 +58,7 @@ ccu() {
   brew upgrade claude-code
 
   echo ""
-  local version=$(brew info claude-code --json=v2 2>/dev/null | grep -o '"version":"[^"]*"' | head -1 | cut -d'"' -f4)
+  local version=$(brew info claude-code --json=v2 2>/dev/null | grep -o '"installed": "[^"]*"' | head -1 | cut -d'"' -f4)
   echo "Installed version: $version"
 
   if $show_notes; then
