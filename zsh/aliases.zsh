@@ -9,6 +9,7 @@ alias lr='eza -lha --tree'
 alias pubkey="more ~/.ssh/id_rsa.pub | pbcopy | echo '=> Public key copied to pasteboard.'"
 alias vim="nvim"
 alias n="nvim"
+alias c="claude"
 alias p="pnpm"
 alias b="bun"
 alias bx="bunx"
