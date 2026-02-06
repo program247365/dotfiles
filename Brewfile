@@ -16,6 +16,7 @@ brew 'eza' # https://github.com/eza-community/eza
 brew 'fantastical' # https://flexibits.com/fantastical
 brew 'fastfetch' # https://github.com/fastfetch-cli/fastfetch
 brew 'fd'
+brew 'fnm' # https://github.com/Schniz/fnm
 brew 'fx'
 brew 'fzf-make' # https://github.com/kyu08/fzf-make
 brew 'gh'

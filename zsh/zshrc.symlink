@@ -64,6 +64,10 @@ bindkey "^[[B" down-line-or-beginning-search # Down
 # https://starship.rs/guide/
 eval "$(starship init zsh)"
 
+# https://github.com/Schniz/fnm
+# Automatically switches Node version when cd'ing into a project with .node-version or .nvmrc
+eval "$(fnm env --use-on-cd)"
+
 # https://github.com/ajeetdsouza/zoxide
 export VOLTA_HOME="$HOME/.volta"
 export PATH="$VOLTA_HOME/bin:$PATH"
