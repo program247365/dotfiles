@@ -68,10 +68,6 @@ eval "$(starship init zsh)"
 # Automatically switches Node version when cd'ing into a project with .node-version or .nvmrc
 eval "$(fnm env --use-on-cd)"
 
-# https://github.com/ajeetdsouza/zoxide
-export VOLTA_HOME="$HOME/.volta"
-export PATH="$VOLTA_HOME/bin:$PATH"
-
 # my custom bin files I may use a lot
 export PATH="$PATH":"$HOME/.kevin/bin:$PATH"
 
