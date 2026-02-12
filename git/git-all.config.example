@@ -1,0 +1,4 @@
+# git-all config — one repo path per line
+# Lines starting with # are comments, blank lines are ignored
+# ~/path/to/repo-one
+# ~/path/to/repo-two
