@@ -1,3 +1,4 @@
 git/gitconfig.local.symlink
+git/git-all.config.local
 zsh/zshrc.local.symlink
 .DS_Store
