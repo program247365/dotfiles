@@ -76,7 +76,7 @@ gwt() {
   local suffix="$1"
   if [[ -z "$suffix" ]]; then
     echo "Usage: gwt <branch-suffix>"
-    echo "  e.g. gwt fix-thing → ~/code/supermono-fix-thing, ~/code/supernormal-fix-thing"
+    echo "  e.g. gwt fix-thing → ~/code/repo1-fix-thing, ~/code/repo2-fix-thing"
     return 1
   fi
   git-all worktree add ~/code/{name}-$suffix -b $suffix
