@@ -31,8 +31,16 @@ while IFS= read -r line; do
     continue
   fi
 
-  echo "\033[36m━━━ \033[1;35m$(basename "$dir")\033[0;36m ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-  git -C "$dir" "$@"
+  name=$(basename "$dir")
+  echo "\033[36m━━━ \033[1;35m$name\033[0;36m ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+
+  # Replace {name} placeholder with the repo basename in all arguments
+  local args=()
+  for arg in "$@"; do
+    args+=("${arg//\{name\}/$name}")
+  done
+
+  git -C "$dir" "${args[@]}"
   if [[ $? -ne 0 ]]; then
     echo "\033[31m✗ failed\033[0m"
   fi
