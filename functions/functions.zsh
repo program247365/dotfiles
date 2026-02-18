@@ -71,6 +71,17 @@ ccu() {
   fi
 }
 
+# git-all worktree shortcut: gwt fix-thing → creates ~/code/{repo}-fix-thing worktrees
+gwt() {
+  local suffix="$1"
+  if [[ -z "$suffix" ]]; then
+    echo "Usage: gwt <branch-suffix>"
+    echo "  e.g. gwt fix-thing → ~/code/supermono-fix-thing, ~/code/supernormal-fix-thing"
+    return 1
+  fi
+  git-all worktree add ~/code/{name}-$suffix -b $suffix
+}
+
 clean-xcode() {
   echo "🧹 Starting Xcode cleanup..."
   echo ""
