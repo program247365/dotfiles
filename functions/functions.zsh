@@ -79,7 +79,30 @@ gwt() {
     echo "  e.g. gwt fix-thing → ~/code/repo1-fix-thing, ~/code/repo2-fix-thing"
     return 1
   fi
-  git-all worktree add ~/code/{name}-$suffix -b $suffix
+
+  local config="$HOME/.config/git-all/config"
+  if [[ ! -f "$config" ]]; then
+    echo "\033[31mNo config found at $config\033[0m"
+    return 1
+  fi
+
+  while IFS= read -r line; do
+    [[ -z "$line" || "$line" == \#* ]] && continue
+    local dir="${line/#\~/$HOME}"
+    [[ ! -d "$dir/.git" ]] && continue
+
+    local name=$(basename "$dir")
+    local wt_dir="$HOME/code/${name}-${suffix}"
+
+    echo "\033[36m━━━ \033[1;35m$name\033[0;36m ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    git -C "$dir" worktree add "$wt_dir" -b "$suffix"
+    if [[ $? -eq 0 ]]; then
+      echo "\033[32m→ ~/code/${name}-${suffix}\033[0m"
+    else
+      echo "\033[31m✗ failed\033[0m"
+    fi
+    echo
+  done < "$config"
 }
 
 clean-xcode() {
