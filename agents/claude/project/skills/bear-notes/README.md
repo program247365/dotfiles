@@ -17,32 +17,29 @@ This skill uses two complementary methods to interact with Bear:
 
 ### Option A: Via Dotfiles (this repo)
 
-The skill lives at `.claude/skills/bear-notes/` in this dotfiles repo. Claude Code looks for skills in `~/.claude/skills/`, so symlink it:
+The skill lives at `agents/claude/project/skills/bear-notes/` in this dotfiles repo. The `agents/claude/install.sh` script symlinks the project config (including skills) to `.dotfiles/.claude`, and Claude Code picks it up automatically when working in the dotfiles repo.
+
+To set everything up, run:
 
 ```bash
-ln -sf ~/.dotfiles/.claude/skills ~/.claude/skills
-```
-
-If `~/.claude/skills` already exists as a directory, you can symlink just this skill:
-
-```bash
-ln -sf ~/.dotfiles/.claude/skills/bear-notes ~/.claude/skills/bear-notes
+sh ~/.dotfiles/agents/claude/install.sh
 ```
 
 ### Option B: Manual Install
 
-Copy the skill directory to where Claude Code looks for skills:
+Copy the skill directory to your project's `.claude/skills/`:
 
 ```bash
-cp -r bear-notes ~/.claude/skills/
+mkdir -p .claude/skills
+cp -r agents/claude/project/skills/bear-notes .claude/skills/
 ```
 
 ### Verify Installation
 
-Claude Code loads skills from `~/.claude/skills/`. Check that it's accessible:
+Check that the skill is accessible from the dotfiles project:
 
 ```bash
-ls ~/.claude/skills/bear-notes/SKILL.md   # should exist
+ls ~/.dotfiles/.claude/skills/bear-notes/SKILL.md   # should exist (via symlink)
 ```
 
 ---
@@ -69,28 +66,28 @@ The skill includes a standalone Python CLI at `bear.py` that works independently
 
 ```bash
 # Search notes
-python3 ~/.claude/skills/bear-notes/bear.py search "query" --format json
-python3 ~/.claude/skills/bear-notes/bear.py search "query" --tag "work"
+python3 ~/.dotfiles/agents/claude/project/skills/bear-notes/bear.py search "query" --format json
+python3 ~/.dotfiles/agents/claude/project/skills/bear-notes/bear.py search "query" --tag "work"
 
 # Date filtering (Bear operators)
-python3 ~/.claude/skills/bear-notes/bear.py search "@last7days"
-python3 ~/.claude/skills/bear-notes/bear.py search "@today meetings"
-python3 ~/.claude/skills/bear-notes/bear.py search "@date(>2024-01-01) docker"
+python3 ~/.dotfiles/agents/claude/project/skills/bear-notes/bear.py search "@last7days"
+python3 ~/.dotfiles/agents/claude/project/skills/bear-notes/bear.py search "@today meetings"
+python3 ~/.dotfiles/agents/claude/project/skills/bear-notes/bear.py search "@date(>2024-01-01) docker"
 
 # Read a specific note
-python3 ~/.claude/skills/bear-notes/bear.py read NOTE_ID --format text
+python3 ~/.dotfiles/agents/claude/project/skills/bear-notes/bear.py read NOTE_ID --format text
 
 # Create a note
-python3 ~/.claude/skills/bear-notes/bear.py create --title "Title" --text "Content" --tags "tag1,tag2"
+python3 ~/.dotfiles/agents/claude/project/skills/bear-notes/bear.py create --title "Title" --text "Content" --tags "tag1,tag2"
 
 # Add text to an existing note
-python3 ~/.claude/skills/bear-notes/bear.py add --id NOTE_ID "text to append" --mode append
+python3 ~/.dotfiles/agents/claude/project/skills/bear-notes/bear.py add --id NOTE_ID "text to append" --mode append
 
 # List all tags
-python3 ~/.claude/skills/bear-notes/bear.py tags
+python3 ~/.dotfiles/agents/claude/project/skills/bear-notes/bear.py tags
 
 # Open a note in Bear
-python3 ~/.claude/skills/bear-notes/bear.py open --id NOTE_ID --edit
+python3 ~/.dotfiles/agents/claude/project/skills/bear-notes/bear.py open --id NOTE_ID --edit
 ```
 
 #### Date Operators
