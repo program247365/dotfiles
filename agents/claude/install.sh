@@ -26,4 +26,23 @@ else
   echo "  shell.zsh already sourced in ~/.zshrc.local (skipping)"
 fi
 
+# Merge statusLine config into ~/.claude/settings.json (idempotent)
+SETTINGS_JSON="$CLAUDE_DIR/settings.json"
+if command -v jq > /dev/null 2>&1; then
+  if [ -f "$SETTINGS_JSON" ]; then
+    if jq -e '.statusLine' "$SETTINGS_JSON" > /dev/null 2>&1; then
+      echo "  statusLine already set in ~/.claude/settings.json (skipping)"
+    else
+      tmp=$(mktemp)
+      jq '. + {"statusLine": {"type": "command", "command": "~/.claude/statusline.sh"}}' "$SETTINGS_JSON" > "$tmp" && mv "$tmp" "$SETTINGS_JSON"
+      echo "  Added statusLine to ~/.claude/settings.json"
+    fi
+  else
+    echo '{"statusLine": {"type": "command", "command": "~/.claude/statusline.sh"}}' > "$SETTINGS_JSON"
+    echo "  Created ~/.claude/settings.json with statusLine"
+  fi
+else
+  echo "  Warning: jq not found, skipping statusLine config (install jq and re-run)"
+fi
+
 echo 'Done setting up Claude Code'
