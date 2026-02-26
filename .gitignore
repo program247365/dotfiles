@@ -4,4 +4,4 @@ zsh/zshrc.local.symlink
 .DS_Store
 .claude
 AGENTS.md
-SOFTWARE_ENGINEERING.md
+/SOFTWARE_ENGINEERING.md
