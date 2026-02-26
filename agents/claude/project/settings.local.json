@@ -1,8 +1,4 @@
 {
-  "statusLine": {
-    "type": "command",
-    "command": "~/.claude/statusline.sh"
-  },
   "permissions": {
     "allow": [
       "Bash(find:*)",
@@ -14,12 +10,17 @@
       "Read(//Users/kevin/.claude/**)",
       "WebFetch(domain:www.anthropic.com)",
       "Bash(python3:*)",
-      "Skill(bear-notes)"
+      "Skill(bear-notes)",
+      "WebFetch(domain:docs.anthropic.com)"
     ],
     "deny": [],
     "ask": []
   },
   "disabledMcpjsonServers": [
     "figma"
-  ]
+  ],
+  "statusLine": {
+    "type": "command",
+    "command": "~/.claude/statusline.sh"
+  }
 }
