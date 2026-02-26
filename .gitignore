@@ -3,3 +3,5 @@ git/git-all.config.local
 zsh/zshrc.local.symlink
 .DS_Store
 .claude
+AGENTS.md
+SOFTWARE_ENGINEERING.md

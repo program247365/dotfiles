@@ -1,26 +1,69 @@
-#!/bin/sh
+#!/usr/bin/env bash
+
+set -euo pipefail
 
 echo 'Setting up Claude Code...'
 
 DOTFILES_ROOT="$HOME/.dotfiles"
 DOTFILES_CLAUDE="$DOTFILES_ROOT/agents/claude"
+DOTFILES_PHILOSOPHY="$DOTFILES_ROOT/agents/philosophy/SOFTWARE_ENGINEERING.md"
 CLAUDE_DIR="$HOME/.claude"
 
-# Create ~/.claude directory if it doesn't exist
+link_with_backup() {
+  local source="$1"
+  local target="$2"
+  local label="$3"
+  local current_target=""
+  local backup=""
+
+  if [ -L "$target" ]; then
+    current_target="$(readlink "$target")"
+    if [ "$current_target" = "$source" ]; then
+      echo "  $label already linked"
+      return
+    fi
+    rm "$target"
+  elif [ -e "$target" ]; then
+    backup="${target}.bak.$(date +%Y%m%d%H%M%S)"
+    mv "$target" "$backup"
+    echo "  Backed up existing $label to $backup"
+  fi
+
+  ln -s "$source" "$target"
+  echo "  Linked $label"
+}
+
 mkdir -p "$CLAUDE_DIR"
 
-# Symlink statusline script to ~/.claude/
-ln -sf "$DOTFILES_CLAUDE/statusline.sh" "$CLAUDE_DIR/statusline.sh"
-echo "  Linked statusline.sh to ~/.claude/statusline.sh"
+link_with_backup \
+  "$DOTFILES_CLAUDE/home/CLAUDE.md" \
+  "$CLAUDE_DIR/CLAUDE.md" \
+  "~/.claude/CLAUDE.md"
 
-# Symlink commands directory to ~/.claude/commands
-rm -rf "$CLAUDE_DIR/commands"
-ln -sfn "$DOTFILES_CLAUDE/commands" "$CLAUDE_DIR/commands"
-echo "  Linked commands/ to ~/.claude/commands"
+link_with_backup \
+  "$DOTFILES_CLAUDE/commands" \
+  "$CLAUDE_DIR/commands" \
+  "~/.claude/commands"
 
-# Symlink project-level .claude/ directory in the dotfiles repo
-ln -sfn "$DOTFILES_CLAUDE/project" "$DOTFILES_ROOT/.claude"
-echo "  Linked project config to .dotfiles/.claude"
+link_with_backup \
+  "$DOTFILES_CLAUDE/statusline.sh" \
+  "$CLAUDE_DIR/statusline.sh" \
+  "~/.claude/statusline.sh"
+
+link_with_backup \
+  "$DOTFILES_CLAUDE/project" \
+  "$DOTFILES_ROOT/.claude" \
+  "~/.dotfiles/.claude"
+
+link_with_backup \
+  "$DOTFILES_PHILOSOPHY" \
+  "$CLAUDE_DIR/SOFTWARE_ENGINEERING.md" \
+  "~/.claude/SOFTWARE_ENGINEERING.md"
+
+link_with_backup \
+  "$DOTFILES_PHILOSOPHY" \
+  "$DOTFILES_ROOT/SOFTWARE_ENGINEERING.md" \
+  "~/.dotfiles/SOFTWARE_ENGINEERING.md"
 
 # Source shell.zsh in ~/.zshrc.local (idempotent)
 SHELL_ZSH_SOURCE="source \"$DOTFILES_CLAUDE/shell.zsh\""
