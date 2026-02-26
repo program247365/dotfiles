@@ -13,6 +13,11 @@ mkdir -p "$CLAUDE_DIR"
 ln -sf "$DOTFILES_CLAUDE/statusline.sh" "$CLAUDE_DIR/statusline.sh"
 echo "  Linked statusline.sh to ~/.claude/statusline.sh"
 
+# Symlink commands directory to ~/.claude/commands
+rm -rf "$CLAUDE_DIR/commands"
+ln -sfn "$DOTFILES_CLAUDE/commands" "$CLAUDE_DIR/commands"
+echo "  Linked commands/ to ~/.claude/commands"
+
 # Symlink project-level .claude/ directory in the dotfiles repo
 ln -sfn "$DOTFILES_CLAUDE/project" "$DOTFILES_ROOT/.claude"
 echo "  Linked project config to .dotfiles/.claude"
