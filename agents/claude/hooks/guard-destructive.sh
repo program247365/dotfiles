@@ -19,19 +19,15 @@ tool_name="$(printf '%s' "$input" | jq -r '.tool_name // empty' 2>/dev/null)" ||
 command="$(printf '%s' "$input" | jq -r '.tool_input.command // empty' 2>/dev/null)" || exit 0
 [ -n "$command" ] || exit 0
 
-# Fixed-string match against high-risk patterns
+# Fixed-string match against high-risk patterns (grep handles multiline commands)
 blocked=""
-case "$command" in
-  *"rm -rf"*)          blocked="rm -rf" ;;
-  *"git push --force"*) blocked="git push --force" ;;
-  *"git push -f "*)    blocked="git push -f" ;;
-  *"git reset --hard"*) blocked="git reset --hard" ;;
-  *"git clean -f"*)    blocked="git clean -f" ;;
-  *"git branch -D"*)   blocked="git branch -D" ;;
-  *"chmod -R 777"*)    blocked="chmod -R 777" ;;
-  *"DROP TABLE"*)      blocked="DROP TABLE" ;;
-  *"DROP DATABASE"*)   blocked="DROP DATABASE" ;;
-esac
+for pattern in "rm -rf" "git push --force" "git push -f " "git reset --hard" \
+               "git clean -f" "git branch -D" "chmod -R 777" "DROP TABLE" "DROP DATABASE"; do
+  if printf '%s' "$command" | grep -qF -- "$pattern"; then
+    blocked="$pattern"
+    break
+  fi
+done
 
 if [ -n "$blocked" ]; then
   echo "BLOCKED: Destructive pattern '$blocked' detected."
