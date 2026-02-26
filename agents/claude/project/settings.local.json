@@ -11,10 +11,24 @@
       "WebFetch(domain:www.anthropic.com)",
       "Bash(python3:*)",
       "Skill(bear-notes)",
+      "Skill(plan-exit-review)",
       "WebFetch(domain:docs.anthropic.com)"
     ],
     "deny": [],
     "ask": []
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.dotfiles/agents/claude/hooks/guard-destructive.sh"
+          }
+        ]
+      }
+    ]
   },
   "disabledMcpjsonServers": [
     "figma"
