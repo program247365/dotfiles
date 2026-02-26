@@ -65,8 +65,18 @@ link_with_backup \
   "$DOTFILES_ROOT/SOFTWARE_ENGINEERING.md" \
   "~/.dotfiles/SOFTWARE_ENGINEERING.md"
 
+link_with_backup \
+  "$DOTFILES_CLAUDE/rules" \
+  "$CLAUDE_DIR/rules" \
+  "~/.claude/rules"
+
+link_with_backup \
+  "$DOTFILES_CLAUDE/agents" \
+  "$CLAUDE_DIR/agents" \
+  "~/.claude/agents"
+
 # Source shell.zsh in ~/.zshrc.local (idempotent)
-SHELL_ZSH_SOURCE="source \"$DOTFILES_CLAUDE/shell.zsh\""
+SHELL_ZSH_SOURCE="source \"$DOTFILES_ROOT/agents/shell.zsh\""
 if ! grep -qF "$SHELL_ZSH_SOURCE" "$HOME/.zshrc.local" 2>/dev/null; then
   echo "$SHELL_ZSH_SOURCE" >> "$HOME/.zshrc.local"
   echo "  Added shell.zsh source to ~/.zshrc.local"
