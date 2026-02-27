@@ -1,5 +1,31 @@
+# Fuzzy-switch between branches and worktrees via sk
 gch() {
-  git branch | sk | xargs git checkout
+  local -A wt_map
+  local entries=()
+
+  # Parse worktrees: map branch → path
+  while read -r wt_path _hash branch; do
+    branch="${branch#\[}"
+    branch="${branch%\]}"
+    [[ -z "$branch" || "$branch" == "(bare)" ]] && continue
+    wt_map[$branch]="$wt_path"
+    entries+=("$branch  [$wt_path]")
+  done < <(git worktree list)
+
+  # Add branches that don't have a worktree
+  while read -r branch; do
+    [[ -z "${wt_map[$branch]}" ]] && entries+=("$branch")
+  done < <(git branch --format='%(refname:short)')
+
+  local pick
+  pick=$(printf '%s\n' "${entries[@]}" | sk) || return
+
+  local branch="${pick%%  \[*}"
+  if [[ -n "${wt_map[$branch]}" ]]; then
+    cd "${wt_map[$branch]}"
+  else
+    git checkout "$branch"
+  fi
 }
 
 gcode() {
