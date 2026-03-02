@@ -12,6 +12,7 @@
       "Bash(python3:*)",
       "Skill(bear-notes)",
       "Skill(plan-exit-review)",
+      "Skill(workday)",
       "WebFetch(domain:docs.anthropic.com)"
     ],
     "deny": [],
