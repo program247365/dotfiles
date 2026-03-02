@@ -13,6 +13,7 @@
       "Skill(bear-notes)",
       "Skill(plan-exit-review)",
       "Skill(workday)",
+      "Skill(visual-explainer)",
       "WebFetch(domain:docs.anthropic.com)"
     ],
     "deny": [],
