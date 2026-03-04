@@ -41,3 +41,4 @@ alias fh='fzf-make history'
 
 # My Apps
 alias r='rem-tui'
+alias q='qmd'
