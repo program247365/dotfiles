@@ -75,11 +75,40 @@ bcli trash NOTE_ID --force
 bcli sync --full -v
 ```
 
+## QMD Search (Preferred for Discovery)
+
+When the user asks to search or find Bear notes, prefer `qmd` over `bcli search` — it uses BM25 full-text search, vector similarity, and LLM reranking for much better relevance.
+
+```bash
+# Fast keyword search (BM25)
+qmd search "query" -c bear --json
+
+# Best quality: hybrid search with reranking
+qmd query "query" -c bear --json
+
+# Get full document content by path or docid
+qmd get "#abc123"
+qmd get "uuid.md" --full
+```
+
+QMD returns docids (`#abc123`), scores, titles, and snippets. To get the full note body, use `qmd get`. The `path` field is the Bear UUID + `.md` — strip the `.md` suffix to get the bcli note ID for write operations.
+
+**When to use bcli search instead of QMD:**
+- Tag-only filtering (`bcli ls --tag "tagname"`)
+- Date operators (`@today`, `@last7days`)
+- When QMD index is stale (tell user to run `qmd update`)
+
+**When to always use bcli:**
+- Creating notes (`bcli create`)
+- Editing notes (`bcli edit`)
+- Opening notes in Bear
+- Listing tags
+
 ## Workflow
 
 **When answering questions:**
-1. **Search first** — use `search` to find relevant notes
-2. **Read details** — use `read NOTE_ID` for full content of relevant notes
+1. **Search first** — use `qmd query` for best results, fall back to `bcli search` for tag/date filtering
+2. **Read details** — use `bcli get NOTE_ID --json` for full content of relevant notes
 3. **Synthesize** — combine info from multiple notes
 4. **Cite sources** — always mention which note titles you're referencing
 
