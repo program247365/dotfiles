@@ -81,7 +81,12 @@ async (page) => {
 }
 ```
 
-After the Playwright run, build the results JSON from the notes file + confirmed screenshots on disk:
+After the Playwright run, **close the browser**:
+```
+browser_close
+```
+
+Then build the results JSON from the notes file + confirmed screenshots on disk:
 ```python
 import json, os
 notes = json.load(open('/tmp/need_image_notes.json'))
@@ -145,7 +150,10 @@ for r in results:
 
     row = cur.execute('SELECT ZTEXT FROM ZSFNOTE WHERE Z_PK=?', (r['pk'],)).fetchone()
     if row and row[0] and '![tweet_screenshot.png]' not in row[0]:
-        new_text = row[0].rstrip() + '\n\n![tweet_screenshot.png](tweet_screenshot.png)\n'
+        body = row[0].rstrip()
+        if '#inbox/saved-tweets' not in body:
+            body += '\n\n#inbox/saved-tweets'
+        new_text = body + '\n\n![tweet_screenshot.png](tweet_screenshot.png)\n'
         cur.execute('UPDATE ZSFNOTE SET ZTEXT=?, ZMODIFICATIONDATE=? WHERE Z_PK=?',
                     (new_text, bear_time, r['pk']))
     print(f'Done pk={r["pk"]} uuid={r["uuid"][:8]}...')

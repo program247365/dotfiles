@@ -14,7 +14,8 @@
       "Skill(plan-exit-review)",
       "Skill(workday)",
       "Skill(visual-explainer)",
-      "WebFetch(domain:docs.anthropic.com)"
+      "WebFetch(domain:docs.anthropic.com)",
+      "mcp__plugin_playwright_playwright__browser_run_code"
     ],
     "deny": [],
     "ask": []
