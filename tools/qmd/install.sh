@@ -63,7 +63,9 @@ else
   if [ -d "$FORK_DIR/.git" ]; then
     echo "  Updating existing clone..."
     cd "$FORK_DIR"
+    git stash
     git pull --ff-only
+    git stash pop 2>/dev/null || true
   else
     echo "  Cloning fork..."
     mkdir -p "$(dirname "$FORK_DIR")"
@@ -73,11 +75,9 @@ else
 
   npm install
 
+  echo "  Building..."
   QMD_EXEC="$FORK_DIR/dist/qmd.js"
-  if [ ! -f "$QMD_EXEC" ]; then
-    echo "  Building..."
-    npm run build
-  fi
+  npm run build
   chmod +x "$QMD_EXEC"
 fi
 
