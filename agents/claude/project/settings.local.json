@@ -15,11 +15,21 @@
       "Skill(workday)",
       "Skill(visual-explainer)",
       "WebFetch(domain:docs.anthropic.com)",
-      "mcp__plugin_playwright_playwright__browser_run_code"
+      "mcp__plugin_playwright_playwright__browser_run_code",
+      "Bash(qmd query:*)",
+      "Bash(qmd search:*)",
+      "Bash(bcli search:*)",
+      "Bash(qmd collection:*)",
+      "Bash(cat:*)",
+      "Bash(qmd status:*)",
+      "Bash(qmd:*)"
     ],
     "deny": [],
     "ask": []
   },
+  "disabledMcpjsonServers": [
+    "figma"
+  ],
   "hooks": {
     "PreToolUse": [
       {
@@ -33,9 +43,6 @@
       }
     ]
   },
-  "disabledMcpjsonServers": [
-    "figma"
-  ],
   "statusLine": {
     "type": "command",
     "command": "~/.claude/statusline.sh"
