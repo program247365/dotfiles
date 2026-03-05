@@ -90,4 +90,22 @@ else
   exit 1
 fi
 
+# --- Collections & embeddings ---
+
+echo "Setting up Bear notes collection..."
+
+# Add collection only if not already registered
+if ! qmd collection list 2>/dev/null | grep -q "^bear"; then
+  qmd collection add --type bear --name bear
+  echo "  Registered Bear collection"
+else
+  echo "  Bear collection already registered, skipping"
+fi
+
+echo "Indexing Bear notes..."
+qmd update
+
+echo "Generating embeddings..."
+qmd embed
+
 echo "Done setting up QMD"
