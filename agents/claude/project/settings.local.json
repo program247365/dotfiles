@@ -22,7 +22,8 @@
       "Bash(qmd collection:*)",
       "Bash(cat:*)",
       "Bash(qmd status:*)",
-      "Bash(qmd:*)"
+      "Bash(qmd:*)",
+      "mcp__plugin_playwright_playwright__browser_close"
     ],
     "deny": [],
     "ask": []
