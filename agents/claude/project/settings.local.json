@@ -23,7 +23,12 @@
       "Bash(cat:*)",
       "Bash(qmd status:*)",
       "Bash(qmd:*)",
-      "mcp__plugin_playwright_playwright__browser_close"
+      "mcp__plugin_playwright_playwright__browser_close",
+      "Bash(bcli ls:*)",
+      "Bash(bcli tags:*)",
+      "Read(//Users/kevin/.local/bin/**)",
+      "Bash(bcli --help)",
+      "Bash(~/.local/bin/bcli search:*)"
     ],
     "deny": [],
     "ask": []
