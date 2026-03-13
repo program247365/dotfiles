@@ -30,6 +30,15 @@ If no argument is given, infer from day-of-week and time:
 - `bcli` installed at `~/.local/bin/bcli` and authenticated (see bear-notes skill)
 - Linear MCP server connected (for issue queries)
 
+## bcli Auth Recovery
+
+Any `bcli` command can fail with an authentication error (expired token, missing credentials, HTTP 401/403, or "unauthorized"/"not authenticated" in output). When this happens:
+
+1. Tell the user: "bcli authentication has expired. Please run `bcli auth` to re-authenticate."
+2. **Stop and wait** for the user to confirm they've completed auth before retrying.
+3. Do NOT retry the failed command automatically — the user must complete the interactive `bcli auth` flow first.
+4. Once the user confirms, retry the original command and continue the workflow.
+
 ## Conventions
 
 - **Tag taxonomy:**
