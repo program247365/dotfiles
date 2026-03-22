@@ -42,3 +42,12 @@ alias fh='fzf-make history'
 # My Apps
 alias r='rem-tui'
 alias q='qmd'
+
+# Wrap claude to auto-rename the Warp tab while it's running
+function claude() {
+  local project
+  project="$(basename "$PWD")"
+  printf "\033]0;Claude | %s\007" "$project"
+  command claude "$@"
+  printf "\033]0;%s\007" "$project"
+}
