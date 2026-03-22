@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# fresh — check health of all git repos under $PROJECTS (or ~/code)
+#
+# Reports repos with:
+#   - uncommitted changes (dirty working tree)
+#   - unpushed commits (local commits not on upstream)
+#
+# Usage: fresh [directory]
+
+set -euo pipefail
+
+ROOT="${1:-${PROJECTS:-$HOME/code}}"
+
+if [ ! -d "$ROOT" ]; then
+  echo "Directory not found: $ROOT"
+  exit 1
+fi
+
+ISSUES=0
+
+for repo in "$ROOT"/*/; do
+  [ -d "$repo/.git" ] || continue
+  name="$(basename "$repo")"
+  flags=()
+
+  # Check for uncommitted changes
+  if ! git -C "$repo" diff --quiet 2>/dev/null || \
+     ! git -C "$repo" diff --cached --quiet 2>/dev/null; then
+    flags+=("dirty")
+  fi
+
+  # Check for untracked files
+  if [ -n "$(git -C "$repo" ls-files --others --exclude-standard 2>/dev/null)" ]; then
+    flags+=("untracked")
+  fi
+
+  # Check for unpushed commits (silently skip if no upstream)
+  unpushed=$(git -C "$repo" rev-list --count "@{u}..HEAD" 2>/dev/null || echo "")
+  if [ -n "$unpushed" ] && [ "$unpushed" -gt 0 ]; then
+    flags+=("$unpushed unpushed")
+  fi
+
+  if [ "${#flags[@]}" -gt 0 ]; then
+    label=$(IFS=", "; echo "${flags[*]}")
+    printf "  %-30s %s\n" "$name" "[$label]"
+    ISSUES=$((ISSUES + 1))
+  fi
+done
+
+echo ""
+if [ "$ISSUES" -eq 0 ]; then
+  echo "All repos clean."
+else
+  echo "$ISSUES repo(s) need attention."
+fi
