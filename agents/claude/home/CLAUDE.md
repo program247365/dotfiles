@@ -19,6 +19,17 @@ Use @~/.claude/SOFTWARE_ENGINEERING.md as the baseline software engineering phil
 - Always include a "Test plan" section in PR descriptions.
 - Never force-push to main/master — warn and refuse if asked.
 
+## Dev Server URLs
+
+- Projects use portless (https://port1355.dev/) for stable dev URLs.
+- URL pattern: `http://<project-name>.localhost:1355`
+- With HTTPS enabled: `https://<project-name>.localhost`
+- The project name is the directory name unless overridden with `--name`.
+- In git worktrees, branch name is prepended: `http://<branch>.<project>.localhost:1355`
+- Start a dev server with `pldev` (auto-detects stack) or `portless <name> <cmd>`.
+- If a project has portless in its `package.json` dev script, use `pnpm dev` as normal.
+- Never hardcode `localhost:3000` or similar — always use the portless URL.
+
 ## Dotfiles
 
 - When working in `~/.dotfiles`, follow project config in `~/.dotfiles/.claude`.
