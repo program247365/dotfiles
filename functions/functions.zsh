@@ -1,3 +1,40 @@
+# Initialize a project with CLAUDE.md and WORKLOG.md scaffolding
+project-init() {
+  local dir="${1:-.}"
+  local created=0
+
+  if [ ! -f "$dir/CLAUDE.md" ]; then
+    cat > "$dir/CLAUDE.md" <<'SCAFFOLD'
+# Project
+
+## Purpose
+
+## Setup
+
+## Build & Deploy
+
+## Conventions
+
+## Known Gotchas
+SCAFFOLD
+    echo "Created CLAUDE.md"
+    created=1
+  fi
+
+  if [ ! -f "$dir/WORKLOG.md" ]; then
+    cat > "$dir/WORKLOG.md" <<'SCAFFOLD'
+# WORKLOG
+
+## Session Log
+
+SCAFFOLD
+    echo "Created WORKLOG.md"
+    created=1
+  fi
+
+  [ "$created" -eq 0 ] && echo "Both files already exist, nothing to do."
+}
+
 # Fuzzy-switch between branches and worktrees via sk
 gch() {
   local -A wt_map
