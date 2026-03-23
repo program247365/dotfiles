@@ -69,9 +69,46 @@ adopt_and_link() {
       mv "$target" "$source"
       echo "  [adopt] $label (moved to dotfiles)"
     elif [ -f "$target" ] && [ -e "$source" ]; then
-      # Both exist as files — dotfiles wins, discard target
-      rm "$target"
-      echo "  [adopt] $label (dotfiles version kept)"
+      # Both exist as files — prompt user to resolve
+      if diff -q "$source" "$target" > /dev/null 2>&1; then
+        rm "$target"
+        echo "  [adopt] $label (files identical)"
+      else
+        echo "  [conflict] $label"
+        echo "    Local:    $target"
+        echo "    Dotfiles: $source"
+        diff --color=auto -u "$source" "$target" 2>/dev/null | head -30 || true
+        echo ""
+        printf "    Keep (d)otfiles, keep (l)ocal, open (m)erge tool, or (s)kip? "
+        read -r choice
+        case "$choice" in
+          d|D)
+            rm "$target"
+            echo "  [adopt] $label (dotfiles version kept)"
+            ;;
+          l|L)
+            mv "$target" "$source"
+            echo "  [adopt] $label (local version adopted into dotfiles)"
+            ;;
+          m|M)
+            # Merge local changes into dotfiles source, then link
+            if command -v code > /dev/null 2>&1; then
+              code --diff "$source" "$target" --wait
+            elif command -v vimdiff > /dev/null 2>&1; then
+              vimdiff "$source" "$target"
+            else
+              echo "    No merge tool found. Manually resolve, then re-run."
+              return
+            fi
+            rm -f "$target"
+            echo "  [adopt] $label (merged)"
+            ;;
+          *)
+            echo "  [skip] $label"
+            return
+            ;;
+        esac
+      fi
     else
       echo "  [skip] $label (unexpected state: target and source both exist but types differ)"
       return
@@ -103,6 +140,11 @@ adopt_and_link \
   "$DOTFILES_CLAUDE/home/CLAUDE.md" \
   "$CLAUDE_DIR/CLAUDE.md" \
   "~/.claude/CLAUDE.md"
+
+adopt_and_link \
+  "$DOTFILES_CLAUDE/home/settings.json" \
+  "$CLAUDE_DIR/settings.json" \
+  "~/.claude/settings.json"
 
 adopt_and_link \
   "$DOTFILES_CLAUDE/commands" \
@@ -146,25 +188,6 @@ if ! grep -qF "$SHELL_ZSH_SOURCE" "$HOME/.zshrc.local" 2>/dev/null; then
   echo "  Added shell.zsh source to ~/.zshrc.local"
 else
   echo "  [ok] shell.zsh sourced in ~/.zshrc.local"
-fi
-
-# Merge statusLine config into ~/.claude/settings.json (idempotent)
-SETTINGS_JSON="$CLAUDE_DIR/settings.json"
-if command -v jq > /dev/null 2>&1; then
-  if [ -f "$SETTINGS_JSON" ]; then
-    if jq -e '.statusLine' "$SETTINGS_JSON" > /dev/null 2>&1; then
-      echo "  [ok] statusLine in ~/.claude/settings.json"
-    else
-      tmp=$(mktemp)
-      jq '. + {"statusLine": {"type": "command", "command": "~/.claude/statusline.sh"}}' "$SETTINGS_JSON" > "$tmp" && mv "$tmp" "$SETTINGS_JSON"
-      echo "  [add] statusLine to ~/.claude/settings.json"
-    fi
-  else
-    echo '{"statusLine": {"type": "command", "command": "~/.claude/statusline.sh"}}' > "$SETTINGS_JSON"
-    echo "  [create] ~/.claude/settings.json with statusLine"
-  fi
-else
-  echo "  [warn] jq not found, skipping statusLine config (install jq and re-run)"
 fi
 
 echo 'Done setting up Claude Code'
