@@ -29,7 +29,8 @@
       "Read(//Users/kevin/.local/bin/**)",
       "Bash(bcli --help)",
       "Bash(~/.local/bin/bcli search:*)",
-      "WebFetch(domain:randsinrepose.com)"
+      "WebFetch(domain:randsinrepose.com)",
+      "Skill(update-config)"
     ],
     "deny": [],
     "ask": []
