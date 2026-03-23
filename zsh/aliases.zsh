@@ -43,11 +43,26 @@ alias fh='fzf-make history'
 alias r='rem-tui'
 alias q='qmd'
 
-# Wrap claude to auto-rename the Warp tab while it's running
+# Wrap claude to auto-rename the Warp tab while it's running.
+# In Warp, disable auto-title so OSC 0 sticks across split panes.
 function claude() {
-  local project
+  local project prev_auto_title
   project="$(basename "$PWD")"
+
+  if [[ "$TERM_PROGRAM" == "WarpTerminal" ]]; then
+    prev_auto_title="${WARP_DISABLE_AUTO_TITLE:-}"
+    export WARP_DISABLE_AUTO_TITLE="true"
+  fi
+
   printf "\033]0;Claude | %s\007" "$project"
   command claude "$@"
   printf "\033]0;%s\007" "$project"
+
+  if [[ "$TERM_PROGRAM" == "WarpTerminal" ]]; then
+    if [[ -n "$prev_auto_title" ]]; then
+      export WARP_DISABLE_AUTO_TITLE="$prev_auto_title"
+    else
+      unset WARP_DISABLE_AUTO_TITLE
+    fi
+  fi
 }
