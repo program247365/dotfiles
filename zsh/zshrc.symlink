@@ -64,10 +64,6 @@ bindkey "^[[B" down-line-or-beginning-search # Down
 # https://starship.rs/guide/
 eval "$(starship init zsh)"
 
-# https://github.com/Schniz/fnm
-# Automatically switches Node version when cd'ing into a project with .node-version or .nvmrc
-eval "$(fnm env --use-on-cd)"
-
 # my custom bin files I may use a lot
 export PATH="$PATH":"$HOME/.kevin/bin:$PATH"
 
@@ -78,16 +74,6 @@ eval "$(zoxide init zsh)"
 if [[ -f "$HOME/.config/broot/launcher/bash/br" ]]; then
   source "$HOME/.config/broot/launcher/bash/br"
 fi
-
-export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
-
-# pnpm
-export PNPM_HOME="$HOME/Library/pnpm"
-case ":$PATH:" in
-  *":$PNPM_HOME:"*) ;;
-  *) export PATH="$PNPM_HOME:$PATH" ;;
-esac
-# pnpm end
 
 # bun completions
 [ -s "/Users/kevin/.bun/_bun" ] && source "/Users/kevin/.bun/_bun"

@@ -16,7 +16,7 @@ brew 'eza' # https://github.com/eza-community/eza
 brew 'fantastical' # https://flexibits.com/fantastical
 brew 'fastfetch' # https://github.com/fastfetch-cli/fastfetch
 brew 'fd'
-brew 'fnm' # https://github.com/Schniz/fnm
+brew 'mise' # https://mise.jdx.dev
 brew 'fx'
 brew 'fzf-make' # https://github.com/kyu08/fzf-make
 brew 'gh'
@@ -38,8 +38,6 @@ brew 'noahgorstein/tap/jqp' #JQ playground: https://github.com/noahgorstein/jqp
 brew 'neovim'
 brew 'nvm' # https://github.com/mhinz/neovim-remote
 brew 'onefetch'
-brew 'pyenv'
-brew 'pnpm'
 brew 'ripgrep'
 brew 'sk'
 brew 'so'
