@@ -28,7 +28,8 @@
       "Bash(bcli tags:*)",
       "Read(//Users/kevin/.local/bin/**)",
       "Bash(bcli --help)",
-      "Bash(~/.local/bin/bcli search:*)"
+      "Bash(~/.local/bin/bcli search:*)",
+      "WebFetch(domain:randsinrepose.com)"
     ],
     "deny": [],
     "ask": []
@@ -44,6 +45,16 @@
           {
             "type": "command",
             "command": "~/.dotfiles/agents/claude/hooks/guard-destructive.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "osascript -e 'display notification \"Claude finished\" with title \"Claude Code\" sound name \"Ping\"'"
           }
         ]
       }
