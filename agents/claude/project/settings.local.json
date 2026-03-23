@@ -30,7 +30,8 @@
       "Bash(bcli --help)",
       "Bash(~/.local/bin/bcli search:*)",
       "WebFetch(domain:randsinrepose.com)",
-      "Skill(update-config)"
+      "Skill(update-config)",
+      "WebFetch(domain:docs.warp.dev)"
     ],
     "deny": [],
     "ask": []

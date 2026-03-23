@@ -20,13 +20,13 @@ echo "Setting up QMD..."
 # Node >= 22 (README requirement)
 NODE_VERSION=$(node --version 2>/dev/null | sed 's/^v//')
 if [ -z "$NODE_VERSION" ]; then
-  echo "  Error: node not found. Run: fnm install 22 && fnm default 22"
+  echo "  Error: node not found. Run: mise install node@22 && mise use node@22"
   exit 1
 fi
 NODE_MAJOR=$(echo "$NODE_VERSION" | cut -d. -f1)
 if [ "$NODE_MAJOR" -lt 22 ]; then
   echo "  Error: node v$NODE_VERSION too old. QMD requires >= 22"
-  echo "  Run: fnm install 22 && fnm default 22"
+  echo "  Run: mise install node@22 && mise use node@22"
   exit 1
 fi
 
