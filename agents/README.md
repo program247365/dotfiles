@@ -15,9 +15,14 @@ agents/
 ├── README.md
 ├── claude/
 │   ├── install.sh
-│   ├── home/
-│   │   └── CLAUDE.md
 │   ├── statusline.sh
+│   ├── home/
+│   │   ├── CLAUDE.md
+│   │   └── settings.json
+│   ├── agents/
+│   ├── commands/
+│   ├── hooks/
+│   ├── rules/
 │   └── project/
 │       ├── settings.local.json
 │       └── skills/
@@ -85,12 +90,16 @@ Both philosophy files are symlinked to:
 `agents/claude/install.sh` manages:
 
 - `~/.claude/CLAUDE.md` -> `~/.dotfiles/agents/claude/home/CLAUDE.md`
+- `~/.claude/settings.json` -> `~/.dotfiles/agents/claude/home/settings.json`
+- `~/.claude/commands` -> `~/.dotfiles/agents/claude/commands`
 - `~/.claude/statusline.sh` -> `~/.dotfiles/agents/claude/statusline.sh`
+- `~/.claude/rules` -> `~/.dotfiles/agents/claude/rules`
+- `~/.claude/agents` -> `~/.dotfiles/agents/claude/agents`
 - `~/.dotfiles/.claude` -> `~/.dotfiles/agents/claude/project`
 - `~/.claude/SOFTWARE_ENGINEERING.md` -> `~/.dotfiles/agents/philosophy/SOFTWARE_ENGINEERING.md`
 - `~/.dotfiles/SOFTWARE_ENGINEERING.md` -> `~/.dotfiles/agents/philosophy/SOFTWARE_ENGINEERING.md`
 
-This keeps project Claude settings and skills in repo while remaining active in this workspace.
+This keeps all Claude configuration in version control. Global settings (permissions, plugins, hooks) are symlinked directly — changes made interactively by Claude Code are tracked automatically.
 
 ## Codex Setup
 
