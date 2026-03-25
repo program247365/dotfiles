@@ -156,6 +156,8 @@ adopt_and_link \
   "$CLAUDE_DIR/statusline.sh" \
   "~/.claude/statusline.sh"
 
+# Project-scoped: only available in the dotfiles repo
+# Add project-only skills to agents/claude/project/skills/
 adopt_and_link \
   "$DOTFILES_CLAUDE/project" \
   "$DOTFILES_ROOT/.claude" \
@@ -181,6 +183,11 @@ adopt_and_link \
   "$CLAUDE_DIR/agents" \
   "~/.claude/agents"
 
+# Global skills: available in all projects
+# Add global skills to agents/claude/home/skills/
+# On a new machine, adopt_and_link merges any locally-installed skills
+# (e.g. from ~/.claude/skills/) into dotfiles, then the prompt below
+# offers to commit them so they follow you across machines.
 adopt_and_link \
   "$DOTFILES_CLAUDE/home/skills" \
   "$CLAUDE_DIR/skills" \
