@@ -43,11 +43,26 @@ alias fh='fzf-make history'
 alias r='rem-tui'
 alias q='qmd'
 
-# Wrap claude to auto-rename the Warp tab while it's running.
+# Wrap claude to auto-update and auto-rename the Warp tab while it's running.
 # In Warp, disable auto-title so OSC 0 sticks across split panes.
 function claude() {
   local project prev_auto_title
   project="$(basename "$PWD")"
+
+  # Auto-update via brew (skip if --help, --version, or other info flags)
+  if [[ "$1" != "--help" && "$1" != "-h" && "$1" != "--version" ]]; then
+    local cur_ver new_ver semver release_url
+    cur_ver=$(command claude --version 2>/dev/null | head -1)
+    brew upgrade claude-code &>/dev/null
+    new_ver=$(command claude --version 2>/dev/null | head -1)
+    semver=$(echo "$new_ver" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+    release_url="https://github.com/anthropics/claude-code/releases/tag/v${semver}"
+    if [[ "$cur_ver" != "$new_ver" ]]; then
+      echo "Updated to $new_ver — $release_url"
+    else
+      echo "No update needed — $new_ver is latest — $release_url"
+    fi
+  fi
 
   if [[ "$TERM_PROGRAM" == "WarpTerminal" ]]; then
     prev_auto_title="${WARP_DISABLE_AUTO_TITLE:-}"
