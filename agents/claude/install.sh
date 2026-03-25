@@ -186,6 +186,26 @@ adopt_and_link \
   "$CLAUDE_DIR/skills" \
   "~/.claude/skills"
 
+# Check for new skills not yet tracked in git
+SKILLS_DIR="$DOTFILES_CLAUDE/home/skills"
+NEW_SKILLS=$(git -C "$DOTFILES_ROOT" ls-files --others --exclude-standard "$SKILLS_DIR" 2>/dev/null)
+if [ -n "$NEW_SKILLS" ]; then
+  echo ""
+  echo "  New skills found (not tracked in dotfiles):"
+  git -C "$DOTFILES_ROOT" ls-files --others --exclude-standard "$SKILLS_DIR" \
+    | sed 's|.*/skills/||' | cut -d/ -f1 | sort -u \
+    | while read -r skill; do echo "    - $skill"; done
+  printf "  Commit to dotfiles? (y/n) "
+  read -r answer
+  if [ "$answer" = "y" ] || [ "$answer" = "Y" ]; then
+    git -C "$DOTFILES_ROOT" add "$SKILLS_DIR"
+    git -C "$DOTFILES_ROOT" commit -m "feat(claude): track adopted skills from $(hostname -s)"
+    echo "  [commit] new skills tracked"
+  else
+    echo "  [skip] skills left untracked"
+  fi
+fi
+
 # Source shell.zsh in ~/.zshrc.local (idempotent)
 SHELL_ZSH_SOURCE="source \"$DOTFILES_ROOT/agents/shell.zsh\""
 if ! grep -qF "$SHELL_ZSH_SOURCE" "$HOME/.zshrc.local" 2>/dev/null; then
