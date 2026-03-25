@@ -181,6 +181,11 @@ adopt_and_link \
   "$CLAUDE_DIR/agents" \
   "~/.claude/agents"
 
+adopt_and_link \
+  "$DOTFILES_CLAUDE/home/skills" \
+  "$CLAUDE_DIR/skills" \
+  "~/.claude/skills"
+
 # Source shell.zsh in ~/.zshrc.local (idempotent)
 SHELL_ZSH_SOURCE="source \"$DOTFILES_ROOT/agents/shell.zsh\""
 if ! grep -qF "$SHELL_ZSH_SOURCE" "$HOME/.zshrc.local" 2>/dev/null; then
