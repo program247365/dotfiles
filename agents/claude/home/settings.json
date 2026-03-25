@@ -22,7 +22,8 @@
       "Bash(pnpm exec tsc:*)",
       "WebSearch",
       "Bash(git log:*)",
-      "Bash(gh pr diff:*)"
+      "Bash(gh pr diff:*)",
+      "Bash(dev-browser *)"
     ]
   },
   "model": "opus[1m]",
@@ -66,6 +67,15 @@
     "plugin-dev@claude-code-plugins": true,
     "pr-review-toolkit@claude-code-plugins": true,
     "ralph-wiggum@claude-code-plugins": true,
-    "security-guidance@claude-code-plugins": true
+    "security-guidance@claude-code-plugins": true,
+    "compound-engineering@compound-engineering-plugin": true
+  },
+  "extraKnownMarketplaces": {
+    "compound-engineering-plugin": {
+      "source": {
+        "source": "github",
+        "repo": "EveryInc/compound-engineering-plugin"
+      }
+    }
   }
 }
