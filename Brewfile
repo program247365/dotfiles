@@ -30,6 +30,7 @@ brew 'jq'
 brew 'keith/formulae/reminders-cli'
 brew 'lazydocker'
 brew 'lazygit'
+brew 'illegalstudio/tap/lazyagent' # https://lazyagent.dev
 brew 'lsd'
 brew 'm-cli'
 brew 'mas'
