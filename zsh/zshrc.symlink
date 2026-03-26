@@ -88,3 +88,6 @@ if [[ -f "$HOME/.zshrc.local" ]]; then
 fi
 
 export PATH="$HOME/bin:$PATH"
+
+# mise - version manager
+eval "$(mise activate zsh)"
