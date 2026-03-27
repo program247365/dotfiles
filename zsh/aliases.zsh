@@ -49,18 +49,25 @@ function claude() {
   local project prev_auto_title
   project="$(basename "$PWD")"
 
-  # Auto-update via brew (skip if --help, --version, or other info flags)
+  # Auto-update via brew (check at most once per hour)
   if [[ "$1" != "--help" && "$1" != "-h" && "$1" != "--version" ]]; then
-    local cur_ver new_ver semver release_url
-    cur_ver=$(command claude --version 2>/dev/null | head -1)
-    brew upgrade claude-code &>/dev/null
-    new_ver=$(command claude --version 2>/dev/null | head -1)
-    semver=$(echo "$new_ver" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
-    release_url="https://github.com/anthropics/claude-code/releases/tag/v${semver}"
-    if [[ "$cur_ver" != "$new_ver" ]]; then
-      echo "Updated to $new_ver — $release_url"
-    else
-      echo "No update needed — $new_ver is latest — $release_url"
+    local cache_file="$HOME/.claude/.update_check"
+    local now=$(date +%s)
+    local last_check=0
+    [[ -f "$cache_file" ]] && last_check=$(cat "$cache_file")
+
+    if (( now - last_check >= 3600 )); then
+      echo "$now" > "$cache_file"
+      if HOMEBREW_NO_AUTO_UPDATE=1 brew outdated --formula | grep -q '^claude-code$'; then
+        local cur_ver
+        cur_ver=$(command claude --version 2>/dev/null | head -1)
+        HOMEBREW_NO_AUTO_UPDATE=1 brew upgrade claude-code
+        local new_ver semver release_url
+        new_ver=$(command claude --version 2>/dev/null | head -1)
+        semver=$(echo "$new_ver" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+        release_url="https://github.com/anthropics/claude-code/releases/tag/v${semver}"
+        echo "Updated $cur_ver → $new_ver — $release_url"
+      fi
     fi
   fi
 
