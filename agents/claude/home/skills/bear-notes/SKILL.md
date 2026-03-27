@@ -9,10 +9,9 @@ You have full access to the user's Bear notes via `bcli` (better-bear-cli), whic
 
 ## Setup
 
-Install bcli (one-time):
+Install bcli via dotfiles (installs to `~/.kevin/bin`, which is on PATH):
 ```bash
-curl -L https://github.com/mreider/better-bear-cli/releases/latest/download/bcli-macos-universal.tar.gz \
-  -o /tmp/bcli.tar.gz && tar xzf /tmp/bcli.tar.gz -C /tmp && mv /tmp/bcli ~/.local/bin/bcli
+~/.dotfiles/tools/bcli/install.sh
 ```
 
 Authenticate (opens browser for Apple Sign-In):
