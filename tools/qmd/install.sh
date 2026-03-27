@@ -76,7 +76,7 @@ else
   npm install
 
   echo "  Building..."
-  QMD_EXEC="$FORK_DIR/dist/qmd.js"
+  QMD_EXEC="$FORK_DIR/dist/cli/qmd.js"
   npm run build
   chmod +x "$QMD_EXEC"
 fi
