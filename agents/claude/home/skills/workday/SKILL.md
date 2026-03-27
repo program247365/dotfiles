@@ -27,7 +27,7 @@ If no argument is given, infer from day-of-week and time:
 
 ## Prerequisites
 
-- `bcli` installed at `~/.local/bin/bcli` and authenticated (see bear-notes skill)
+- `bcli` installed and on PATH (see bear-notes skill; installed via `~/.dotfiles/tools/bcli/install.sh`)
 - Linear MCP server connected (for issue queries)
 
 ## bcli Auth Recovery
@@ -55,7 +55,7 @@ Any `bcli` command can fail with an authentication error (expired token, missing
 
 ```bash
 # Save all notes to temp file, then filter in Python
-~/.local/bin/bcli ls --all --json > /tmp/bear_all_notes.json
+bcli ls --all --json > /tmp/bear_all_notes.json
 ```
 
 ```python
@@ -90,7 +90,7 @@ Use the Linear MCP `list_issues` tool:
 ### Read Note Content
 
 ```bash
-~/.local/bin/bcli get NOTE_ID --raw
+bcli get NOTE_ID --raw
 ```
 
 Search results only have `id`, `title`, `tags`, `match` — always fetch body separately.
