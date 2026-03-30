@@ -70,6 +70,12 @@
     "security-guidance@claude-code-plugins": true,
     "compound-engineering@compound-engineering-plugin": true
   },
+  "mcpServers": {
+    "msgvault": {
+      "command": "msgvault",
+      "args": ["mcp"]
+    }
+  },
   "extraKnownMarketplaces": {
     "compound-engineering-plugin": {
       "source": {
