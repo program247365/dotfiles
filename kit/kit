@@ -338,10 +338,7 @@ cmd_search() {
       echo "$name ($type): $desc"
       return 0
     fi
-    help_flag=$(printf '%s' "$entry" | jq -r '.help_flag')
-    "$name" $help_flag 2>&1 \
-      | bat --style=plain --pager "less -R" 2>/dev/null \
-      || "$name" $help_flag 2>&1 | less -R
+    "$name"
   else
     echo "Not installed. To install:"
     if [[ "$type" == "cask" ]]; then
