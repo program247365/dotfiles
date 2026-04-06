@@ -44,19 +44,25 @@ _require() {
 
 _extract_desc() {
   # Extract description from an inline comment on a line.
-  # Strips leading URLs (e.g. "# https://github.com/foo - The real desc" → "The real desc")
+  # "# https://foo.com - Real desc" → "Real desc"
+  # "# https://foo.com"             → "foo.com"  (URL-only: use bare domain as fallback)
   local line="$1"
-  local desc=""
+  local desc="" url=""
   if [[ "$line" == *" #"* ]]; then
     desc="${line#* #}"
     desc="${desc## }"
-    # If comment starts with a URL, strip it (and optional separator)
-    # Use -E (ERE) — BSD sed on macOS does not support \? in BRE
+    # Capture leading URL before stripping (used as fallback if nothing else remains)
+    if [[ "$desc" =~ ^https?://([^ ]*) ]]; then
+      url="${BASH_REMATCH[1]}"
+    fi
+    # Strip leading URL and optional separator; use -E (BSD sed doesn't support \? in BRE)
     desc=$(printf '%s' "$desc" | sed -E 's|^https?://[^ ]* *[-–]* *||')
-    # Strip any trailing URLs
+    # Strip trailing URLs
     desc=$(printf '%s' "$desc" | sed -E 's| https?://[^ ]*||g')
     # Trim whitespace
     desc=$(printf '%s' "$desc" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+    # Fall back to bare URL domain if comment was URL-only
+    [[ -z "$desc" && -n "$url" ]] && desc="$url"
   fi
   printf '%s' "$desc"
 }
