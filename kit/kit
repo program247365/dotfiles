@@ -34,7 +34,109 @@ main() {
   esac
 }
 
-cmd_index()   { echo "index not yet implemented" >&2; }
+# ── helpers ──────────────────────────────────────────────────────────────────
+
+_require() {
+  for cmd in "$@"; do
+    command -v "$cmd" >/dev/null 2>&1 || { echo "kit: required command not found: $cmd" >&2; exit 1; }
+  done
+}
+
+_extract_desc() {
+  # Extract description from an inline comment on a line.
+  # Strips leading URLs (e.g. "# https://github.com/foo - The real desc" → "The real desc")
+  local line="$1"
+  local desc=""
+  if [[ "$line" == *" #"* ]]; then
+    desc="${line#* #}"
+    desc="${desc## }"
+    # If comment starts with a URL, strip it (and optional separator)
+    desc=$(printf '%s' "$desc" | sed 's|^https\?://[^ ]* *[-–]* *||')
+    # Strip any trailing URLs
+    desc=$(printf '%s' "$desc" | sed 's| https\?://[^ ]*||g')
+    # Trim whitespace
+    desc=$(printf '%s' "$desc" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+  fi
+  printf '%s' "$desc"
+}
+
+_get_dotfiles_added() {
+  # Find the first commit that introduced 'name' (quoted) into Brewfile.
+  local name="$1"
+  git -C "$DOTFILES" log --format="%ad" --date=format:"%Y-%m-%d" -S "'${name}'" -- Brewfile 2>/dev/null | tail -1
+}
+
+# ── cmd_index ─────────────────────────────────────────────────────────────────
+
+cmd_index() {
+  _require jq git brew
+
+  echo "Building kit index..." >&2
+  mkdir -p "$KIT_HOME"
+
+  # Load existing index to preserve manual help_flag overrides
+  local existing_index="[]"
+  [[ -f "$INDEX" ]] && existing_index=$(cat "$INDEX")
+
+  # Temp file: accumulate newline-delimited JSON objects, combine at end
+  local tmp
+  tmp=$(mktemp)
+  # shellcheck disable=SC2064
+  trap "rm -f $tmp" EXIT
+
+  # ── Brewfile ────────────────────────────────────────────────────────────────
+  while IFS= read -r line; do
+    [[ -z "$line" ]] && continue
+    [[ "$line" =~ ^[[:space:]]*# ]] && continue
+    [[ "$line" =~ ^(tap|cask_args)[[:space:]] ]] && continue
+
+    local type="" full_name="" name="" desc=""
+
+    if [[ "$line" =~ ^brew\ \'([^\']+)\' ]]; then
+      full_name="${BASH_REMATCH[1]}"
+      name="${full_name##*/}"   # strip tap prefix: 'keith/formulae/reminders-cli' → 'reminders-cli'
+      type="brew"
+    elif [[ "$line" =~ ^cask\ \'([^\']+)\' ]]; then
+      full_name="${BASH_REMATCH[1]}"
+      name="$full_name"
+      type="cask"
+    else
+      continue
+    fi
+
+    desc=$(_extract_desc "$line")
+
+    # Preserve existing help_flag override; default to --help
+    local help_flag="--help"
+    local existing_flag
+    existing_flag=$(printf '%s' "$existing_index" | jq -r --arg n "$name" \
+      '.[] | select(.name == $n) | .help_flag // ""' 2>/dev/null || true)
+    [[ -n "$existing_flag" ]] && help_flag="$existing_flag"
+
+    # dotfiles_added: first git commit that introduced this name to Brewfile
+    local dotfiles_added
+    dotfiles_added=$(_get_dotfiles_added "$name")
+
+    jq -n \
+      --arg  name           "$name" \
+      --arg  type           "$type" \
+      --arg  desc           "$desc" \
+      --arg  dotfiles_added "$dotfiles_added" \
+      --arg  help_flag      "$help_flag" \
+      '{name:$name,type:$type,description:$desc,dotfiles_added:$dotfiles_added,
+        installed:false,installed_at:null,help_flag:$help_flag}' \
+      >> "$tmp"
+
+  done < "$DOTFILES/Brewfile"
+
+  # Combine into array and write (brew cross-reference comes in Task 4)
+  jq -s '.' "$tmp" > "$INDEX"
+
+  local count
+  count=$(jq 'length' "$INDEX")
+  echo "Indexed $count entries → $INDEX" >&2
+}
+
 cmd_search()  { echo "search not yet implemented" >&2; }
 cmd_recent()  { echo "recent not yet implemented" >&2; }
 cmd_missing() { echo "missing not yet implemented" >&2; }
