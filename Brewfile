@@ -2,8 +2,10 @@ cask_args appdir: '/Applications'
 
 tap 'homebrew/bundle'
 tap 'homebrew/cask-fonts'
+tap 'Arthur-Ficial/tap' # https://github.com/Arthur-Ficial/apfel
 
 brew '1password-cli'
+brew 'apfel' # https://github.com/Arthur-Ficial/apfel - Apple Intelligence from the CLI (on-device LLM, no API key)
 brew 'bat'
 brew 'broot'
 brew 'bottom' # 'btm' is the cli binary
