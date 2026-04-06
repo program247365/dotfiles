@@ -13,7 +13,7 @@ set -euo pipefail
 
 DOTFILES="${DOTFILES:-$HOME/.dotfiles}"
 KIT_HOME="$HOME/.kit"
-INDEX="$KIT_HOME/index.json"
+INDEX="$KIT_HOME/index.json"  # used by cmd_index, cmd_search, cmd_recent, cmd_missing
 
 main() {
   case "${1:-}" in
