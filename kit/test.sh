@@ -31,7 +31,7 @@ assert "bat entry present" "$has_bat"
 
 # T4: bat entry has required fields
 bat_entry=$(jq -r '.[] | select(.name == "bat")' "$INDEX")
-has_fields=$(echo "$bat_entry" | jq -r 'has("name") and has("type") and has("installed") and has("help_flag")' 2>/dev/null)
+has_fields=$(echo "$bat_entry" | jq -r 'has("name") and has("type") and has("installed") and has("help_flag") and has("description") and has("dotfiles_added")' 2>/dev/null)
 assert "bat entry has required fields" "$has_fields"
 
 # T5: bat type is brew
