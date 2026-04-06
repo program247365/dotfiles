@@ -51,9 +51,10 @@ _extract_desc() {
     desc="${line#* #}"
     desc="${desc## }"
     # If comment starts with a URL, strip it (and optional separator)
-    desc=$(printf '%s' "$desc" | sed 's|^https\?://[^ ]* *[-–]* *||')
+    # Use -E (ERE) — BSD sed on macOS does not support \? in BRE
+    desc=$(printf '%s' "$desc" | sed -E 's|^https?://[^ ]* *[-–]* *||')
     # Strip any trailing URLs
-    desc=$(printf '%s' "$desc" | sed 's| https\?://[^ ]*||g')
+    desc=$(printf '%s' "$desc" | sed -E 's| https?://[^ ]*||g')
     # Trim whitespace
     desc=$(printf '%s' "$desc" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
   fi
