@@ -28,7 +28,7 @@ main() {
       echo "  kit <query>      search pre-filtered to <query>"
       echo "  kit index        rebuild ~/.kit/index.json"
       echo "  kit recent [n]   show n recently added tools (default: 10)"
-      echo "  kit missing      show tools not yet installed"
+      echo "  kit missing      show tools declared in dotfiles but not installed"
       ;;
     *)        cmd_search "${1:-}" ;;
   esac
