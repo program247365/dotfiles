@@ -54,6 +54,18 @@ assert "ll alias entry present" "$has_ll"
 has_gch=$(jq -r 'any(.[]; .name == "gch")' "$INDEX")
 assert "gch function entry present" "$has_gch"
 
+# T10: bat should be installed (it's in Brewfile and definitely installed)
+bat_installed=$(jq -r '.[] | select(.name == "bat") | .installed' "$INDEX")
+assert "bat is marked installed" "$([[ $bat_installed == true ]] && echo true || echo false)"
+
+# T11: no entry should have installed:false AND type:bin (bin scripts are always installed)
+bin_not_installed=$(jq '[.[] | select(.type == "bin" and .installed == false)] | length' "$INDEX")
+assert "no bin entries marked not-installed" "$([[ $bin_not_installed -eq 0 ]] && echo true || echo false)"
+
+# T12: all entries have a non-null name
+null_names=$(jq '[.[] | select(.name == null or .name == "")] | length' "$INDEX")
+assert "all entries have non-empty names" "$([[ $null_names -eq 0 ]] && echo true || echo false)"
+
 echo ""
 echo "Results: $PASS passed, $FAIL failed"
 [[ $FAIL -eq 0 ]]
