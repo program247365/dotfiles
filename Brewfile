@@ -3,6 +3,7 @@ cask_args appdir: '/Applications'
 tap 'homebrew/bundle'
 tap 'homebrew/cask-fonts'
 tap 'Arthur-Ficial/tap' # https://github.com/Arthur-Ficial/apfel
+tap 'program247365/tap' # https://github.com/program247365/homebrew-tap
 
 brew '1password-cli'
 brew 'apfel' # https://github.com/Arthur-Ficial/apfel - Apple Intelligence from the CLI (on-device LLM, no API key)
@@ -31,6 +32,7 @@ brew 'jless' # https://jless.io/
 brew 'jq'
 brew 'keith/formulae/reminders-cli'
 brew 'lazydocker'
+brew 'program247365/tap/looper' # https://github.com/program247365/looper - CLI music looper with TUI
 brew 'lazygit'
 brew 'illegalstudio/tap/lazyagent' # https://lazyagent.dev
 brew 'lsd'
