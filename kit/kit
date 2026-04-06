@@ -357,14 +357,7 @@ cmd_search() {
       echo "$name ($type): $desc"
       return 0
     fi
-    # Prompt for optional args; just Enter runs bare
-    local args=""
-    read -r -e -p "$ $name " args 2>/dev/null || true
-    if [[ -n "$args" ]]; then
-      eval "$name $args"
-    else
-      "$name"
-    fi
+    "$name"
   else
     echo "Not installed. To install:"
     if [[ "$type" == "cask" ]]; then
