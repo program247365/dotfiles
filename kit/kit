@@ -20,6 +20,7 @@ main() {
     index)    shift; cmd_index "$@" ;;
     recent)   shift; cmd_recent "$@" ;;
     missing)  shift; cmd_missing "$@" ;;
+    add)      shift; cmd_add "$@" ;;
     -h|--help)
       echo "kit — Kevin's installed tools"
       echo ""
@@ -29,6 +30,11 @@ main() {
       echo "  kit index        rebuild ~/.kit/index.json"
       echo "  kit recent [n]   show n recently added tools (default: 10)"
       echo "  kit missing      show tools declared in dotfiles but not installed"
+      echo "  kit add <name>   add formula to Brewfile, install, and reindex"
+      echo ""
+      echo "Picker keys:"
+      echo "  Enter            run selected tool"
+      echo "  ctrl-h           show --help for selected tool"
       ;;
     *)        cmd_search "${1:-}" ;;
   esac
@@ -283,7 +289,11 @@ cmd_index() {
             ($info[0].formulae[] | select(.name == $entry.name) |
              .installed[0].installed_on // null |
              if . then (. | split("T")[0]) else null end) // null
-          )
+          ) |
+          # Fall back to brew formula desc when dotfiles comment is empty
+          .description = (if .description == "" then
+            (($info[0].formulae[] | select(.name == $entry.name) | .desc) // "")
+          else .description end)
         else $entry end
       elif $entry.type == "cask" then
         if ($entry.name as $n | installed_casks | any(. == $n)) then
@@ -323,7 +333,10 @@ cmd_search() {
       (if .installed then "" else "[not installed]" end)
     ] | @tsv' "$INDEX" \
     | column -t -s $'\t' \
-    | sk --query "$query" --ansi
+    | sk --query "$query" --ansi \
+         --preview 'cmd=$(echo {} | cut -d" " -f1); ($cmd --help 2>&1 | head -50) || echo "(no --help)"' \
+         --preview-window 'right:50%:wrap' \
+         --bind 'ctrl-h:execute($SHELL -c "cmd=\$(echo {} | cut -d\" \" -f1); \$cmd --help 2>&1 | less -R")'
   ) || return 0   # user pressed Esc — exit cleanly
 
   [[ -z "$selection" ]] && return 0
@@ -344,7 +357,14 @@ cmd_search() {
       echo "$name ($type): $desc"
       return 0
     fi
-    "$name"
+    # Prompt for optional args; just Enter runs bare
+    local args=""
+    read -r -e -p "$ $name " args 2>/dev/null || true
+    if [[ -n "$args" ]]; then
+      eval "$name $args"
+    else
+      "$name"
+    fi
   else
     echo "Not installed. To install:"
     if [[ "$type" == "cask" ]]; then
@@ -401,6 +421,15 @@ cmd_missing() {
   else
     echo "$missing"
   fi
+}
+
+cmd_add() {
+  local name="${1:-}"
+  [[ -z "$name" ]] && { echo "Usage: kit add <formula>" >&2; exit 1; }
+  echo "brew '$name'" >> "$DOTFILES/Brewfile"
+  echo "Added brew '$name' to Brewfile" >&2
+  brew install "$name"
+  cmd_index
 }
 
 main "$@"
