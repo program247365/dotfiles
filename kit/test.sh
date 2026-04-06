@@ -38,6 +38,22 @@ assert "bat entry has required fields" "$has_fields"
 bat_type=$(echo "$bat_entry" | jq -r '.type')
 assert "bat type is brew" "$([[ $bat_type == brew ]] && echo true || echo false)"
 
+# T6: dot (bin/ script) is in the index
+has_dot=$(jq -r 'any(.[]; .name == "dot")' "$INDEX")
+assert "dot bin entry present" "$has_dot"
+
+# T7: dot type is bin
+dot_type=$(jq -r '.[] | select(.name == "dot") | .type' "$INDEX")
+assert "dot type is bin" "$([[ $dot_type == bin ]] && echo true || echo false)"
+
+# T8: ll (alias) is in the index
+has_ll=$(jq -r 'any(.[]; .name == "ll")' "$INDEX")
+assert "ll alias entry present" "$has_ll"
+
+# T9: gch (function) is in the index
+has_gch=$(jq -r 'any(.[]; .name == "gch")' "$INDEX")
+assert "gch function entry present" "$has_gch"
+
 echo ""
 echo "Results: $PASS passed, $FAIL failed"
 [[ $FAIL -eq 0 ]]
