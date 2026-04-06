@@ -54,6 +54,11 @@ assert "ll alias entry present" "$has_ll"
 has_gch=$(jq -r 'any(.[]; .name == "gch")' "$INDEX")
 assert "gch function entry present" "$has_gch"
 
+# T13: kit can format entries for display (non-interactive smoke test)
+formatted=$(jq -r '.[] | [.name, ("[" + .type + "]"), .description,
+  (if .installed then "" else "[not installed]" end)] | @tsv' "$INDEX" | column -t -s $'\t' 2>/dev/null)
+assert "kit formats entries for display" "$([[ -n $formatted ]] && echo true || echo false)"
+
 # T10: bat should be installed (it's in Brewfile and definitely installed)
 bat_installed=$(jq -r '.[] | select(.name == "bat") | .installed' "$INDEX")
 assert "bat is marked installed" "$([[ $bat_installed == true ]] && echo true || echo false)"

@@ -67,6 +67,32 @@ _get_dotfiles_added() {
   git -C "$DOTFILES" log --format="%ad" --date=format:"%Y-%m-%d" -S "'${name}'" -- Brewfile 2>/dev/null | tail -1
 }
 
+_stale_warn() {
+  [[ ! -f "$INDEX" ]] && return
+  local idx_mtime
+  idx_mtime=$(stat -f %m "$INDEX" 2>/dev/null || stat -c %Y "$INDEX" 2>/dev/null)
+
+  local sources=(
+    "$DOTFILES/Brewfile"
+    "$DOTFILES/zsh/aliases.zsh"
+    "$DOTFILES/functions/functions.zsh"
+    "$DOTFILES/agents/shell.zsh"
+    "$DOTFILES/docker/aliases.zsh"
+    "$DOTFILES/git/aliases.zsh"
+    "$DOTFILES/xcode/aliases.zsh"
+  )
+
+  for f in "${sources[@]}"; do
+    [[ -f "$f" ]] || continue
+    local f_mtime
+    f_mtime=$(stat -f %m "$f" 2>/dev/null || stat -c %Y "$f" 2>/dev/null)
+    if (( f_mtime > idx_mtime )); then
+      echo "⚠ index may be stale ($(basename "$f") changed) — run 'kit index' to refresh" >&2
+      return
+    fi
+  done
+}
+
 # ── cmd_index ─────────────────────────────────────────────────────────────────
 
 cmd_index() {
@@ -270,7 +296,62 @@ cmd_index() {
   echo "Indexed $count entries → $INDEX" >&2
 }
 
-cmd_search()  { echo "search not yet implemented" >&2; }
+cmd_search() {
+  local query="${1:-}"
+  _require sk jq
+
+  if [[ ! -f "$INDEX" ]]; then
+    echo "No index found. Building..." >&2
+    cmd_index
+  fi
+
+  _stale_warn
+
+  # Format: name  [type]  description  [not installed]?
+  local selection
+  selection=$(
+    jq -r '.[] | [
+      .name,
+      ("[" + .type + "]"),
+      .description,
+      (if .installed then "" else "[not installed]" end)
+    ] | @tsv' "$INDEX" \
+    | column -t -s $'\t' \
+    | sk --query "$query" --ansi
+  ) || return 0   # user pressed Esc — exit cleanly
+
+  [[ -z "$selection" ]] && return 0
+
+  # Name is always the first whitespace-delimited token
+  local name
+  name=$(printf '%s' "$selection" | awk '{print $1}')
+
+  local entry installed type help_flag
+  entry=$(jq -r --arg n "$name" '.[] | select(.name == $n)' "$INDEX")
+  installed=$(printf '%s' "$entry" | jq -r '.installed')
+  type=$(printf '%s' "$entry" | jq -r '.type')
+
+  if [[ "$installed" == "true" ]]; then
+    if [[ "$type" == "alias" || "$type" == "function" ]]; then
+      local desc
+      desc=$(printf '%s' "$entry" | jq -r '.description')
+      echo "$name ($type): $desc"
+      return 0
+    fi
+    help_flag=$(printf '%s' "$entry" | jq -r '.help_flag')
+    "$name" $help_flag 2>&1 \
+      | bat --style=plain --pager "less -R" 2>/dev/null \
+      || "$name" $help_flag 2>&1 | less -R
+  else
+    echo "Not installed. To install:"
+    if [[ "$type" == "cask" ]]; then
+      echo "  brew install --cask $name"
+    else
+      echo "  brew install $name"
+    fi
+  fi
+}
+
 cmd_recent()  { echo "recent not yet implemented" >&2; }
 cmd_missing() { echo "missing not yet implemented" >&2; }
 
