@@ -70,7 +70,9 @@ gcode() {
 }
 
 mzk () {
-  find $HOME/.kevin/listen -type f \( -name "*.mp3" -o -name "*.wav" \) | sk --height 40% --reverse | tr '\n' '\0' | xargs -0 looper play --url
+  local file
+  file=$(find $HOME/.kevin/listen -type f \( -name "*.mp3" -o -name "*.wav" \) | sk --height 40% --reverse)
+  [[ -n "$file" ]] && looper play --url "$file"
 }
 
 npmr() {
