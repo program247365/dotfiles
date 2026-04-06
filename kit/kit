@@ -130,6 +130,94 @@ cmd_index() {
 
   done < "$DOTFILES/Brewfile"
 
+  # ── bin/ scripts ────────────────────────────────────────────────────────────
+  for f in "$DOTFILES/bin/"*; do
+    [[ -f "$f" ]] || continue
+    local name type desc dotfiles_added help_flag existing_flag
+    name=$(basename "$f")
+    type="bin"
+    # First non-shebang comment line as description
+    desc=$(grep -m1 '^#[^!]' "$f" 2>/dev/null | sed 's/^#[[:space:]]*//' || true)
+    desc="${desc:-shell script}"
+    dotfiles_added=$(git -C "$DOTFILES" log --format="%ad" --date=format:"%Y-%m-%d" \
+      -- "bin/$name" 2>/dev/null | tail -1 || true)
+    help_flag="--help"
+    existing_flag=$(printf '%s' "$existing_index" | jq -r --arg n "$name" \
+      '.[] | select(.name == $n) | .help_flag // ""' 2>/dev/null || true)
+    [[ -n "$existing_flag" ]] && help_flag="$existing_flag"
+
+    jq -n \
+      --arg name           "$name" \
+      --arg type           "$type" \
+      --arg desc           "$desc" \
+      --arg dotfiles_added "$dotfiles_added" \
+      --arg help_flag      "$help_flag" \
+      '{name:$name,type:$type,description:$desc,dotfiles_added:$dotfiles_added,
+        installed:true,installed_at:null,help_flag:$help_flag}' \
+      >> "$tmp"
+  done
+
+  # ── aliases and functions from .zsh files ────────────────────────────────────
+  # Scan all known .zsh source files for alias and function definitions
+  local zsh_sources=(
+    "$DOTFILES/zsh/aliases.zsh"
+    "$DOTFILES/docker/aliases.zsh"
+    "$DOTFILES/git/aliases.zsh"
+    "$DOTFILES/xcode/aliases.zsh"
+    "$DOTFILES/agents/shell.zsh"
+    "$DOTFILES/functions/functions.zsh"
+  )
+
+  for zf in "${zsh_sources[@]}"; do
+    [[ -f "$zf" ]] || continue
+    local prev_comment=""
+
+    while IFS= read -r line; do
+      # Track comment lines for function descriptions
+      if [[ "$line" =~ ^[[:space:]]*#[[:space:]]?(.*) ]]; then
+        prev_comment="${BASH_REMATCH[1]}"
+        continue
+      fi
+
+      # alias name='...' or alias name="..."
+      if [[ "$line" =~ ^alias[[:space:]]+([A-Za-z0-9_!-]+)=[\'\"]([^\'\"]+)[\'\"] ]]; then
+        local aname="${BASH_REMATCH[1]}"
+        local acmd="${BASH_REMATCH[2]}"
+        local adesc
+        adesc=$(_extract_desc "$line")
+        [[ -z "$adesc" ]] && adesc="alias for: $acmd"
+
+        jq -n \
+          --arg name "$aname" \
+          --arg desc "$adesc" \
+          '{name:$name,type:"alias",description:$desc,dotfiles_added:"",
+            installed:true,installed_at:null,help_flag:"--help"}' \
+          >> "$tmp"
+        prev_comment=""
+        continue
+      fi
+
+      # function_name() { — shell function definition
+      if [[ "$line" =~ ^([a-zA-Z_][a-zA-Z0-9_-]*)\(\)[[:space:]]*\{ ]]; then
+        local fname="${BASH_REMATCH[1]}"
+        local fdesc="${prev_comment:-shell function}"
+
+        jq -n \
+          --arg name "$fname" \
+          --arg desc "$fdesc" \
+          '{name:$name,type:"function",description:$desc,dotfiles_added:"",
+            installed:true,installed_at:null,help_flag:"--help"}' \
+          >> "$tmp"
+        prev_comment=""
+        continue
+      fi
+
+      # Reset comment tracking on non-comment, non-definition lines
+      prev_comment=""
+
+    done < "$zf"
+  done
+
   # Combine into array and write (brew cross-reference comes in Task 4)
   jq -s '.' "$tmp" > "$INDEX"
 
