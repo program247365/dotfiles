@@ -62,3 +62,9 @@ for script in "$ZSH/migrations"/*.zsh; do
 		"$script"
 	fi
 done
+
+# Rebuild kit index after install/upgrade
+echo "› kit index"
+if command -v kit >/dev/null 2>&1; then
+  kit index
+fi
