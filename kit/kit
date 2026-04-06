@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# kit — Kevin's installed tools
+# Fast fuzzy recall of everything declared in dotfiles
+#
+# Usage:
+#   kit              interactive fuzzy search
+#   kit <query>      search pre-filtered to <query>
+#   kit index        rebuild ~/.kit/index.json
+#   kit recent [n]   show n recently added tools (default: 10)
+#   kit missing      show tools declared in dotfiles but not installed
+
+set -euo pipefail
+
+DOTFILES="${DOTFILES:-$HOME/.dotfiles}"
+KIT_HOME="$HOME/.kit"
+INDEX="$KIT_HOME/index.json"
+
+main() {
+  case "${1:-}" in
+    index)    shift; cmd_index "$@" ;;
+    recent)   shift; cmd_recent "$@" ;;
+    missing)  shift; cmd_missing "$@" ;;
+    -h|--help)
+      echo "kit — Kevin's installed tools"
+      echo ""
+      echo "Usage:"
+      echo "  kit              interactive fuzzy search"
+      echo "  kit <query>      search pre-filtered to <query>"
+      echo "  kit index        rebuild index"
+      echo "  kit recent [n]   show n recently added tools (default: 10)"
+      echo "  kit missing      show tools not yet installed"
+      ;;
+    *)        cmd_search "${1:-}" ;;
+  esac
+}
+
+cmd_index()   { echo "index not yet implemented" >&2; }
+cmd_search()  { echo "search not yet implemented" >&2; }
+cmd_recent()  { echo "recent not yet implemented" >&2; }
+cmd_missing() { echo "missing not yet implemented" >&2; }
+
+main "$@"
