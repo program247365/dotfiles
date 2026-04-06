@@ -352,7 +352,52 @@ cmd_search() {
   fi
 }
 
-cmd_recent()  { echo "recent not yet implemented" >&2; }
-cmd_missing() { echo "missing not yet implemented" >&2; }
+cmd_recent() {
+  local n="${1:-10}"
+  _require jq
+
+  if [[ ! -f "$INDEX" ]]; then
+    echo "No index found. Run 'kit index' first." >&2
+    exit 1
+  fi
+
+  _stale_warn
+
+  jq -r --argjson n "$n" '
+    sort_by(.dotfiles_added // "0000-00-00") | reverse | .[0:$n] |
+    .[] |
+    [
+      .name,
+      .type,
+      ("added "    + (.dotfiles_added // "unknown")),
+      (if .installed then
+        (if .installed_at != null then "installed " + .installed_at else "installed" end)
+       else "not yet installed" end)
+    ] | @tsv
+  ' "$INDEX" | column -t -s $'\t'
+}
+
+cmd_missing() {
+  _require jq
+
+  if [[ ! -f "$INDEX" ]]; then
+    echo "No index found. Run 'kit index' first." >&2
+    exit 1
+  fi
+
+  _stale_warn
+
+  local missing
+  missing=$(jq -r '
+    .[] | select(.installed == false) |
+    [.name, .type, ("added " + (.dotfiles_added // "unknown"))] | @tsv
+  ' "$INDEX" | column -t -s $'\t')
+
+  if [[ -z "$missing" ]]; then
+    echo "All dotfiles tools are installed."
+  else
+    echo "$missing"
+  fi
+}
 
 main "$@"

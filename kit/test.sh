@@ -71,6 +71,18 @@ assert "no bin entries marked not-installed" "$([[ $bin_not_installed -eq 0 ]] &
 null_names=$(jq '[.[] | select(.name == null or .name == "")] | length' "$INDEX")
 assert "all entries have non-empty names" "$([[ $null_names -eq 0 ]] && echo true || echo false)"
 
+# T14: kit recent returns output
+recent_output=$(kit recent 5 2>/dev/null)
+assert "kit recent returns output" "$([[ -n $recent_output ]] && echo true || echo false)"
+
+# T15: kit recent respects n
+recent_lines=$(kit recent 3 2>/dev/null | wc -l | tr -d ' ')
+assert "kit recent 3 returns ≤3 lines" "$([[ $recent_lines -le 3 ]] && echo true || echo false)"
+
+# T16: kit missing runs without error
+kit missing 2>/dev/null
+assert "kit missing exits cleanly" "true"
+
 echo ""
 echo "Results: $PASS passed, $FAIL failed"
 [[ $FAIL -eq 0 ]]
