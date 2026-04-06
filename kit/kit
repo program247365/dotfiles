@@ -307,6 +307,35 @@ cmd_index() {
 
   mv "$tmp2" "$INDEX"
 
+  # Fetch help text for installed tools (parallel, 2s timeout each)
+  echo "Fetching help text for installed tools..." >&2
+  local help_tmp_dir
+  help_tmp_dir=$(mktemp -d)
+
+  while IFS=$'\t' read -r name installed help_flag; do
+    [[ "$installed" != "true" ]] && continue
+    command -v "$name" >/dev/null 2>&1 || continue
+    (
+      timeout 2 bash -c "$name $help_flag 2>&1 | head -80" \
+        > "$help_tmp_dir/$name" 2>/dev/null || true
+    ) &
+  done < <(jq -r '.[] | [.name, (.installed | tostring), (.help_flag // "--help")] | @tsv' "$INDEX")
+
+  wait
+
+  local tmp3
+  tmp3=$(mktemp)
+  while IFS= read -r entry; do
+    local name help_text
+    name=$(printf '%s' "$entry" | jq -r '.name')
+    help_text=""
+    [[ -f "$help_tmp_dir/$name" ]] && help_text=$(cat "$help_tmp_dir/$name")
+    printf '%s' "$entry" | jq --arg ht "$help_text" '. + {help_text: $ht}' >> "$tmp3"
+  done < <(jq -c '.[]' "$INDEX")
+  jq -s '.' "$tmp3" > "$INDEX"
+  rm -f "$tmp3"
+  rm -rf "$help_tmp_dir"
+
   local count
   count=$(jq 'length' "$INDEX")
   echo "Indexed $count entries → $INDEX" >&2
@@ -324,28 +353,53 @@ cmd_search() {
   _stale_warn
 
   # Format: name  [type]  description  [not installed]?
-  local selection
-  selection=$(
-    jq -r '.[] | [
-      .name,
-      ("[" + .type + "]"),
-      .description,
-      (if .installed then "" else "[not installed]" end)
-    ] | @tsv' "$INDEX" \
-    | column -t -s $'\t' \
+  # Help text is appended as a hidden tab-delimited field so sk searches it
+  # without displaying it (--with-nth 1 shows only the display column).
+  local sk_out sk_exit=0
+  sk_out=$(
+    paste \
+      <(jq -r '.[] | [
+          .name,
+          ("[" + .type + "]"),
+          .description,
+          (if .installed then "" else "[not installed]" end)
+        ] | @tsv' "$INDEX" | column -t -s $'\t') \
+      <(jq -r '.[] | (.help_text // "") | gsub("\n"; " ") | gsub("\t"; " ")' "$INDEX") \
     | sk --query "$query" --ansi \
-         --preview 'cmd=$(echo {} | cut -d" " -f1); ($cmd --help 2>&1 | head -50) || echo "(no --help)"' \
+         --print-query \
+         --delimiter $'\t' \
+         --with-nth 1 \
+         --preview 'cmd=$(echo {} | awk "{print \$1}"); ($cmd --help 2>&1 | head -50) || echo "(no --help)"' \
          --preview-window 'right:50%:wrap' \
-         --bind 'ctrl-h:execute($SHELL -c "cmd=\$(echo {} | cut -d\" \" -f1); \$cmd --help 2>&1 | less -R")'
-  ) || return 0   # user pressed Esc — exit cleanly
+         --bind 'ctrl-h:execute($SHELL -c "cmd=\$(echo {} | awk \"{print \\\$1}\"); \$cmd --help 2>&1 | less -R")'
+  ) || sk_exit=$?
 
-  [[ -z "$selection" ]] && return 0
+  # --print-query always outputs the final query on line 1.
+  # Selected entry (if any) is on line 2+.
+  local sk_query selection
+  sk_query=$(printf '%s' "$sk_out" | head -1)
+  selection=$(printf '%s' "$sk_out" | tail -n +2)
 
-  # Name is always the first whitespace-delimited token
+  if [[ -z "$selection" ]]; then
+    # No match selected (0 results or Esc). If the query is "tool args", run it.
+    # sk exits 130 on Esc/Ctrl-C — don't try to run anything in that case.
+    [[ "$sk_exit" -eq 130 ]] && return 0
+    if [[ "$sk_query" =~ ^([A-Za-z0-9_-]+)[[:space:]]+(.+)$ ]]; then
+      local tool="${BASH_REMATCH[1]}" tool_args="${BASH_REMATCH[2]}"
+      if jq -e --arg n "$tool" 'any(.[]; .name == $n and .installed == true)' "$INDEX" > /dev/null 2>&1; then
+        # shellcheck disable=SC2086
+        "$tool" $tool_args
+        return 0
+      fi
+    fi
+    return 0
+  fi
+
+  # Name is always the first whitespace-delimited token of the selected line
   local name
   name=$(printf '%s' "$selection" | awk '{print $1}')
 
-  local entry installed type help_flag
+  local entry installed type
   entry=$(jq -r --arg n "$name" '.[] | select(.name == $n)' "$INDEX")
   installed=$(printf '%s' "$entry" | jq -r '.installed')
   type=$(printf '%s' "$entry" | jq -r '.type')
@@ -357,7 +411,13 @@ cmd_search() {
       echo "$name ($type): $desc"
       return 0
     fi
-    "$name"
+    # If the query was "name arg1 arg2 ...", pass those args through
+    local args=""
+    if [[ "$sk_query" =~ ^"$name"[[:space:]]+(.+)$ ]]; then
+      args="${BASH_REMATCH[1]}"
+    fi
+    # shellcheck disable=SC2086
+    "$name" $args
   else
     echo "Not installed. To install:"
     if [[ "$type" == "cask" ]]; then
