@@ -91,3 +91,13 @@ export PATH="$HOME/bin:$PATH"
 
 # mise - version manager
 eval "$(mise activate zsh)"
+
+export PORTLESS_TLD=local
+
+# pnpm
+export PNPM_HOME="/Users/kevin/Library/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
