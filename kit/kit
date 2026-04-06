@@ -218,8 +218,52 @@ cmd_index() {
     done < "$zf"
   done
 
-  # Combine into array and write (brew cross-reference comes in Task 4)
-  jq -s '.' "$tmp" > "$INDEX"
+  # ── brew cross-reference ─────────────────────────────────────────────────────
+  echo "Cross-referencing with brew..." >&2
+
+  local brew_formulae brew_casks
+  brew_formulae=$(brew list --formula 2>/dev/null || true)
+  brew_casks=$(brew list --cask 2>/dev/null || true)
+
+  local brew_info_file
+  brew_info_file=$(mktemp)
+  brew info --json=v2 --installed 2>/dev/null > "$brew_info_file" \
+    || echo '{"formulae":[],"casks":[]}' > "$brew_info_file"
+
+  local tmp2
+  tmp2=$(mktemp)
+
+  jq -s '.' "$tmp" | jq \
+    --arg formulae "$brew_formulae" \
+    --arg casks    "$brew_casks" \
+    --slurpfile info "$brew_info_file" \
+    '
+    def installed_formulae: ($formulae | split("\n") | map(select(length > 0)));
+    def installed_casks:    ($casks    | split("\n") | map(select(length > 0)));
+
+    map(
+      . as $entry |
+      if $entry.type == "brew" then
+        if ($entry.name as $n | installed_formulae | any(. == $n)) then
+          $entry |
+          .installed = true |
+          .installed_at = (
+            ($info[0].formulae[] | select(.name == $entry.name) |
+             .installed[0].installed_on // null |
+             if . then (. | split("T")[0]) else null end) // null
+          )
+        else $entry end
+      elif $entry.type == "cask" then
+        if ($entry.name as $n | installed_casks | any(. == $n)) then
+          $entry | .installed = true
+        else $entry end
+      else $entry end
+    )
+    ' > "$tmp2"
+
+  rm -f "$brew_info_file"
+
+  mv "$tmp2" "$INDEX"
 
   local count
   count=$(jq 'length' "$INDEX")
