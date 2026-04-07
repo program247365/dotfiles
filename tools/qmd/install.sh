@@ -2,9 +2,9 @@
 #
 # QMD — local hybrid search engine for notes, docs, and transcripts
 #
-# While PR #301 is pending on tobi/qmd, installs from the fork via
-# git clone + npm install (the README's dev install path). Once upstream
-# merges, switches to `npm install -g @tobilu/qmd` (prebuilt binaries).
+# Upstream (tobi/qmd) has no Bear Notes support (PR #301 was closed).
+# Installs from the fork which adds a source plugin for Bear. If upstream
+# ever adopts source plugins, auto-switches to `npm install -g @tobilu/qmd`.
 
 set -e
 
@@ -58,7 +58,7 @@ if [ "$UPSTREAM_STATUS" = "200" ]; then
   QMD_EXEC="$(npm prefix -g)/bin/qmd"
 else
   # Fork — clone + npm install (README dev install path)
-  echo "  PR #301 not yet merged — installing from fork..."
+  echo "  Upstream lacks Bear support — installing from fork..."
 
   if [ -d "$FORK_DIR/.git" ]; then
     echo "  Updating existing clone..."
