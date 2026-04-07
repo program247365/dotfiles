@@ -24,6 +24,9 @@
       "Bash(git log:*)",
       "Bash(gh pr diff:*)",
       "Bash(dev-browser *)"
+    ],
+    "additionalDirectories": [
+      "/Users/kevin/.kevin/code/claude-code"
     ]
   },
   "model": "opus[1m]",
@@ -52,10 +55,8 @@
     "superpowers@claude-plugins-official": true,
     "pr-review-toolkit@claude-plugins-official": true,
     "commit-commands@claude-plugins-official": true,
-    "greptile@claude-plugins-official": true,
     "slack@claude-plugins-official": true,
     "linear@claude-plugins-official": true,
-    "ralph-loop@claude-plugins-official": true,
     "agent-sdk-dev@claude-code-plugins": true,
     "code-review@claude-code-plugins": true,
     "commit-commands@claude-code-plugins": true,
@@ -68,7 +69,8 @@
     "pr-review-toolkit@claude-code-plugins": true,
     "ralph-wiggum@claude-code-plugins": true,
     "security-guidance@claude-code-plugins": true,
-    "compound-engineering@compound-engineering-plugin": true
+    "compound-engineering@compound-engineering-plugin": true,
+    "vercel-plugin@vercel-vercel-plugin": true
   },
   "mcpServers": {
     "msgvault": {
@@ -82,6 +84,13 @@
         "source": "github",
         "repo": "EveryInc/compound-engineering-plugin"
       }
+    },
+    "vercel-vercel-plugin": {
+      "source": {
+        "source": "directory",
+        "path": "/Users/kevin/.cache/plugins/github.com-vercel-vercel-plugin"
+      }
     }
-  }
+  },
+  "skipDangerousModePermissionPrompt": true
 }
