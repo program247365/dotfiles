@@ -18,7 +18,7 @@ UPSTREAM_REPO="mreider/better-bear-cli"
 FORK_REPO="program247365/better-bear-cli"
 
 # PRs that must be merged upstream before we can use the release binary
-REQUIRED_PRS="6 7 8"
+REQUIRED_PRS="6 7 8 9"
 
 mkdir -p "$BIN_DIR"
 
