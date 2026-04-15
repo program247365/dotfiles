@@ -34,6 +34,18 @@ agents/
 │   │   └── AGENTS.md
 │   └── skills/
 │       └── README.md
+├── pi/
+│   ├── install.sh
+│   ├── system-preflight-check.sh
+│   ├── install-local-models.sh
+│   ├── README.md
+│   ├── LOCAL_MODELS.md
+│   ├── lib/
+│   └── home/
+│       ├── AGENTS.md
+│       ├── settings.json
+│       ├── models.json.default
+│       └── auth.json.example
 └── philosophy/
     ├── install.sh
     └── SOFTWARE_ENGINEERING.md
@@ -52,6 +64,7 @@ Or run only agent installers:
 ```bash
 sh ~/.dotfiles/agents/claude/install.sh
 sh ~/.dotfiles/agents/codex/install.sh
+sh ~/.dotfiles/agents/pi/install.sh
 sh ~/.dotfiles/agents/philosophy/install.sh
 ```
 
@@ -115,6 +128,32 @@ Installer behavior:
 - Creates missing `~/.codex` and `~/.codex/skills` directories.
 - Is idempotent (safe to rerun).
 - Backs up existing non-symlink files before replacing them (`.bak.<timestamp>`).
+
+## Pi Setup
+
+`agents/pi/install.sh` manages:
+
+- `~/.pi/agent/settings.json` -> `~/.dotfiles/agents/pi/home/settings.json`
+- `~/.pi/agent/AGENTS.md` -> `~/.dotfiles/agents/pi/home/AGENTS.md`
+- `~/.pi/agent/models.json` -> copied from `~/.dotfiles/agents/pi/home/models.json.default` only if missing
+- `~/.kevin/bin/pi` -> symlinked to the global `pnpm` install of `@mariozechner/pi-coding-agent`
+
+Installer behavior:
+
+- Uses `pnpm add -g @mariozechner/pi-coding-agent`.
+- Optionally installs Ollama with `sh ~/.dotfiles/agents/pi/install.sh --install-ollama`.
+- When `--install-ollama` is used, it also ensures the Ollama API is running before the installer exits.
+- Creates missing `~/.pi/agent`.
+- Leaves existing machine-local `models.json` untouched after first seed.
+- Adds Pi local-model helper scripts under `agents/pi/`.
+
+Local-model workflow:
+
+- Run `~/.dotfiles/agents/pi/system-preflight-check.sh` to inspect the current machine.
+- Run `~/.dotfiles/agents/pi/install-local-models.sh --recommended` to optionally pull the recommended Ollama models.
+- Run `sh ~/.dotfiles/agents/pi/install.sh --install-ollama` if you want the base Pi setup to provision and start Ollama in one step.
+- Use `piensure <model>` to pull an Ollama model on demand before launching Pi.
+- See `agents/pi/LOCAL_MODELS.md` for memory, CPU, and `apfel` notes.
 
 ## Add a Codex Skill
 
