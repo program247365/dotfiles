@@ -1,0 +1,68 @@
+{
+  "providers": {
+    "ollama": {
+      "baseUrl": "http://127.0.0.1:11434/v1",
+      "api": "openai-completions",
+      "apiKey": "ollama",
+      "compat": {
+        "supportsDeveloperRole": false,
+        "supportsReasoningEffort": false
+      },
+      "models": [
+        {
+          "id": "qwen2.5-coder:7b",
+          "name": "Qwen 2.5 Coder 7B",
+          "contextWindow": 32768,
+          "maxTokens": 8192
+        },
+        {
+          "id": "qwen2.5-coder:14b",
+          "name": "Qwen 2.5 Coder 14B",
+          "contextWindow": 32768,
+          "maxTokens": 8192
+        },
+        {
+          "id": "gemma4:e2b",
+          "name": "Gemma 4 E2B",
+          "contextWindow": 131072,
+          "maxTokens": 8192
+        },
+        {
+          "id": "gemma4:e4b",
+          "name": "Gemma 4 E4B",
+          "contextWindow": 131072,
+          "maxTokens": 8192
+        },
+        {
+          "id": "gpt-oss:20b",
+          "name": "gpt-oss 20B",
+          "contextWindow": 131072,
+          "maxTokens": 8192
+        },
+        {
+          "id": "qwen3-coder:30b",
+          "name": "Qwen 3 Coder 30B",
+          "contextWindow": 262144,
+          "maxTokens": 8192
+        }
+      ]
+    },
+    "apfel": {
+      "baseUrl": "http://127.0.0.1:11435/v1",
+      "api": "openai-completions",
+      "apiKey": "apfel",
+      "compat": {
+        "supportsDeveloperRole": false,
+        "supportsReasoningEffort": false
+      },
+      "models": [
+        {
+          "id": "apple-foundation-model",
+          "name": "Apple Foundation Model via apfel",
+          "contextWindow": 4096,
+          "maxTokens": 2048
+        }
+      ]
+    }
+  }
+}

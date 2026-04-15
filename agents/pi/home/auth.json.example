@@ -1,0 +1,13 @@
+{
+  "providers": {
+    "anthropic": {
+      "apiKey": "${ANTHROPIC_API_KEY}"
+    },
+    "openai": {
+      "apiKey": "${OPENAI_API_KEY}"
+    },
+    "google": {
+      "apiKey": "${GEMINI_API_KEY}"
+    }
+  }
+}

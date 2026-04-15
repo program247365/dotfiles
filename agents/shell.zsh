@@ -63,3 +63,15 @@ c0() {
     "${base_cmd[@]}"
   fi
 }
+
+pipreflight() {
+  bash "$HOME/.dotfiles/agents/pi/system-preflight-check.sh" "$@"
+}
+
+pimodels() {
+  bash "$HOME/.dotfiles/agents/pi/install-local-models.sh" "$@"
+}
+
+piensure() {
+  bash "$HOME/.dotfiles/agents/pi/pi-local-ensure.sh" "$@"
+}
