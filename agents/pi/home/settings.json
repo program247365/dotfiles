@@ -1,0 +1,15 @@
+{
+  "defaultProvider": "ollama",
+  "defaultModel": "qwen2.5-coder:7b",
+  "enabledModels": [
+    "anthropic/claude-sonnet-4-5",
+    "openai/gpt-5.4",
+    "google/gemini-2.5-pro",
+    "ollama/qwen2.5-coder:7b",
+    "ollama/gemma4:e2b",
+    "apfel/apple-foundation-model"
+  ],
+  "quietStartup": false,
+  "lastChangelogVersion": "0.67.2",
+  "defaultThinkingLevel": "medium"
+}
