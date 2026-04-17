@@ -33,6 +33,7 @@ brew 'jq'
 brew 'keith/formulae/reminders-cli'
 brew 'lazydocker'
 brew 'program247365/tap/looper' # https://github.com/program247365/looper - CLI music looper with TUI
+brew 'program247365/tap/hackertuah' # https://github.com/program247365/hackertuah - Terminal UI for Hacker News
 brew 'lazygit'
 brew 'illegalstudio/tap/lazyagent' # https://lazyagent.dev
 brew 'lsd'
