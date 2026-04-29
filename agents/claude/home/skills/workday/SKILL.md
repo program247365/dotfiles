@@ -7,7 +7,7 @@ description: |
 
 # Workday Skill
 
-Manage daily and weekly planning rituals by combining Bear notes (`bcli`) and Linear (MCP).
+Manage daily and weekly planning rituals by combining Bear notes (`bearcli`) and Linear (MCP).
 
 ## Invocation
 
@@ -27,17 +27,8 @@ If no argument is given, infer from day-of-week and time:
 
 ## Prerequisites
 
-- `bcli` installed and on PATH (see bear-notes skill; installed via `~/.dotfiles/tools/bcli/install.sh`)
+- `bearcli` installed and on PATH (see bear-notes skill; installed via `~/.dotfiles/tools/bearcli/install.sh`)
 - Linear MCP server connected (for issue queries)
-
-## bcli Auth Recovery
-
-Any `bcli` command can fail with an authentication error (expired token, missing credentials, HTTP 401/403, or "unauthorized"/"not authenticated" in output). When this happens:
-
-1. Tell the user: "bcli authentication has expired. Please run `bcli auth` to re-authenticate."
-2. **Stop and wait** for the user to confirm they've completed auth before retrying.
-3. Do NOT retry the failed command automatically — the user must complete the interactive `bcli auth` flow first.
-4. Once the user confirms, retry the original command and continue the workflow.
 
 ## Conventions
 
@@ -46,38 +37,27 @@ Any `bcli` command can fail with an authentication error (expired token, missing
   - `#supernormal/journal` — archived daily/weekly entries and completed work
   - More specific tags (e.g. `#supernormal/agents-experience`) take priority over `journal` when they exist
 - **Note naming:** `YYYYMMDD - <Type>` (e.g. `20260302 - Week Plan`, `20260303 - Day Start`)
-- **bcli date filtering:** `bcli ls --all --json` then filter `modificationDate` (unix timestamp float) in Python. bcli does NOT support `@today` or `@last7days`.
-- **bcli modificationDate format:** float (unix timestamp in seconds), NOT ISO string. Convert with `datetime.fromtimestamp(value)`.
+- **Date filtering:** prefer Bear's inline operators — `@today`, `@yesterday`, `@last7days`, `@date(>YYYY-MM-DD)`. Combine with tags: `bearcli search "#supernormal @last7days" --format json`. No more post-processing in Python for date windows.
 
 ## Shared Steps
 
 ### Gather Bear Notes
 
+For most modes, a single `bearcli search` query returns the right window directly:
+
 ```bash
-# Save all notes to temp file, then filter in Python
-bcli ls --all --json > /tmp/bear_all_notes.json
+# Last week's supernormal notes
+bearcli search "#supernormal @last7days" --format json --fields id,title,tags,modified \
+  > /tmp/bear_last_week.json
+
+# Today's working set
+bearcli search "#supernormal/_today" --format json --fields id,title,tags > /tmp/bear_today.json
+
+# Notes modified in a specific window
+bearcli search "#supernormal @date(>2026-04-21) @date(<2026-04-29)" --format json
 ```
 
-```python
-# Filter supernormal notes by date range
-import json
-from datetime import datetime, timedelta
-
-with open('/tmp/bear_all_notes.json') as f:
-    notes = json.load(f)
-
-supernormal = [n for n in notes if any('supernormal' in t.lower() for t in n.get('tags', []))]
-
-# Filter by date range (adjust start/end per mode)
-def in_range(n, start, end):
-    mod = n.get('modificationDate', 0)
-    if not isinstance(mod, (int, float)):
-        return False
-    dt = datetime.fromtimestamp(mod)
-    return start <= dt < end
-
-filtered = [n for n in supernormal if in_range(n, start, end)]
-```
+For modes that need exact start/end boundaries, fall back to date-clamped searches like `@date(>YYYY-MM-DD) @date(<YYYY-MM-DD)`.
 
 ### Gather Linear Issues
 
@@ -90,19 +70,22 @@ Use the Linear MCP `list_issues` tool:
 ### Read Note Content
 
 ```bash
-bcli get NOTE_ID --raw
+bearcli cat NOTE_ID                                      # raw markdown
+bearcli show NOTE_ID --format json --fields all,content  # everything
 ```
 
-Search results only have `id`, `title`, `tags`, `match` — always fetch body separately.
+Search/list results carry only `id`, `title`, `tags`, `matches` by default. Add `--fields all,content` (and pass via `--format json`) when you need the body in the same call.
 
 ### Retag Notes
 
-To move a note from `_today` to `journal` (or another tag):
-1. Read the note body: `bcli get NOTE_ID --raw`
-2. Replace `#supernormal/_today` with the target tag in the body text
-3. Write back: `printf '%s' "$new_body" | bcli edit NOTE_ID --stdin`
+To move a note from `_today` to `journal` (or another tag), use the dedicated tag commands — they don't disturb the body or modification date:
 
-If a note already has a more specific tag (e.g. `#supernormal/agents-experience`), just remove `#supernormal/_today` instead of replacing it with `journal`.
+```bash
+bearcli tags remove NOTE_ID supernormal/_today
+bearcli tags add    NOTE_ID supernormal/journal
+```
+
+If a note already has a more specific subtag (e.g. `supernormal/agents-experience`), just remove `_today` and skip the `journal` add.
 
 ## Mode: `week-start`
 
@@ -115,7 +98,7 @@ If a note already has a more specific tag (e.g. `#supernormal/agents-experience`
    - Linear issues assigned to me that were completed last week
    - Linear issues assigned to me that are currently active
 
-2. **Read content** of all last-week notes (use `bcli get ID --raw`, limit to first 40 lines each for context)
+2. **Read content** of all last-week notes (use `bearcli cat ID`, limit to first 40 lines each for context)
 
 3. **Create "Week Review" note** tagged `#supernormal/journal`:
    - Title: `Week Review: <date range>`

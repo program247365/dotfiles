@@ -5,448 +5,189 @@ description: "Search, read, and create notes in Bear. Use when the user asks abo
 
 # Bear Notes Assistant
 
-You have full access to the user's Bear notes via `bcli` (better-bear-cli), which reads and writes through Bear's CloudKit API. Use the Bash tool to run commands. `bear.py` is still available at `~/.dotfiles/.claude/skills/bear-notes/bear.py` but is only needed for the screenshot attachment workflow (SQLite direct access).
+You have full access to the user's Bear notes via `bearcli`, Bear's official CLI (Bear 2.8+). It reads and writes Bear's local SQLite directly through Bear's own frameworks — no auth, no CloudKit roundtrip, no cache, no rate limits, and changes appear immediately in the running app.
 
 ## Setup
 
-Install bcli via dotfiles (installs to `~/.kevin/bin`, which is on PATH):
+`bearcli` ships inside the Bear app bundle. The dotfiles install script symlinks it onto PATH:
+
 ```bash
-~/.dotfiles/tools/bcli/install.sh
+~/.dotfiles/tools/bearcli/install.sh
 ```
 
-Authenticate (opens browser for Apple Sign-In):
-```bash
-bcli auth
-```
-
-Token stored at `~/.config/bear-cli/auth.json`. Cache at `~/.config/bear-cli/cache.json` (5-min staleness threshold). Run `bcli sync` to force refresh.
+Verify: `bearcli list -n 1 --format json` should return a note row.
 
 ## Available Commands
 
+All commands accept `--format tsv|csv|json` (default `tsv`). Use `--format json` for parsing. Mutating commands print nothing on success in TSV/CSV; in JSON they emit `{"ok":true}`. Run `bearcli help all` for the full reference.
+
 ### Search Notes
+
 ```bash
-bcli search "query" --json
-bcli search "query" --limit 20 --json
-bcli ls --tag "tagname" --json
-bcli ls --all --json
+bearcli search "query"                              # default TSV, all matches
+bearcli search "query" --format json
+bearcli search "query" -n 20 --format json          # cap to 20
+bearcli list --tag "tagname" --format json          # tag filter (incl. nested)
+bearcli list --location all --format json           # incl. trash/archive
 ```
 
-> **Note:** bcli does NOT support Bear's `@today`, `@last7days`, `@date(>...)` operators. For date filtering, use `bcli ls --all --json` and post-process the `modificationDate` ISO8601 field in Python. Search results contain only `id`, `title`, `tags`, `match` — no body. Use `bcli get NOTE_ID --json` to fetch body (`text` field).
+`bearcli search` supports Bear's full search syntax inline:
+
+- Text: `keyword`, `"exact phrase"`, `-negation`
+- Tags: `#tag`, `!#tag` (exact, no children), `#*/tag` (subtags only)
+- Dates (modified): `@today`, `@yesterday`, `@last7days`, `@date(YYYY-MM-DD)`, `@date(>2026-01-01)`
+- Created: `@ctoday`, `@created7days`, `@cdate(...)`
+- Tasks: `@todo`, `@done`, `@task`
+- State: `@pinned`, `@untagged`, `@empty`, `@untitled`, `@locked`
+- Content: `@images`, `@files`, `@attachments`, `@code`
+- Combine freely: `bearcli search "@today @todo meeting" --format json`
 
 ### Read a Note
+
 ```bash
-bcli get NOTE_ID --json    # full metadata + body
-bcli get NOTE_ID --raw     # markdown body only
+bearcli cat NOTE_ID                                  # raw markdown only
+bearcli show NOTE_ID --format json --fields all,content   # full metadata + body
+bearcli show --title "Mars" --format json --fields all,content   # by title
 ```
 
 ### Create a Note
+
 ```bash
-bcli create "Title" --body "Content" --tags "tag1,tag2"
-NEW_ID=$(bcli create "Title" --body "Content" --tags "tag1" --quiet)  # capture ID
+bearcli create "Title" --content "Body" --tags "tag1,tag2"
+NEW_ID=$(bearcli create "Title" --content "Body" --tags "tag1" --format json --fields id \
+  | python3 -c "import json,sys; print(json.load(sys.stdin)['id'])")
 ```
 
-### Add to a Note
+If the body has a `# heading` matching the title, Bear strips the duplicate automatically. To avoid an auto-derived title, omit the title positional and put `# Title` in `--content`.
+
+### Edit a Note
+
 ```bash
-bcli edit NOTE_ID --append "text to append"
-printf '%s' "replacement body" | bcli edit NOTE_ID --stdin   # replace mode
-bcli edit NOTE_ID --editor                                    # open in $EDITOR
+bearcli append NOTE_ID --content "text to append"
+bearcli append NOTE_ID --content "text" --position beginning   # prepend (after title/tags)
+bearcli edit NOTE_ID --at "old text" --replace "new text"      # surgical, exact match
+bearcli edit NOTE_ID --at "## Section" --insert "\nNew line"   # insert after match
+bearcli edit NOTE_ID --at "cat" --replace "dog" --all --word   # whole-word, all matches
+printf '%s' "replacement body" | bearcli write NOTE_ID         # overwrite entire content
 ```
 
-> **Note:** bcli has no `--prepend`. To prepend: read with `bcli get NOTE_ID --raw`, construct new body, pipe back with `--stdin`.
+`bearcli write` reads from stdin when `--content` is omitted. `bearcli write` accepts `--base <hash>` (from `bearcli show --fields hash`) for optimistic concurrency — pass it when the note may have been edited concurrently.
 
-### List All Tags
+> **Editor flow:** for an interactive edit, do `bearcli cat ID > /tmp/note.md && $EDITOR /tmp/note.md && bearcli write ID < /tmp/note.md`.
+
+### Tags
+
 ```bash
-bcli tags --flat --json
+bearcli tags list --format json                     # global tag list
+bearcli tags list NOTE_ID --format json             # tags on one note
+bearcli tags add NOTE_ID work work/meetings         # adds without touching body text
+bearcli tags remove NOTE_ID draft
+bearcli tags rename old-name new-name [--force]
+bearcli tags delete unused-tag
 ```
 
-### Open a Note in Bear
-bcli has no `open` command. bcli IDs are Bear's `ZUNIQUEIDENTIFIER` — use them directly in the URL scheme:
+`tags add`/`remove` are the right call for tag mutations — they don't disturb the note body or its modification date. Use `bearcli edit ... --at ... --replace ...` only when you specifically need the inline `#tag` text changed.
+
+### Attachments
+
 ```bash
-open "bear://x-callback-url/open-note?id=NOTE_ID"
-# Or by title:
-TITLE=$(bcli get NOTE_ID --json | python3 -c "import json,sys; print(json.load(sys.stdin)['title'])")
-open "bear://x-callback-url/open-note?title=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1]))" "$TITLE")"
+bearcli attachments list NOTE_ID --format json
+cat photo.jpg | bearcli attachments add NOTE_ID --filename photo.jpg
+bearcli attachments add NOTE_ID --filename photo.jpg < photo.jpg
+bearcli attachments delete NOTE_ID --filename photo.jpg
+bearcli attachments save NOTE_ID --filename photo.jpg > photo.jpg
 ```
 
-### Trash / Sync
+After adding, reference the attachment in the note body with `![photo.jpg](photo.jpg)` (use `bearcli edit --at "<anchor>" --insert` or `bearcli append`).
+
+### Open / Pin / Lifecycle
+
 ```bash
-bcli trash NOTE_ID --force
-bcli sync --full -v
+bearcli open NOTE_ID                                # foregrounds Bear with note open
+bearcli open NOTE_ID --header "Section" --edit      # scroll + start editing
+bearcli pin add NOTE_ID global                      # All Notes pin
+bearcli pin add NOTE_ID work projects               # tag-scoped pins
+bearcli pin remove NOTE_ID global
+bearcli trash NOTE_ID
+bearcli archive NOTE_ID
+bearcli restore NOTE_ID
 ```
 
 ## QMD Search (Preferred for Discovery)
 
-When the user asks to search or find Bear notes, prefer `qmd` over `bcli search` — it uses BM25 full-text search, vector similarity, and LLM reranking for much better relevance.
+When the user asks to search or find Bear notes, prefer `qmd` over `bearcli search` — it uses BM25 full-text search, vector similarity, and LLM reranking for much better relevance.
 
 ```bash
-# Fast keyword search (BM25)
-qmd search "query" -c bear --json
-
-# Best quality: hybrid search with reranking
-qmd query "query" -c bear --json
-
-# Get full document content by path or docid
-qmd get "#abc123"
+qmd search "query" -c bear --json                   # fast keyword (BM25)
+qmd query  "query" -c bear --json                   # hybrid + reranking
+qmd get "#abc123"                                    # full document by docid
 qmd get "uuid.md" --full
 ```
 
-QMD returns docids (`#abc123`), scores, titles, and snippets. To get the full note body, use `qmd get`. The `path` field is the Bear UUID + `.md` — strip the `.md` suffix to get the bcli note ID for write operations.
+QMD returns docids (`#abc123`), scores, titles, and snippets. The `path` field is the Bear UUID + `.md` — strip `.md` to get the bearcli `NOTE_ID` for write operations.
 
-**When to use bcli search instead of QMD:**
-- Tag-only filtering (`bcli ls --tag "tagname"`)
-- Date operators (`@today`, `@last7days`)
-- When QMD index is stale (tell user to run `qmd update`)
+**Use `bearcli search` directly when:**
+- You need Bear's date/state operators (`@today`, `@last7days`, `@todo`, `@untagged`, `@images`)
+- You need exact-match tag filtering (`!#tag`, `#*/subtag`)
+- The QMD index is stale (tell user to run `qmd update`)
 
-**When to always use bcli:**
-- Creating notes (`bcli create`)
-- Editing notes (`bcli edit`)
-- Opening notes in Bear
-- Listing tags
+**Always use bearcli for mutations** (`create`, `edit`, `write`, `append`, `tags`, `attachments`, `trash`, `open`).
 
 ## Workflow
 
 **When answering questions:**
-1. **Search first** — use `qmd query` for best results, fall back to `bcli search` for tag/date filtering
-2. **Read details** — use `bcli get NOTE_ID --json` for full content of relevant notes
-3. **Synthesize** — combine info from multiple notes
+1. **Search first** — `qmd query` for relevance ranking, `bearcli search` for date/state filters
+2. **Read details** — `bearcli show ID --format json --fields all,content` for full content
+3. **Synthesize** — combine across notes
 4. **Cite sources** — always mention which note titles you're referencing
 
 **When creating content:**
 1. Offer to save important information to Bear
-2. Suggest tags based on existing tags (run `tags` to check)
-3. Ask if user wants to open the note after creation
+2. Suggest tags from existing taxonomy (run `bearcli tags list --format json` to check)
+3. Ask if the user wants `bearcli open ID` to jump into the new note
 
 ## Enrich Saved Tweets Workflow
 
-Use this when the user asks to enrich, process, or title their saved tweet notes.
+Use this when the user asks to enrich, process, or title their saved tweet notes. The full per-note enrichment lives in the `notes-organize-tweets` slash command — invoke it for the idempotent pipeline. The high-level flow:
 
-**Step 1 — Find bare tweet URL notes:**
+1. **Audit** existing tweet notes via `bearcli search "x.com" --format json --fields all,content,attachments,tags`. Classify each note's needs (`image`, `body`, `inbox_tag`, `extra_tags`).
+2. **Playwright** fetch tweet content + screenshot for notes needing `image` or `body`.
+3. **Mutate** via `bearcli`:
+   - Image: `bearcli attachments add ID --filename tweet_screenshot.png < /tmp/tweet_<id>.png`
+   - Structured body: `bearcli write ID --content "..."` (Bear derives the title from the first heading)
+   - Image markdown line: `bearcli edit ID --at "<anchor>" --insert "\n![tweet_screenshot.png](tweet_screenshot.png)"`
+   - Inbox tag: `bearcli tags add ID inbox/saved-tweets`
+   - Extra tags: `bearcli tags add ID #learn/something`
+
+No Bear restart, no SQLite, no Core Data dance — `bearcli` writes through Bear's own frameworks.
+
+## Attach a Single Screenshot to a Note
+
+The whole flow is one line:
+
 ```bash
-# bcli search returns title/tags/id only (no body). Must fetch each note individually.
-bcli ls --all --json | python3 -c "
-import json, sys, subprocess, re
-notes = json.load(sys.stdin)
-results = []
-for note in notes:
-    title = note.get('title', '')
-    if not title.startswith('https://x.com/'): continue
-    detail = json.loads(subprocess.check_output(['bcli', 'get', note['id'], '--json']))
-    body = detail.get('text', '')
-    links = re.findall(r'https?://(?:www\.)?x\.com/\S+', body)
-    if len(links) == 1:
-        url = re.sub(r'[\)\]>]+$', '', links[0])
-        results.append({'id': note['id'], 'url': url})
-print(json.dumps(results))
-" > /tmp/tweet_notes.json
+bearcli attachments add "$NOTE_ID" --filename screenshot.png < /tmp/screenshot.png
+bearcli edit "$NOTE_ID" --at "<anchor line>" --insert "\n![screenshot.png](screenshot.png)"
 ```
 
-**Step 2 — Fetch tweet content via Playwright (MCP browser tool):**
-Use `browser_run_code` with a loop over all URLs to extract tweet text from page titles:
-```js
-async (page) => {
-  const fs = require('fs');
-  const notes = JSON.parse(fs.readFileSync('/tmp/tweet_notes.json', 'utf8'));
-  const results = [];
-  for (const {url} of notes) {
-    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 15000 });
-    await page.waitForTimeout(2500);
-    const title = await page.title();
-    const match = title.match(/^(.+?) on X: "(.+?)"(?:\s*\/\s*X)?$/s);
-    if (match) results.push({ url, author: match[1], tweet: match[2].trim() });
-    else results.push({ url, author: null, tweet: title });
-  }
-  return JSON.stringify(results);
-}
-```
-Save results to `/tmp/tweet_data.json`.
+Or, for a fresh note created with the image at the bottom:
 
-**Step 3 — Update notes via bcli:**
-```python
-python3 -c "
-import json, subprocess, re
-
-with open('/tmp/tweet_data.json') as f: tweets = json.load(f)
-with open('/tmp/tweet_notes.json') as f: notes = json.load(f)
-
-url_to_id = {n['url']: n['id'] for n in notes}
-
-for t in tweets:
-    url = t['url']
-    tweet_text = t.get('tweet', '').strip()
-    author = t.get('author', '')
-    note_id = url_to_id.get(url)
-    if not note_id or not tweet_text: continue
-
-    m = re.match(r'https?://(?:www\.)?x\.com/([^/]+)/status/', url)
-    handle = f'@{m.group(1)}' if m else ''
-    short = tweet_text[:60] + ('…' if len(tweet_text) > 60 else '')
-    title = f'{author}: {short}' if author else short
-
-    new_body = f'# {title}\n\n> {tweet_text}\n\n**{handle}** · [View on X]({url})\n\n#inbox/saved-tweets'
-
-    result = subprocess.run(
-        ['bcli', 'edit', note_id, '--stdin'],
-        input=new_body, text=True, capture_output=True
-    )
-    if result.returncode != 0:
-        print(f'Error {note_id}: {result.stderr.strip()}')
-    else:
-        print(f'Updated: {title[:50]}')
-print('Done')
-"
-```
-No `time.sleep()` required (CloudKit API, not URL scheme fire-and-forget). No `urllib.parse.quote()` needed.
-
-## Batch Add Tweet Screenshots Workflow
-
-Use this when the user asks to add screenshots/images to their saved tweet notes. This embeds the actual tweet screenshot into each note.
-
-**Prerequisites:** bcli auth done. Playwright MCP browser available. **Chrome must be fully quit** (`Cmd+Q`) before running Playwright — the MCP uses Chrome's persistent context which conflicts with a running Chrome instance.
-
-**Step 1 — Find notes needing screenshots (via SQLite, not bcli):**
-> bcli tag search has a result limit. Use SQLite directly to get all notes in the tag.
-```python
-python3 -c "
-import sqlite3, re, json, os
-DB = os.path.expanduser('~/Library/Group Containers/9K33E3U3T4.net.shinyfrog.bear/Application Data/database.sqlite')
-conn = sqlite3.connect(f'file:{DB}?mode=ro', uri=True)
-conn.row_factory = sqlite3.Row
-rows = conn.execute('''
-    SELECT n.Z_PK, n.ZUNIQUEIDENTIFIER, n.ZTEXT
-    FROM ZSFNOTE n
-    JOIN Z_5TAGS nt ON n.Z_PK = nt.Z_5NOTES
-    JOIN ZSFNOTETAG t ON nt.Z_13TAGS = t.Z_PK
-    WHERE t.ZTITLE = \"inbox/saved-tweets\" AND n.ZTRASHED = 0
-    ORDER BY n.ZMODIFICATIONDATE DESC
-''').fetchall()
-need_image = []
-for row in rows:
-    text = row['ZTEXT'] or ''
-    if re.search(r'!\[.*?\]\(.*?\.png\)', text): continue  # already has image
-    url_match = re.search(r'https?://(?:www\.)?x\.com/([^\s\)\"]+)', text)
-    url = 'https://x.com/' + url_match.group(1) if url_match else None
-    if not url: continue
-    need_image.append({'pk': row['Z_PK'], 'uuid': row['ZUNIQUEIDENTIFIER'], 'url': url})
-with open('/tmp/need_image_notes.json', 'w') as f: json.dump(need_image, f)
-print(f'{len(need_image)} notes need screenshots')
-"
-```
-
-**Step 2 — Screenshot tweets via Playwright (`browser_run_code`):**
-> `require()` is not available in `browser_run_code` — inline the notes data directly. `locator.screenshot({path})` writes to disk natively. After screenshotting, load notes JSON into the code inline (generate it from Python first, then paste into the tool call).
-```js
-// Generate the inlined notes array first:
-// python3 -c "import json; notes=json.load(open('/tmp/need_image_notes.json')); print(json.dumps(notes))"
-// Then inline it as: const notes = [...paste here...];
-
-async (page) => {
-  const notes = /* INLINE JSON HERE */;
-  const results = [];
-  for (const note of notes) {
-    const filename = '/tmp/tweet_' + note.uuid + '.png';
-    try {
-      await page.goto(note.url, { waitUntil: 'domcontentloaded', timeout: 15000 });
-      const article = page.locator('article[data-testid="tweet"]').first();
-      try { await article.waitFor({ timeout: 6000 }); } catch(_) {}
-      if (!await article.count()) {
-        results.push({ uuid: note.uuid, pk: note.pk, status: 'no_article', url: note.url });
-        continue;
-      }
-      await article.screenshot({ path: filename, type: 'png' });
-      results.push({ uuid: note.uuid, pk: note.pk, status: 'ok', filename });
-    } catch(e) {
-      results.push({ uuid: note.uuid, pk: note.pk, status: 'error', error: String(e), url: note.url });
-    }
-  }
-  const ok = results.filter(r => r.status === 'ok').length;
-  return JSON.stringify({ ok, failed: results.filter(r => r.status !== 'ok'), results });
-}
-```
-Parse results: `python3 -c "import json,re; raw=open('TOOL_RESULT_FILE').read(); ..."` — extract the JSON from the `### Result` wrapper and save to `/tmp/tweet_screenshots.json`.
-
-**Step 3 — Quit Bear, bulk insert image records into SQLite, patch ZTEXT, restart:**
-> Do NOT use `bcli edit` to add the image markdown — bcli updates CloudKit but Bear renders from its local `ZTEXT` column. Write `ZTEXT` directly.
-```python
-python3 << 'EOF'
-import sqlite3, os, uuid, shutil, struct, json
-from datetime import datetime
-
-DB = os.path.expanduser('~/Library/Group Containers/9K33E3U3T4.net.shinyfrog.bear/Application Data/database.sqlite')
-NOTE_IMAGES = os.path.expanduser('~/Library/Group Containers/9K33E3U3T4.net.shinyfrog.bear/Application Data/Local Files/Note Images')
-
-with open('/tmp/tweet_screenshots.json') as f:
-    results = [r for r in json.load(f) if r['status'] == 'ok']
-
-bear_epoch = datetime(2001, 1, 1).timestamp()
-bear_time = datetime.now().timestamp() - bear_epoch
-
-conn = sqlite3.connect(DB, timeout=10)
-cur = conn.cursor()
-new_pk = (cur.execute('SELECT MAX(Z_PK) FROM ZSFNOTEFILE').fetchone()[0] or 0) + 1
-
-for r in results:
-    screenshot = f"/tmp/tweet_{r['uuid']}.png"
-    if not os.path.exists(screenshot): continue
-
-    with open(screenshot, 'rb') as f:
-        f.read(8); f.read(4); f.read(4)
-        width  = struct.unpack('>I', f.read(4))[0]
-        height = struct.unpack('>I', f.read(4))[0]
-    file_size = os.path.getsize(screenshot)
-    filename = 'tweet_screenshot.png'
-    file_uuid = str(uuid.uuid4()).upper()
-    os.makedirs(os.path.join(NOTE_IMAGES, file_uuid))
-    shutil.copy2(screenshot, os.path.join(NOTE_IMAGES, file_uuid, filename))
-
-    cur.execute('''
-        INSERT INTO ZSFNOTEFILE
-        (Z_PK, Z_ENT, Z_OPT, ZDOWNLOADED, ZFILESIZE, ZINDEX, ZPERMANENTLYDELETED,
-         ZSKIPSYNC, ZUNUSED, ZUPLOADED, ZNOTE, ZANIMATED, ZHEIGHT, ZWIDTH,
-         ZDURATION, ZHEIGHT1, ZWIDTH1, ZCREATIONDATE, ZMODIFICATIONDATE, ZUPLOADEDDATE,
-         ZFILENAME, ZNORMALIZEDFILEEXTENSION, ZSEARCHTEXT, ZLASTEDITINGDEVICE, ZUNIQUEIDENTIFIER)
-        VALUES (?,9,1, 1,?,0,0,0,0,0, ?,0,?,?,NULL,NULL,NULL, ?,?,NULL, ?,"png",NULL,NULL,?)
-    ''', (new_pk, file_size, r['pk'], height, width, bear_time, bear_time, filename, file_uuid))
-
-    # Patch ZTEXT directly — do NOT use bcli edit (CloudKit sync won't update ZTEXT before restart)
-    row = cur.execute('SELECT ZTEXT FROM ZSFNOTE WHERE Z_PK=?', (r['pk'],)).fetchone()
-    if row and row[0] and '![tweet_screenshot.png]' not in row[0]:
-        new_text = row[0].rstrip() + '\n\n![tweet_screenshot.png](tweet_screenshot.png)\n'
-        cur.execute('UPDATE ZSFNOTE SET ZTEXT=?, ZMODIFICATIONDATE=? WHERE Z_PK=?',
-                    (new_text, bear_time, r['pk']))
-    new_pk += 1
-
-conn.commit()
-conn.close()
-print(f'Done: {len(results)} images inserted + ZTEXT patched')
-EOF
-```
-
-Then restart Bear:
 ```bash
-osascript -e 'tell application "Bear" to quit' && sleep 3 && open -a Bear
+ID=$(bearcli create "Title" --content "# Title\n\n![screenshot.png](screenshot.png)" \
+       --format json --fields id | python3 -c "import json,sys; print(json.load(sys.stdin)['id'])")
+bearcli attachments add "$ID" --filename screenshot.png < /tmp/screenshot.png
 ```
 
-**Notes on this workflow:**
-- `bcli --tag` returns 0 results; use `bcli search "tagname"` or SQLite directly
-- CloudKit 409 `TRY_AGAIN_LATER` on bcli edits = rate limit; retry with `time.sleep(2)` between calls
-- 2 tweet URLs that return `no_article` = deleted/protected accounts; skip them
-- bcli IDs = Bear's `ZUNIQUEIDENTIFIER` — you can pass them to `?id=` in URL scheme calls
-
-## Attach Screenshot to Bear Note Workflow
-
-Use this to embed an actual image (e.g. a tweet screenshot) into a Bear note. Bear's URL scheme doesn't accept image uploads directly, so we insert into Bear's SQLite database and then restart Bear.
-
-**Why a restart is required:** Bear uses Apple's Core Data framework — an in-memory object graph loaded from SQLite at startup. When you `INSERT` directly into the SQLite file, Bear's running process doesn't see it (Core Data has its own in-memory state). A restart forces Bear to reload from disk, at which point the image record and the markdown reference both appear correctly.
-
-**Step 1 — Take screenshot via Playwright MCP:**
-```js
-// browser_take_screenshot with element targeting for a clean crop
-// Save to e.g. /tmp/tweet_{handle}.png
-```
-
-**Step 2 — Insert image record and append markdown (Python):**
-```python
-python3 -c "
-import sqlite3, os, uuid, shutil, subprocess, urllib.parse, struct, time, json
-from datetime import datetime
-
-
-# NOTE_UUID = the bcli note ID (bcli IDs ARE Bear's ZUNIQUEIDENTIFIER — they're the same)
-# NOTE_PK must be looked up from SQLite (bcli has no Z_PK):
-# python3 -c "
-# import sqlite3, glob, os
-# db = glob.glob(os.path.expanduser(
-#   '~/Library/Group Containers/9K33E3U3T4.net.shinyfrog.bear/Application Data/database.sqlite'))[0]
-# conn = sqlite3.connect(f'file:{db}?mode=ro', uri=True)
-# rows = conn.execute('SELECT Z_PK, ZUNIQUEIDENTIFIER FROM ZSFNOTE WHERE ZUNIQUEIDENTIFIER=\"YOUR-BCLI-ID\"').fetchall()
-# print(rows)
-# "
-NOTE_PK   = 1234
-NOTE_UUID = 'YOUR-BCLI-NOTE-ID'
-SCREENSHOT = '/tmp/tweet_screenshot.png'
-FILENAME   = 'tweet_screenshot.png'
-
-DB = os.path.expanduser('~/Library/Group Containers/9K33E3U3T4.net.shinyfrog.bear/Application Data/database.sqlite')
-NOTE_IMAGES = os.path.expanduser('~/Library/Group Containers/9K33E3U3T4.net.shinyfrog.bear/Application Data/Local Files/Note Images')
-
-# Read PNG dimensions from header
-with open(SCREENSHOT, 'rb') as f:
-    f.read(8); f.read(4); f.read(4)
-    width  = struct.unpack('>I', f.read(4))[0]
-    height = struct.unpack('>I', f.read(4))[0]
-file_size = os.path.getsize(SCREENSHOT)
-
-# Copy image to Bear's Note Images folder (folder name = file UUID)
-file_uuid = str(uuid.uuid4()).upper()
-img_folder = os.path.join(NOTE_IMAGES, file_uuid)
-os.makedirs(img_folder)
-shutil.copy2(SCREENSHOT, os.path.join(img_folder, FILENAME))
-
-# Bear's Core Data epoch starts 2001-01-01
-bear_time = datetime.now().timestamp() - datetime(2001, 1, 1).timestamp()
-
-# Insert ZSFNOTEFILE record (Z_ENT=9, Z_OPT=1 for Bear v1)
-conn = sqlite3.connect(DB, timeout=10)
-cur = conn.cursor()
-new_pk = (cur.execute('SELECT MAX(Z_PK) FROM ZSFNOTEFILE').fetchone()[0] or 0) + 1
-cur.execute('''
-    INSERT INTO ZSFNOTEFILE
-    (Z_PK, Z_ENT, Z_OPT, ZDOWNLOADED, ZFILESIZE, ZINDEX, ZPERMANENTLYDELETED,
-     ZSKIPSYNC, ZUNUSED, ZUPLOADED, ZNOTE, ZANIMATED, ZHEIGHT, ZWIDTH,
-     ZDURATION, ZHEIGHT1, ZWIDTH1, ZCREATIONDATE, ZMODIFICATIONDATE, ZUPLOADEDDATE,
-     ZFILENAME, ZNORMALIZEDFILEEXTENSION, ZSEARCHTEXT, ZLASTEDITINGDEVICE, ZUNIQUEIDENTIFIER)
-    VALUES (?,9,1, 1,?,0,0,0,0,0, ?,0,?,?,NULL,NULL,NULL, ?,?,NULL, ?,\"png\",NULL,NULL,?)
-''', (new_pk, file_size, NOTE_PK, height, width, bear_time, bear_time, FILENAME, file_uuid))
-conn.commit()
-conn.close()
-
-# Append image markdown via Bear URL scheme
-time.sleep(0.5)
-img_md = f'\n![{FILENAME}]({FILENAME})'
-bear_url = ('bear://x-callback-url/add-text'
-    f'?id={urllib.parse.quote(NOTE_UUID)}'
-    f'&text={urllib.parse.quote(img_md)}'
-    '&mode=append&show_window=yes&open_note=yes')
-subprocess.run(['open', bear_url])
-print('Done — restart Bear to see image render')
-"
-```
-
-**Step 3 — Restart Bear:**
-```bash
-osascript -e 'tell application "Bear" to quit'
-sleep 2
-open -a Bear
-```
-After restart, the `![filename](filename)` markdown renders as an inline image.
-
-**Smoother alternative (no restart needed):** Grant your terminal **Accessibility permission** in System Settings → Privacy & Security → Accessibility. Then use AppleScript to paste the image from clipboard — Bear handles the attachment internally through its normal UI path, so Core Data is updated immediately:
-```applescript
--- Set clipboard to PNG data, then paste into Bear edit mode
-set the clipboard to (read (POSIX file "/tmp/tweet_screenshot.png") as «class PNGf»)
-open location "bear://x-callback-url/open-note?id=NOTE_UUID&edit=yes&show_window=yes"
-delay 1.5
-tell application "System Events"
-    tell process "Bear"
-        key code 125 using {command down}  -- Cmd+Down → jump to end of note
-        keystroke return                    -- new line
-        keystroke "v" using {command down} -- Cmd+V → paste image
-    end tell
-end tell
-```
-This bypasses the Core Data issue entirely because Bear processes the paste event itself.
+Bear renders the image immediately — no app restart. The attachment is stored in Bear's `Note Images` directory by Bear itself, with the correct Core Data relationships in place.
 
 ## Notes
 
-- **bcli IDs are Bear's `ZUNIQUEIDENTIFIER`** — they are the same value and can be used interchangeably in URL scheme calls (`bear://x-callback-url/...?id=BCLI_ID`).
-- The only value bcli cannot give you is `Z_PK` (the integer Core Data primary key needed for `ZSFNOTEFILE.ZNOTE`). Look that up from SQLite by `ZUNIQUEIDENTIFIER`.
-- bcli maintains a local cache at `~/.config/bear-cli/cache.json`. Run `bcli sync` if results seem stale.
-- bcli does not support Bear's date query operators (`@today`, `@last7days`, etc.). Filter by `modificationDate` ISO8601 field in Python post-processing (field name from `bcli get --json`).
-- bcli has no image/attachment support. The screenshot workflow still uses direct SQLite insertion (Bear restart required).
-- **`bcli edit` updates CloudKit but does NOT update Bear's local `ZTEXT` column directly.** Bear renders from `ZTEXT`. To add content that must render immediately after restart (e.g. image markdown), write to `ZTEXT` directly in SQLite — do not rely on CloudKit sync timing.
-- `#tag` syntax in note body via `bcli edit` should sync to Bear's tag index via CloudKit. Alternatively, set tags explicitly: `bcli create ... --tags 'inbox/saved-tweets'`.
-- Tags can be hierarchical: `work/projects/2025`
-- URL scheme text must use `urllib.parse.quote()` (percent-encoding) — applies in the screenshot attachment workflow.
-- Always search before claiming a note doesn't exist
-- Wiki links syntax: `[[note title]]`, `[[note title|alias]]`
-- Bear uses Core Data (in-memory object graph over SQLite); direct SQLite INSERTs require a Bear restart to take effect — applies to the screenshot workflow only.
+- **bearcli IDs are Bear's `ZUNIQUEIDENTIFIER`** — interchangeable with the Bear URL scheme: `bear://x-callback-url/open-note?id=<bearcli_id>`. Prefer `bearcli open ID` over the URL scheme.
+- **No auth, no cache, no sync.** `bearcli` reads/writes Bear's running database in place. Drop any retry-on-rate-limit logic — there are no rate limits.
+- **No Bear restart needed for any operation**, including attachments and tag changes. This was the single biggest pain point of the previous `bcli` (CloudKit) workflow.
+- **Optimistic concurrency:** for risky writes, capture `hash` from `bearcli show --fields hash` and pass `--base <hash>` to `bearcli write` — the write is rejected if the note changed since the read.
+- **Tags can be hierarchical:** `work/projects/2025`. `bearcli tags add ID a b/c` adds both, leaving the body untouched.
+- **Wiki links syntax (in note body):** `[[note title]]`, `[[note title|alias]]`. `@wikilinks` / `@backlinks` in search find them.
+- **Locked notes** return metadata via `bearcli show` but reject `--fields content`.
+- **Always search before claiming a note doesn't exist.** Prefer `qmd` for natural-language searches; fall back to `bearcli search` for date or state operators.
+- **MCP server alternative:** `bearcli mcp-server` exposes the same surface over JSON-RPC stdio for MCP-aware clients.

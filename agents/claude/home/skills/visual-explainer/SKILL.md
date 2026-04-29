@@ -55,26 +55,25 @@ Save to: `/tmp/visual-explainer-<slug>.html` (where `<slug>` is a short kebab-ca
 
 Always create a new Bear note for each visual explainer.
 
-1. **Create the note** with `bcli create`:
+1. **Create the note** with `bearcli create`:
    - Title: descriptive name of what's being explained
    - Body: brief markdown summary (5-15 lines) of what the visual covers and why it exists
-   - Tags: at minimum `#visual-explainer`. Add context tags based on the topic (e.g. `#learn/agents` if it's about work).
-   - Capture the note ID from `bcli create ... --quiet`
-
-2. **Attach the HTML file** via Bear URL scheme:
+   - Tags: at minimum `visual-explainer`. Add context tags based on the topic (e.g. `learn/agents` if it's about work).
+   - Capture the note ID from JSON output:
 
 ```bash
-NOTE_ID="<captured-id>"
+NOTE_ID=$(bearcli create "Title here" \
+  --content "Brief summary..." \
+  --tags "visual-explainer,learn/agents" \
+  --format json --fields id \
+  | python3 -c "import json,sys; print(json.load(sys.stdin)['id'])")
+```
+
+2. **Attach the HTML file** — single command, no URL scheme, no base64:
+
+```bash
 FILENAME="<slug>.html"
-FILE_B64=$(base64 -i "/tmp/visual-explainer-<slug>.html")
-python3 -c "
-import urllib.parse, subprocess
-url = ('bear://x-callback-url/add-file'
-    + '?id=' + urllib.parse.quote('$NOTE_ID')
-    + '&filename=' + urllib.parse.quote('$FILENAME')
-    + '&file=' + urllib.parse.quote('''$FILE_B64'''))
-subprocess.run(['open', url])
-"
+bearcli attachments add "$NOTE_ID" --filename "$FILENAME" < "/tmp/visual-explainer-<slug>.html"
 ```
 
 3. **Open the HTML in browser** so the user can see it immediately:
