@@ -6,51 +6,36 @@ The workflow is fully idempotent — run it any time to catch up on anything tha
 
 **Pre-check — Audit all tweet notes and classify what needs work**
 
-This single query covers all three categories:
-1. Bare x.com URL notes with no content
-2. Notes with `#inbox/saved-tweets` missing an image
-3. Notes with `#inbox/saved-tweets` missing structured body OR missing additional tags
+One `bearcli search` call returns everything the classifier needs (tags, attachments, full body) for every note that mentions an x.com URL.
 
 ```python
-import sqlite3, re, json, os
+import json, re, subprocess
 
-DB = os.path.expanduser('~/Library/Group Containers/9K33E3U3T4.net.shinyfrog.bear/Application Data/database.sqlite')
-conn = sqlite3.connect(f'file:{DB}?mode=ro', uri=True)
-conn.row_factory = sqlite3.Row
-
-rows = conn.execute('''
-    SELECT Z_PK, ZUNIQUEIDENTIFIER, ZTEXT
-    FROM ZSFNOTE
-    WHERE ZTRASHED = 0 AND ZTEXT LIKE "%x.com%"
-    ORDER BY ZCREATIONDATE DESC
-''').fetchall()
+raw = subprocess.check_output([
+    'bearcli', 'search', 'x.com',
+    '--format', 'json',
+    '--fields', 'id,title,tags,attachments,content',
+    '--location', 'notes',
+])
+notes = json.loads(raw)
 
 todo = []
-for row in rows:
-    text = (row['ZTEXT'] or '').strip()
-    pk, uuid = row['Z_PK'], row['ZUNIQUEIDENTIFIER']
-
+for n in notes:
+    text = (n.get('content') or '').strip()
     url_match = re.search(r'https?://(?:www\.)?x\.com/\S+', text)
-    if not url_match: continue
+    if not url_match:
+        continue
     url = re.sub(r'[\)\]>"\s]+$', '', url_match.group(0))
 
-    tags = [r['ZTITLE'] for r in conn.execute('''
-        SELECT t.ZTITLE FROM ZSFNOTETAG t
-        JOIN Z_5TAGS nt ON t.Z_PK = nt.Z_13TAGS
-        WHERE nt.Z_5NOTES = ?
-    ''', (pk,)).fetchall()]
+    tags = [t.lstrip('#') for t in (n.get('tags') or [])]
     has_inbox_tag = 'inbox/saved-tweets' in tags
 
     is_bare = re.match(r'^https?://(?:www\.)?x\.com/\S+$', text) is not None
     if not is_bare and not has_inbox_tag:
         continue  # not a tweet note
 
-    has_image = conn.execute(
-        'SELECT 1 FROM ZSFNOTEFILE WHERE ZNOTE=? AND ZPERMANENTLYDELETED=0', (pk,)
-    ).fetchone() is not None
-
-    # Structured body = has a # heading AND a > blockquote (from enrichment)
-    has_body = bool(re.search(r'^#\s+\S', text, re.MULTILINE)) and '> ' in text
+    has_image = bool(n.get('attachments'))
+    has_body  = bool(re.search(r'^#\s+\S', text, re.MULTILINE)) and '> ' in text
 
     needs = []
     if not has_inbox_tag: needs.append('inbox_tag')
@@ -60,12 +45,11 @@ for row in rows:
 
     if needs:
         todo.append({
-            'pk': pk, 'uuid': uuid, 'url': url,
+            'id': n['id'], 'url': url,
             'has_image': has_image, 'has_body': has_body,
-            'has_inbox_tag': has_inbox_tag, 'tags': tags, 'needs': needs
+            'has_inbox_tag': has_inbox_tag, 'tags': tags, 'needs': needs,
         })
 
-conn.close()
 with open('/tmp/tweet_todo.json', 'w') as f: json.dump(todo, f)
 
 from collections import Counter
@@ -74,7 +58,7 @@ print(f'{len(todo)} notes need work:')
 for k, v in sorted(counts.items()): print(f'  {k}: {v}')
 print()
 for n in todo:
-    print(f'  pk={n["pk"]} needs={n["needs"]} {n["url"][:65]}')
+    print(f'  id={n["id"]} needs={n["needs"]} {n["url"][:65]}')
 ```
 
 Review the output before proceeding. Then:
@@ -89,10 +73,10 @@ For all notes that need `image` OR `body`, run a Playwright batch to screenshot 
 import json
 todo = json.load(open('/tmp/tweet_todo.json'))
 playwright_batch = [n for n in todo if 'image' in n['needs'] or 'body' in n['needs']]
-print(json.dumps([{'pk': n['pk'], 'uuid': n['uuid'], 'url': n['url']} for n in playwright_batch]))
+print(json.dumps([{'id': n['id'], 'url': n['url']} for n in playwright_batch]))
 ```
 
-Use `browser_run_code` with the batch inlined. Closes Chrome if open first (`osascript -e 'tell application "Google Chrome" to quit'`). Screenshots go to `/tmp/tweet_{uuid}.png`:
+Use `browser_run_code` with the batch inlined. Closes Chrome if open first (`osascript -e 'tell application "Google Chrome" to quit'`). Screenshots go to `/tmp/tweet_{id}.png`:
 
 ```js
 async (page) => {
@@ -118,13 +102,13 @@ async (page) => {
     });
   };
   for (const note of notes) {
-    const filename = '/tmp/tweet_' + note.uuid + '.png';
+    const filename = '/tmp/tweet_' + note.id + '.png';
     try {
       await page.goto(note.url, { waitUntil: 'domcontentloaded', timeout: 15000 });
       const article = page.locator('article[data-testid="tweet"]').first();
       try { await article.waitFor({ timeout: 6000 }); } catch(_) {}
       if (!await article.count()) {
-        results.push({ uuid: note.uuid, pk: note.pk, status: 'no_article', url: note.url });
+        results.push({ id: note.id, status: 'no_article', url: note.url });
         continue;
       }
       await dismissBanners();
@@ -137,10 +121,10 @@ async (page) => {
       const handleMatch = note.url.match(/x\.com\/([^/?]+)/);
       const handle = handleMatch ? handleMatch[1] : '';
       await article.screenshot({ path: filename, type: 'png' });
-      results.push({ uuid: note.uuid, pk: note.pk, status: 'ok', filename,
+      results.push({ id: note.id, status: 'ok', filename,
                      tweetText, author, handle, url: note.url });
     } catch(e) {
-      results.push({ uuid: note.uuid, pk: note.pk, status: 'error', error: String(e), url: note.url });
+      results.push({ id: note.id, status: 'error', error: String(e), url: note.url });
     }
   }
   try {
@@ -163,133 +147,110 @@ Verify screenshots landed:
 ```python
 import json, os
 results = json.load(open('/tmp/tweet_playwright.json'))
-ok = sum(1 for r in results if r.get('status') == 'ok' and os.path.exists(f'/tmp/tweet_{r["uuid"]}.png'))
+ok = sum(1 for r in results if r.get('status') == 'ok' and os.path.exists(f'/tmp/tweet_{r["id"]}.png'))
 print(f'{ok}/{len(results)} screenshots confirmed on disk')
 ```
 
 ---
 
-**Step B — SQLite update (Quit Bear first)**
+**Step B — Apply mutations via bearcli**
 
-```bash
-osascript -e 'tell application "Bear" to quit' && sleep 2
-```
+No SQLite. No Bear restart. `bearcli` writes through Bear's own frameworks, so changes appear immediately in the running app.
 
 ```python
-import sqlite3, os, uuid, shutil, struct, json
-from datetime import datetime
+import json, os, subprocess
 
-DB = os.path.expanduser('~/Library/Group Containers/9K33E3U3T4.net.shinyfrog.bear/Application Data/database.sqlite')
-NOTE_IMAGES = os.path.expanduser('~/Library/Group Containers/9K33E3U3T4.net.shinyfrog.bear/Application Data/Local Files/Note Images')
+todo = {n['id']: n for n in json.load(open('/tmp/tweet_todo.json'))}
+playwright = {r['id']: r for r in json.load(open('/tmp/tweet_playwright.json')) if r.get('status') == 'ok'}
 
-todo = {n['pk']: n for n in json.load(open('/tmp/tweet_todo.json'))}
-playwright = {r['pk']: r for r in json.load(open('/tmp/tweet_playwright.json')) if r.get('status') == 'ok'}
+def run(*args, **kwargs):
+    return subprocess.run(args, check=False, capture_output=True, text=True, **kwargs)
 
-bear_epoch = datetime(2001, 1, 1).timestamp()
-bear_time = datetime.now().timestamp() - bear_epoch
+def get_content(note_id):
+    r = run('bearcli', 'cat', note_id)
+    return r.stdout
 
-conn = sqlite3.connect(DB, timeout=10)
-cur = conn.cursor()
-new_pk = (cur.execute('SELECT MAX(Z_PK) FROM ZSFNOTEFILE').fetchone()[0] or 0) + 1
+ATTACH_NAME = 'tweet_screenshot.png'
 
-for pk, note in todo.items():
+for note_id, note in todo.items():
     needs = note['needs']
-    pr = playwright.get(pk, {})
+    pr = playwright.get(note_id, {})
     tweet_text = pr.get('tweetText', '').strip()
-    author = pr.get('author', '').strip()
-    handle = pr.get('handle', '').strip()
-    url = note['url']
+    author     = pr.get('author', '').strip()
+    handle     = pr.get('handle', '').strip()
+    url        = note['url']
 
-    # --- Insert image if needed ---
+    # 1. Inbox tag — dedicated tag command, no body edit
+    if 'inbox_tag' in needs:
+        run('bearcli', 'tags', 'add', note_id, 'inbox/saved-tweets')
+
+    # 2. Body rewrite — when we have full tweet content, write the structured note
+    if 'body' in needs and tweet_text and author:
+        short = tweet_text[:70] + ('…' if len(tweet_text) > 70 else '')
+        blockquoted = '\n'.join(
+            f'> {line}' if line.strip() else '>'
+            for line in tweet_text.split('\n')
+        )
+        body_lines = [
+            f'# {author}: {short}',
+            '',
+            blockquoted,
+            '',
+            f'**@{handle}** · [View on X]({url})',
+            '',
+            '#inbox/saved-tweets',
+        ]
+        # If we're also adding an image this run, include the markdown line too
+        if 'image' in needs:
+            body_lines += ['', f'![{ATTACH_NAME}]({ATTACH_NAME})']
+        new_body = '\n'.join(body_lines) + '\n'
+        r = run('bearcli', 'write', note_id, '--content', new_body)
+        if r.returncode != 0:
+            print(f'write failed id={note_id}: {r.stderr.strip()}')
+
+    # 3. Image — add the binary first, then ensure the markdown reference exists
     if 'image' in needs:
-        screenshot = f'/tmp/tweet_{note["uuid"]}.png'
+        screenshot = f'/tmp/tweet_{note_id}.png'
         if os.path.exists(screenshot):
             with open(screenshot, 'rb') as f:
-                f.read(8); f.read(4); f.read(4)
-                width  = struct.unpack('>I', f.read(4))[0]
-                height = struct.unpack('>I', f.read(4))[0]
-            file_size = os.path.getsize(screenshot)
-            file_uuid = str(uuid.uuid4()).upper()
-            img_folder = os.path.join(NOTE_IMAGES, file_uuid)
-            os.makedirs(img_folder, exist_ok=True)
-            shutil.copy2(screenshot, os.path.join(img_folder, 'tweet_screenshot.png'))
-            cur.execute('''
-                INSERT INTO ZSFNOTEFILE
-                (Z_PK, Z_ENT, Z_OPT, ZDOWNLOADED, ZFILESIZE, ZINDEX, ZPERMANENTLYDELETED,
-                 ZSKIPSYNC, ZUNUSED, ZUPLOADED, ZNOTE, ZANIMATED, ZHEIGHT, ZWIDTH,
-                 ZDURATION, ZHEIGHT1, ZWIDTH1, ZCREATIONDATE, ZMODIFICATIONDATE, ZUPLOADEDDATE,
-                 ZFILENAME, ZNORMALIZEDFILEEXTENSION, ZSEARCHTEXT, ZLASTEDITINGDEVICE, ZUNIQUEIDENTIFIER)
-                VALUES (?,9,1,1,?,0,0,0,0,0,?,0,?,?,NULL,NULL,NULL,?,?,NULL,"tweet_screenshot.png","png",NULL,NULL,?)
-            ''', (new_pk, file_size, pk, height, width, bear_time, bear_time, file_uuid))
-            new_pk += 1
+                r = run('bearcli', 'attachments', 'add', note_id,
+                        '--filename', ATTACH_NAME, input=f.read())
+            if r.returncode != 0:
+                print(f'attachments add failed id={note_id}: {r.stderr.strip()}')
+                continue
+            # If we did NOT just rewrite the body, append the markdown reference
+            if not ('body' in needs and tweet_text and author):
+                cur = get_content(note_id)
+                if f'![{ATTACH_NAME}]' not in cur:
+                    run('bearcli', 'append', note_id,
+                        '--content', f'\n\n![{ATTACH_NAME}]({ATTACH_NAME})\n')
         else:
-            print(f'Screenshot missing for pk={pk}, skipping image insert')
+            print(f'screenshot missing for id={note_id}, skipping image')
 
-    # --- Build new ZTEXT ---
-    if 'image' in needs or 'body' in needs or 'inbox_tag' in needs:
-        cur_text = cur.execute('SELECT ZTEXT FROM ZSFNOTE WHERE Z_PK=?', (pk,)).fetchone()
-        cur_text = (cur_text[0] or '').rstrip()
-        has_img_md = '![tweet_screenshot.png]' in cur_text
+    print(f'updated id={note_id} needs={needs}')
 
-        if tweet_text and author and ('body' in needs):
-            short = tweet_text[:70] + ('…' if len(tweet_text) > 70 else '')
-            # Prefix every line with > to handle multiline tweets properly
-            blockquoted = '\n'.join(
-                f'> {line}' if line.strip() else '>'
-                for line in tweet_text.split('\n')
-            )
-            new_text = (
-                f'# {author}: {short}\n\n'
-                f'{blockquoted}\n\n'
-                f'**@{handle}** · [View on X]({url})\n\n'
-                f'#inbox/saved-tweets\n\n'
-                f'![tweet_screenshot.png](tweet_screenshot.png)\n'
-            )
-        else:
-            # Preserve existing text, just add what's missing
-            if '#inbox/saved-tweets' not in cur_text:
-                cur_text += '\n\n#inbox/saved-tweets'
-            if not has_img_md and 'image' in needs:
-                cur_text += '\n\n![tweet_screenshot.png](tweet_screenshot.png)'
-            new_text = cur_text + '\n'
-
-        cur.execute('UPDATE ZSFNOTE SET ZTEXT=?, ZMODIFICATIONDATE=? WHERE Z_PK=?',
-                    (new_text, bear_time, pk))
-        if tweet_text and author:
-            title = f'{author}: {tweet_text[:70]}{"…" if len(tweet_text) > 70 else ""}'
-            cur.execute('UPDATE ZSFNOTE SET ZTITLE=? WHERE Z_PK=?', (title, pk))
-        print(f'Updated pk={pk} needs={needs}')
-
-conn.commit()
-conn.close()
-print('SQLite done')
-```
-
-Restart Bear:
-```bash
-open -a Bear
+print('Done')
 ```
 
 ---
 
 **Step C — Auto-tag pass (notes needing `extra_tags`)**
 
-```python
-import sqlite3, json, os
+Pull the existing tag taxonomy and current note bodies, classify, then apply with `bearcli tags add` — body untouched, modification date untouched.
 
-DB = os.path.expanduser('~/Library/Group Containers/9K33E3U3T4.net.shinyfrog.bear/Application Data/database.sqlite')
-conn = sqlite3.connect(f'file:{DB}?mode=ro', uri=True)
-conn.row_factory = sqlite3.Row
+```python
+import json, subprocess
+
+tags_raw = subprocess.check_output(['bearcli', 'tags', 'list', '--format', 'json'])
+all_tags = sorted({t.lstrip('#') for entry in json.loads(tags_raw) for t in [entry.get('tag', '')] if t})
 
 todo = json.load(open('/tmp/tweet_todo.json'))
 needs_tags = [n for n in todo if 'extra_tags' in n['needs']]
 
-all_tags = [r['ZTITLE'] for r in conn.execute('SELECT ZTITLE FROM ZSFNOTETAG ORDER BY ZTITLE').fetchall()]
 notes_with_text = []
 for n in needs_tags:
-    row = conn.execute('SELECT ZTEXT FROM ZSFNOTE WHERE Z_PK=?', (n['pk'],)).fetchone()
-    notes_with_text.append({**n, 'text': (row['ZTEXT'] or '') if row else ''})
-conn.close()
+    text = subprocess.check_output(['bearcli', 'cat', n['id']], text=True)
+    notes_with_text.append({**n, 'text': text})
 
 with open('/tmp/tweet_tagging.json', 'w') as f:
     json.dump({'tags': all_tags, 'notes': notes_with_text}, f)
@@ -298,49 +259,33 @@ print(f'{len(needs_tags)} notes need extra tags')
 print('Existing tags:', json.dumps(all_tags, indent=2))
 print()
 for n in notes_with_text:
-    print(f'pk={n["pk"]} current_tags={n["tags"]}')
+    print(f'id={n["id"]} current_tags={n["tags"]}')
     print(f'  {n["text"][:200]}')
     print()
 ```
 
-Read the note content above. For each note, pick 1–3 tags from the existing tag list. Prefer `#learn/*` tags. Build the assignment dict and apply:
+Read the note content above. For each note, pick 1–3 tags from the existing tag list. Prefer `learn/*` tags. Build the assignment dict and apply:
 
 ```python
-import sqlite3, json
-from datetime import datetime
+import subprocess
 
-DB = os.path.expanduser('~/Library/Group Containers/9K33E3U3T4.net.shinyfrog.bear/Application Data/database.sqlite')
-
-# Fill this in based on your analysis:
+# Fill this in based on your analysis (no leading # — bearcli strips them anyway):
 TAG_ASSIGNMENTS = {
-    # pk: ['#tag1', '#tag2'],
+    # 'NOTE-UUID': ['tag1', 'tag2'],
 }
 
-bear_time = datetime.now().timestamp() - datetime(2001, 1, 1).timestamp()
-conn = sqlite3.connect(DB, timeout=10)
-cur = conn.cursor()
+for note_id, tags in TAG_ASSIGNMENTS.items():
+    r = subprocess.run(['bearcli', 'tags', 'add', note_id, *tags],
+                       capture_output=True, text=True)
+    if r.returncode != 0:
+        print(f'tags add failed id={note_id}: {r.stderr.strip()}')
+    else:
+        print(f'tagged id={note_id}: {tags}')
 
-for pk, tags in TAG_ASSIGNMENTS.items():
-    row = cur.execute('SELECT ZTEXT FROM ZSFNOTE WHERE Z_PK=?', (pk,)).fetchone()
-    if not row or not row[0]: continue
-    text = row[0].rstrip()
-    for tag in tags:
-        if tag not in text:
-            text += f'\n{tag}'
-    cur.execute('UPDATE ZSFNOTE SET ZTEXT=?, ZMODIFICATIONDATE=? WHERE Z_PK=?',
-                (text + '\n', bear_time, pk))
-    print(f'Tagged pk={pk}: {tags}')
-
-conn.commit()
-conn.close()
-
-# Restart Bear to pick up tag changes
-import subprocess
-subprocess.run(['osascript', '-e', 'tell application "Bear" to quit'])
-import time; time.sleep(2)
-subprocess.run(['open', '-a', 'Bear'])
 print(f'Done: {len(TAG_ASSIGNMENTS)} notes tagged')
 ```
+
+No Bear quit/restart. `bearcli tags add` updates the live database through Bear's own frameworks; changes are visible in the running app immediately.
 
 ---
 

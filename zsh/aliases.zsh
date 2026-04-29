@@ -42,7 +42,6 @@ alias fh='fzf-make history'
 # My Apps
 alias r='rem-tui'
 alias q='qmd'
-alias ba='bcli auth'
 
 # Wrap claude to auto-update and auto-rename the Warp tab while it's running.
 # In Warp, disable auto-title so OSC 0 sticks across split panes.
