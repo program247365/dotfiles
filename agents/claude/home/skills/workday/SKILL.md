@@ -43,21 +43,23 @@ If no argument is given, infer from day-of-week and time:
 
 ### Gather Bear Notes
 
-For most modes, a single `bearcli search` query returns the right window directly:
+For most modes, a single `bearcli search` query returns the right window directly. When you'll need the bodies (review/journal modes), include `content` in `--fields` and skip the second round trip:
 
 ```bash
-# Last week's supernormal notes
-bearcli search "#supernormal @last7days" --format json --fields id,title,tags,modified \
-  > /tmp/bear_last_week.json
+# Last week's supernormal notes — bodies included
+bearcli search "#supernormal @last7days" --format json \
+  --fields id,title,tags,modified,content > /tmp/bear_last_week.json
 
-# Today's working set
-bearcli search "#supernormal/_today" --format json --fields id,title,tags > /tmp/bear_today.json
+# Today's working set — metadata only (bodies fetched on demand)
+bearcli search "#supernormal/_today" --format json --fields id,title,tags,modified \
+  > /tmp/bear_today.json
 
-# Notes modified in a specific window
-bearcli search "#supernormal @date(>2026-04-21) @date(<2026-04-29)" --format json
+# Specific window (use for week-start when @last7days doesn't align)
+bearcli search "#supernormal @date(>2026-04-21) @date(<2026-04-29)" --format json \
+  --fields id,title,tags,modified,content
 ```
 
-For modes that need exact start/end boundaries, fall back to date-clamped searches like `@date(>YYYY-MM-DD) @date(<YYYY-MM-DD)`.
+`content` is excluded from `--fields all` by default — you must list it explicitly. Use `@todo`/`@done` for state filters, `@untagged` to surface stragglers in week-end review.
 
 ### Gather Linear Issues
 
@@ -69,12 +71,15 @@ Use the Linear MCP `list_issues` tool:
 
 ### Read Note Content
 
+Prefer the inline-content search above. Only use these for one-off reads after the gather step:
+
 ```bash
 bearcli cat NOTE_ID                                      # raw markdown
-bearcli show NOTE_ID --format json --fields all,content  # everything
+bearcli cat NOTE_ID --limit 2000                         # first 2000 bytes (not lines)
+bearcli show NOTE_ID --format json --fields all,content  # full metadata + body
 ```
 
-Search/list results carry only `id`, `title`, `tags`, `matches` by default. Add `--fields all,content` (and pass via `--format json`) when you need the body in the same call.
+`--limit` on `cat` is byte-counted; for line truncation pipe through `head`.
 
 ### Retag Notes
 
@@ -93,24 +98,25 @@ If a note already has a more specific subtag (e.g. `supernormal/agents-experienc
 
 **Steps:**
 
-1. **Gather last week's data:**
-   - Bear notes tagged `#supernormal` modified in the previous Mon-Fri
-   - Linear issues assigned to me that were completed last week
-   - Linear issues assigned to me that are currently active
+1. **Gather last week's data in one search** (include bodies, no follow-up cat loop):
+   ```bash
+   bearcli search "#supernormal @last7days" --format json \
+     --fields id,title,tags,modified,content > /tmp/bear_last_week.json
+   ```
+   Plus: Linear issues assigned to me — completed last week and currently active.
 
-2. **Read content** of all last-week notes (use `bearcli cat ID`, limit to first 40 lines each for context)
-
-3. **Create "Week Review" note** tagged `#supernormal/journal`:
+2. **Create "Week Review" note** tagged `#supernormal/journal`:
    - Title: `Week Review: <date range>`
    - Sections: Completed (Linear table), Key Work (grouped by theme), Context
    - Be specific about what was shipped, not vague summaries
 
-4. **Create "Week Plan" note** tagged `#supernormal/_today`:
+3. **Create "Week Plan" note** tagged `#supernormal/_today`, then `bearcli open` it:
    - Title: `YYYYMMDD - Week Plan`
    - Sections: Active Linear issues (grouped by status/priority), Carryover items, Priorities (numbered)
    - Pull priority context from Slack messages if present in notes
+   - Optional: `bearcli pin add NEW_ID supernormal` to surface it at the top of the tag list
 
-5. **Retag old `_today` notes:**
+4. **Retag old `_today` notes:**
    - Read all notes currently tagged `#supernormal/_today`
    - For each that looks like last week's work (completed tickets, investigations, explorations):
      - If it has a more specific supernormal subtag → remove `_today`, keep specific tag
@@ -118,7 +124,7 @@ If a note already has a more specific subtag (e.g. `supernormal/agents-experienc
    - Keep notes that are genuinely ongoing (ideas lists, active conversations, open investigations)
    - When unsure, default to `#supernormal/journal`
 
-6. **Present summary** to user: what was created, what was retagged, what was kept
+5. **Present summary** to user: what was created, what was retagged, what was kept
 
 ## Mode: `day-start`
 
@@ -131,7 +137,7 @@ If a note already has a more specific subtag (e.g. `supernormal/agents-experienc
    - Linear issues assigned to me, active (In Progress, Todo, In Review)
    - Any notes modified yesterday that might need follow-up
 
-2. **Create "Day Start" note** tagged `#supernormal/_today`:
+2. **Create "Day Start" note** tagged `#supernormal/_today`, then `bearcli open NEW_ID`:
    - Title: `YYYYMMDD - Day Start`
    - Sections: Focus (top 3 priorities for today), Active Issues, Carry Forward
    - Keep it short — this is a checklist, not an essay
