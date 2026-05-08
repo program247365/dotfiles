@@ -1,0 +1,9 @@
+{
+  "name": "claude-x-tools",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@the-convocation/twitter-scraper": "latest"
+  }
+}
