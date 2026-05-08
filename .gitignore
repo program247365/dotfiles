@@ -5,3 +5,6 @@ zsh/zshrc.local.symlink
 .claude
 AGENTS.md
 /SOFTWARE_ENGINEERING.md
+.config/notes-organize-tweets/
+agents/claude/tools/node_modules/
+agents/claude/tools/package-lock.json
