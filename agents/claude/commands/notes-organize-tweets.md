@@ -13,19 +13,27 @@ The workflow is fully idempotent — run it any time to catch up on anything tha
 
 **Pre-check — Audit all tweet notes and classify what needs work**
 
-One `bearcli search` call returns everything the classifier needs (tags, attachments, full body) for every note that mentions an x.com URL.
+Two `bearcli search` calls cover the audit surface: a text search for `x.com` (catches notes with structured bodies and `#inbox/saved-tweets` tags) plus `@untagged` (catches bare-URL notes that Bear's FTS doesn't tokenize reliably). Results are merged by ID. Non-tweet untagged notes are silently skipped by the URL filter below.
 
 ```python
 import json, re, subprocess
 from datetime import date, timedelta
 
-raw = subprocess.check_output([
-    'bearcli', 'search', 'x.com',
-    '--format', 'json',
-    '--fields', 'id,title,tags,attachments,content',
-    '--location', 'notes',
-])
-notes = json.loads(raw)
+def _search(query):
+    raw = subprocess.check_output([
+        'bearcli', 'search', query,
+        '--format', 'json',
+        '--fields', 'id,title,tags,attachments,content',
+        '--location', 'notes',
+    ])
+    return json.loads(raw)
+
+by_id = {}
+for n in _search('x.com'):
+    by_id[n['id']] = n
+for n in _search('@untagged'):  # Bear FTS misses bare-URL notes — pick them up here
+    by_id.setdefault(n['id'], n)
+notes = list(by_id.values())
 
 today = date.today()
 auth_needed_ttl = timedelta(days=7)
