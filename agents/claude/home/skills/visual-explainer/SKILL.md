@@ -46,6 +46,24 @@ Write a **single self-contained HTML file**. All CSS inline via `<style>` tags. 
 
 - `mermaid` (via `https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js`) — for diagrams
 - `chart.js` (via `https://cdn.jsdelivr.net/npm/chart.js`) — for charts/graphs, only when needed
+- <https://tailwindcss.com/> (via <https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4>) - for all styling needs, and making sure it's responsive always and readable
+- start with this html always:
+
+```
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  </head>
+  <body>
+    <h1 class="text-3xl font-bold underline">
+      Hello world!
+    </h1>
+  </body>
+</html>
+```
 
 **Everything else must be inline.** Images as base64 data URIs if needed. The file must work offline and render correctly months from now.
 
