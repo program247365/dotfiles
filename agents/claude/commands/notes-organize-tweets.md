@@ -2,10 +2,11 @@ Use the bear-notes skill. Then execute the idempotent Tweet Notes Enrichment Wor
 
 The workflow is fully idempotent — run it any time to catch up on anything that's missing.
 
-> **Two-tier fetching strategy:**
+> **Three-tier fetching strategy:**
 >
 > 1. **Tier 1 (always):** `cdn.syndication.twimg.com/tweet-result?id=<id>` — X's own embed API. Returns full JSON for any single tweet (text, author, photos, video, conversation_count). No login, no bot detection. The `token` parameter isn't validated.
 > 2. **Tier 2 (thread enrichment, opt-in):** `@the-convocation/twitter-scraper` Node lib calling X's authenticated GraphQL via the user's exported cookies. Used only to fetch self-thread continuations when a tweet has `conversation_count > 0`. Skipped silently if cookies are missing or stale.
+> 3. **Tier 3 (screenshot fallback):** Playwright loads `platform.twitter.com/embed/Tweet.html?id=<id>` and screenshots the rendered tweet card. Runs only when Tier 1 returned no embedded photo, so text-only and link-card tweets still get a visual attachment. No auth required.
 >
 > Cookies live at `~/.config/notes-organize-tweets/x-cookies.json` (gitignored). Run `~/.dotfiles/agents/claude/tools/refresh-x-cookies.sh` for setup instructions.
 
@@ -13,7 +14,9 @@ The workflow is fully idempotent — run it any time to catch up on anything tha
 
 **Pre-check — Audit all tweet notes and classify what needs work**
 
-Two `bearcli search` calls cover the audit surface: a text search for `x.com` (catches notes with structured bodies and `#inbox/saved-tweets` tags) plus `@untagged` (catches bare-URL notes that Bear's FTS doesn't tokenize reliably). Results are merged by ID. Non-tweet untagged notes are silently skipped by the URL filter below.
+Two `bearcli search` calls cover the audit surface: a text search for `x.com` (catches notes with structured bodies and `#inbox/saved-tweets` tags) plus `@untagged` (catches bare-URL notes that Bear's FTS doesn't tokenize reliably). Results are merged by ID.
+
+Tweet-save notes are recognized by **title prefix** — Bear auto-derives the title from the first content line, so a title starting with `https://x.com/.../status/...` is a high-confidence signal regardless of body shape. This catches: bare URLs, URL + user annotation (`* note: …`), markdown-link-wrapped `[url](url)`, and notes where the user typed `#inbox/saved-tweets` inline but Bear failed to promote it to a structured tag. Any text following the URL is captured as `annotation` and rendered into a `**My note**` block by Step B.
 
 ```python
 import json, re, subprocess
@@ -38,21 +41,37 @@ notes = list(by_id.values())
 today = date.today()
 auth_needed_ttl = timedelta(days=7)
 
+# Title-prefix matches both `https://x.com/...` and `[https://x.com/...](...)` shapes.
+TWEET_URL_RE = re.compile(r'https?://(?:www\.)?x\.com/[^\s\])]+/status/\d+(?:\?\S*)?', re.IGNORECASE)
+TITLE_TWEET_RE = re.compile(r'^\[?https?://(?:www\.)?x\.com/\S+/status/\d+', re.IGNORECASE)
+
 todo = []
 for n in notes:
     text = (n.get('content') or '').strip()
-    url_match = re.search(r'https?://(?:www\.)?x\.com/\S+', text)
-    if not url_match:
-        continue
-    url = re.sub(r'[\)\]>"\s]+$', '', url_match.group(0))
+    title = (n.get('title') or '').strip()
 
     raw_tags = [t.lstrip('#') for t in (n.get('tags') or [])]
     has_inbox_tag = 'inbox/saved-tweets' in raw_tags
     topical_tags = [t for t in raw_tags if not t.startswith('inbox')]
 
-    is_bare = re.match(r'^https?://(?:www\.)?x\.com/\S+$', text) is not None
-    if not is_bare and not has_inbox_tag:
-        continue  # not a tweet note
+    # Recognize as tweet-save via title prefix OR existing inbox tag.
+    title_is_tweet = bool(TITLE_TWEET_RE.match(title))
+    if not title_is_tweet and not has_inbox_tag:
+        continue  # not a tweet note (e.g. project note that mentions a tweet)
+
+    url_match = TWEET_URL_RE.search(text)
+    if not url_match:
+        continue
+    url = url_match.group(0).rstrip('.,)>]"\'')
+
+    # Capture any user annotation after the URL (excluding inline #inbox/saved-tweets
+    # text and markdown link closers). Only meaningful when the body is still unstructured.
+    annotation = None
+    after_url = text[url_match.end():].strip()
+    after_url = re.sub(r'^\]\([^)]*\)\s*', '', after_url)  # strip markdown link closer
+    after_url = after_url.strip()
+    if after_url and not after_url.startswith('#') and not after_url.startswith('<!--'):
+        annotation = after_url[:500]
 
     has_image = bool(n.get('attachments'))
     is_tombstone = '_Original tweet was deleted or restricted._' in text
@@ -108,6 +127,7 @@ for n in notes:
             'has_image': has_image, 'has_body': has_body,
             'has_inbox_tag': has_inbox_tag, 'tags': raw_tags, 'needs': needs,
             'thread_complete_count': thread_complete_count,
+            'annotation': annotation,  # carried into Step B's body builders
         })
 
 with open('/tmp/tweet_todo.json', 'w') as f: json.dump(todo, f)
@@ -271,6 +291,47 @@ for c in candidates:
 
 ---
 
+**Step A3 — Tweet-card screenshot fallback (Playwright)**
+
+For notes that need an image but the syndication API returned no embedded photo, render the tweet via X's embed widget (`platform.twitter.com/embed/Tweet.html`) and screenshot the article element. The screenshot lands at `/tmp/tweet_<note_id>.png` — the same path Step A would have used for an embedded photo — so Step B picks it up transparently without any further branching.
+
+The embed widget is the same one third-party sites use to render tweets. No auth required, stable interface. Single Chromium process serves the whole batch.
+
+```python
+import json, os, subprocess, sys
+
+todo = {n['id']: n for n in json.load(open('/tmp/tweet_todo.json'))}
+syn = {r['id']: r for r in json.load(open('/tmp/tweet_syndication.json'))}
+
+shot_candidates = []
+for note_id, n in todo.items():
+    if 'image' not in n['needs']:
+        continue
+    # If Step A already downloaded an embedded photo, /tmp/tweet_<id>.png exists.
+    if os.path.exists(f'/tmp/tweet_{note_id}.png'):
+        continue
+    pr = syn.get(note_id) or {}
+    if pr.get('status') != 'ok':
+        continue
+    shot_candidates.append({'note_id': note_id, 'tweet_id': pr['tweet_id']})
+
+print(f'{len(shot_candidates)} notes need a tweet-card screenshot')
+
+if shot_candidates:
+    fetcher = os.path.expanduser('~/.dotfiles/agents/claude/tools/x-screenshot-fetcher.py')
+    cp = subprocess.run(
+        ['python3', fetcher],
+        input=json.dumps(shot_candidates),
+        capture_output=True, text=True,
+    )
+    print(cp.stdout)
+    if cp.returncode != 0:
+        print('STDERR:', cp.stderr, file=sys.stderr)
+        # Soft-fail: Step B will hit `no_photo_available` for whichever shots didn't land.
+```
+
+---
+
 **Step B — Apply mutations via bearcli**
 
 ```python
@@ -330,7 +391,7 @@ def thread_marker(count):
 def auth_needed_marker(date_iso):
     return f'<!-- thread:auth-needed fetched={date_iso} -->'
 
-def build_single_body(syn_entry, url, count_marker=thread_marker(1)):
+def build_single_body(syn_entry, url, count_marker=thread_marker(1), annotation=None):
     tweet_text = clean_text(syn_entry.get('tweetText') or '')
     author = (syn_entry.get('author') or '').strip()
     handle = (syn_entry.get('handle') or '').strip()
@@ -353,13 +414,6 @@ def build_single_body(syn_entry, url, count_marker=thread_marker(1)):
         ]
         if expanded_url:
             lines += [f'**Linked URL**: <{expanded_url}>', '']
-        lines += [
-            f'**@{handle}** · [View on X]({url})',
-            '',
-            '#inbox/saved-tweets',
-            '',
-            count_marker,
-        ]
         kind = 'body_link_only'
     else:
         lines = [
@@ -367,16 +421,22 @@ def build_single_body(syn_entry, url, count_marker=thread_marker(1)):
             '',
             blockquote(tweet_text),
             '',
-            f'**@{handle}** · [View on X]({url})',
-            '',
-            '#inbox/saved-tweets',
-            '',
-            count_marker,
         ]
         kind = 'body'
+
+    if annotation:
+        lines += ['**My note**:', '', blockquote(annotation), '']
+
+    lines += [
+        f'**@{handle}** · [View on X]({url})',
+        '',
+        '#inbox/saved-tweets',
+        '',
+        count_marker,
+    ]
     return '\n'.join(lines) + '\n', kind
 
-def build_thread_body(syn_entry, url, thread):
+def build_thread_body(syn_entry, url, thread, annotation=None):
     """Multi-tweet thread body. `thread['tweets']` is the chronological self-reply list."""
     tweets = thread['tweets']
     n = len(tweets)
@@ -396,6 +456,8 @@ def build_thread_body(syn_entry, url, thread):
         if t.get('photos'):
             lines.append(f'![tweet_{seq}.png](tweet_{seq}.png)')
             lines.append('')
+    if annotation:
+        lines += ['**My note**:', '', blockquote(annotation), '']
     lines += [
         f'**@{handle}** · [View thread on X]({url})',
         '',
@@ -419,6 +481,7 @@ for note_id, note in todo.items():
     pr = syn.get(note_id, {})
     status = pr.get('status', 'missing')
     url = note['url']
+    annotation = note.get('annotation')
 
     # Capture topical tags BEFORE any body rewrite so we can re-add them after.
     # bearcli write reads tags from the body markdown, so non-inbox tags would be lost.
@@ -453,10 +516,10 @@ for note_id, note in todo.items():
     if 'body' in needs:
         if status == 'ok':
             if have_thread and thread_size > 1:
-                write_body = build_thread_body(pr, url, thread_data)
+                write_body = build_thread_body(pr, url, thread_data, annotation=annotation)
                 write_kind = 'body_thread'
             else:
-                write_body, write_kind = build_single_body(pr, url, thread_marker(1))
+                write_body, write_kind = build_single_body(pr, url, thread_marker(1), annotation=annotation)
         elif status == 'no_article':
             write_body = build_tombstone_body(url)
             write_kind = 'body_tombstone'
@@ -478,7 +541,7 @@ for note_id, note in todo.items():
                 counts['failed'] += 1
         elif have_thread and thread_size > 1 and status == 'ok':
             # Body already exists — Tier 2 found a thread. Rebuild as thread.
-            write_body = build_thread_body(pr, url, thread_data)
+            write_body = build_thread_body(pr, url, thread_data, annotation=annotation)
             write_kind = 'body_thread_enrich'
         elif status == 'ok':
             # Single tweet OR thread fetch returned 1 tweet. Stamp count=1 on existing body.
@@ -622,7 +685,7 @@ print(f'Done: {len(TAG_ASSIGNMENTS)} notes tagged')
 
 ---
 
-**Final report**: counts per category — `body`, `body_thread`, `body_thread_enrich`, `body_link_only`, `body_tombstone`, `thread_marker_only`, `thread_auth_needed`, `image`, `thread_image`, `inbox_tag`, `extra_tags`. Plus `no_article`, `no_photo_available`, `skipped_no_data`, `failed`. If `thread_auth_needed > 0`, surface the cookie-refresh hint:
+**Final report**: counts per category — `body`, `body_thread`, `body_thread_enrich`, `body_link_only`, `body_tombstone`, `thread_marker_only`, `thread_auth_needed`, `image` (covers both embedded photos and Tier 3 screenshots — same attachment slot), `thread_image`, `inbox_tag`, `extra_tags`. Plus `no_article`, `no_photo_available`, `skipped_no_data`, `failed`. If `thread_auth_needed > 0`, surface the cookie-refresh hint:
 
 > `~/.dotfiles/agents/claude/tools/refresh-x-cookies.sh`
 
