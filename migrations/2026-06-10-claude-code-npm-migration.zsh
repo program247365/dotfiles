@@ -8,10 +8,17 @@ set -e
 
 echo "Migrating Claude Code: brew cask -> mise npm backend..."
 
-# 1. Remove the Homebrew cask if present
-if brew list --cask claude-code &>/dev/null; then
-  echo "Uninstalling brew cask claude-code..."
-  brew uninstall --cask claude-code
+# 1. Remove the Homebrew cask if present (cask may be named "claude-code" or "claude-code@latest")
+_cask_name=""
+if brew list --cask claude-code@latest &>/dev/null; then
+  _cask_name="claude-code@latest"
+elif brew list --cask claude-code &>/dev/null; then
+  _cask_name="claude-code"
+fi
+
+if [[ -n "$_cask_name" ]]; then
+  echo "Uninstalling brew cask ${_cask_name}..."
+  brew uninstall --cask "$_cask_name"
 else
   echo "✓ brew cask claude-code not installed"
 fi
@@ -35,7 +42,7 @@ fi
 echo ""
 echo "Verifying..."
 
-if brew list --cask claude-code &>/dev/null; then
+if brew list --cask claude-code@latest &>/dev/null || brew list --cask claude-code &>/dev/null; then
   echo "✗ brew cask claude-code is still installed" >&2
   exit 1
 fi
