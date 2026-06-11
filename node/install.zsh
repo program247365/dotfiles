@@ -6,6 +6,8 @@ echo "Setting global Node.js version via mise..."
 mise use --global node@24
 
 echo "Installing global Node.js tools..."
+# Claude Code via mise's npm backend so it survives per-project node version switches
+mise use --global 'npm:@anthropic-ai/claude-code'
 npm install -g dev-browser
 if [ ! -d "$HOME/.dev-browser/node_modules" ]; then
   dev-browser install

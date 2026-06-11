@@ -49,7 +49,7 @@ function claude() {
   local project prev_auto_title
   project="$(basename "$PWD")"
 
-  # Auto-update via brew (check at most once per hour)
+  # Auto-update via mise (check at most once per hour)
   if [[ "$1" != "--help" && "$1" != "-h" && "$1" != "--version" ]]; then
     local cache_file="$HOME/.claude/.update_check"
     local now=$(date +%s)
@@ -58,10 +58,13 @@ function claude() {
 
     if (( now - last_check >= 3600 )); then
       echo "$now" > "$cache_file"
-      if HOMEBREW_NO_AUTO_UPDATE=1 brew outdated --formula | grep -q '^claude-code$'; then
+      # mise outdated --json prints {} when current, a populated object when outdated
+      local outdated_json
+      outdated_json=$(mise outdated --json 'npm:@anthropic-ai/claude-code' 2>/dev/null)
+      if [[ -n "$outdated_json" && "$outdated_json" != "{}" ]]; then
         local cur_ver
         cur_ver=$(command claude --version 2>/dev/null | head -1)
-        HOMEBREW_NO_AUTO_UPDATE=1 brew upgrade claude-code
+        mise upgrade 'npm:@anthropic-ai/claude-code'
         local new_ver semver release_url
         new_ver=$(command claude --version 2>/dev/null | head -1)
         semver=$(echo "$new_ver" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
