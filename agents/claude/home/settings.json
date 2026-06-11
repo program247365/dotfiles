@@ -25,11 +25,12 @@
       "Bash(gh pr diff:*)",
       "Bash(dev-browser *)"
     ],
+    "defaultMode": "auto",
     "additionalDirectories": [
       "/Users/kevin/.kevin/code/claude-code"
     ]
   },
-  "model": "opus[1m]",
+  "model": "claude-fable-5[1m]",
   "hooks": {
     "PostToolUse": [
       {
@@ -56,7 +57,6 @@
     "pr-review-toolkit@claude-plugins-official": true,
     "commit-commands@claude-plugins-official": true,
     "slack@claude-plugins-official": true,
-    "linear@claude-plugins-official": true,
     "agent-sdk-dev@claude-code-plugins": true,
     "code-review@claude-code-plugins": true,
     "commit-commands@claude-code-plugins": true,
@@ -70,13 +70,11 @@
     "ralph-wiggum@claude-code-plugins": true,
     "security-guidance@claude-code-plugins": true,
     "compound-engineering@compound-engineering-plugin": true,
-    "vercel-plugin@vercel-vercel-plugin": true
-  },
-  "mcpServers": {
-    "msgvault": {
-      "command": "msgvault",
-      "args": ["mcp"]
-    }
+    "swift-lsp@claude-plugins-official": true,
+    "skill-creator@claude-plugins-official": true,
+    "posthog@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": true,
+    "warp@claude-code-warp": true
   },
   "extraKnownMarketplaces": {
     "compound-engineering-plugin": {
@@ -90,7 +88,25 @@
         "source": "directory",
         "path": "/Users/kevin/.cache/plugins/github.com-vercel-vercel-plugin"
       }
+    },
+    "claude-code-warp": {
+      "source": {
+        "source": "github",
+        "repo": "warpdotdev/claude-code-warp"
+      }
     }
   },
-  "skipDangerousModePermissionPrompt": true
+  "skipDangerousModePermissionPrompt": true,
+  "skipWorkflowUsageWarning": true,
+  "theme": "dark",
+  "editorMode": "vim",
+  "skipAutoPermissionPrompt": true,
+  "mcpServers": {
+    "msgvault": {
+      "command": "msgvault",
+      "args": [
+        "mcp"
+      ]
+    }
+  }
 }
