@@ -27,7 +27,6 @@
       "WebFetch(domain:randsinrepose.com)",
       "Skill(update-config)",
       "WebFetch(domain:docs.warp.dev)",
-      "WebFetch(domain:www.msgvault.io)",
       "WebFetch(domain:x.com)",
       "WebFetch(domain:nitter.net)",
       "WebFetch(domain:xcancel.com)",
@@ -37,21 +36,14 @@
       "Bash(mise ls:*)",
       "Bash(xargs ls:*)",
       "Bash(dev-browser:*)",
-      "WebFetch(domain:issues.chromium.org)",
-      "WebFetch(domain:developer.chrome.com)",
-      "WebFetch(domain:lazyagent.dev)",
       "Bash(nvim --version)",
       "Bash(brew list:*)",
       "mcp__linear__list_projects",
       "mcp__linear__list_issue_labels",
       "mcp__linear__research",
-      "Read(//Users/kevin/.kevin/personal-code/**)",
       "Read(//Users/kevin/**)",
       "Bash(sqlite3:*)",
       "Bash(xcodegen generate)",
-      "Bash(xcodebuild -project TellMeMore.xcodeproj -scheme TellMeMore -destination 'generic/platform=iOS Simulator' -skipPackagePluginValidation build)",
-      "Bash(xcodebuild -project TellMeMore.xcodeproj -scheme TellMeMore -destination 'platform=iOS Simulator,name=iPhone 16' build)",
-      "Bash(xcodebuild -project TellMeMore.xcodeproj -scheme TellMeMore -destination 'platform=iOS Simulator,id=E531C4E5-2412-4FA9-8C9B-FA5C1564CB8F' build)",
       "Bash(xcrun simctl list *)",
       "Bash(xcrun simctl boot *)",
       "Bash(xcrun simctl shutdown *)",
@@ -59,14 +51,14 @@
       "Bash(xcrun simctl launch *)",
       "Bash(xcrun simctl terminate *)",
       "Bash(xcrun simctl io booted screenshot *)",
-      "Bash(cliclick m:1107,913)",
       "Bash(remindctl show *)",
       "Bash(remindctl complete *)",
-      "Bash(remindctl delete *)",
       "Skill(review-todos)"
     ],
     "deny": [],
-    "ask": []
+    "ask": [
+      "Bash(remindctl delete *)"
+    ]
   },
   "disabledMcpjsonServers": [
     "figma"
