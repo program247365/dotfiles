@@ -156,8 +156,7 @@ adopt_and_link \
   "$CLAUDE_DIR/statusline.sh" \
   "~/.claude/statusline.sh"
 
-# Project-scoped: only available in the dotfiles repo
-# Add project-only skills to agents/claude/project/skills/
+# Project-scoped config: settings.local.json, hooks, etc. (only active in dotfiles repo)
 adopt_and_link \
   "$DOTFILES_CLAUDE/project" \
   "$DOTFILES_ROOT/.claude" \
