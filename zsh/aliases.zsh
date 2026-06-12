@@ -5,6 +5,7 @@ alias flushdns="sudo dscacheutil -flushcache;sudo killall -HUP mDNSResponder"
 alias ls='eza'
 alias ll='eza -lha'
 alias lr='eza -lha --tree'
+alias tree='eza --tree'
 # Pipe my public key to my clipboard.
 alias pubkey="more ~/.ssh/id_rsa.pub | pbcopy | echo '=> Public key copied to pasteboard.'"
 alias vim="nvim"
