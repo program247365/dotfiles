@@ -47,8 +47,12 @@ alias q='qmd'
 # Wrap claude to auto-update and auto-rename the Warp tab while it's running.
 # In Warp, disable auto-title so OSC 0 sticks across split panes.
 function claude() {
-  local project prev_auto_title
+  local project prev_auto_title claude_bin
   project="$(basename "$PWD")"
+  claude_bin="$(mise which 'npm:@anthropic-ai/claude-code' 2>/dev/null)"
+  if [[ -z "$claude_bin" || ! -x "$claude_bin" ]]; then
+    claude_bin="$(whence -p claude)"
+  fi
 
   # Auto-update via mise (check at most once per hour)
   if [[ "$1" != "--help" && "$1" != "-h" && "$1" != "--version" ]]; then
@@ -64,10 +68,12 @@ function claude() {
       outdated_json=$(mise outdated --json 'npm:@anthropic-ai/claude-code' 2>/dev/null)
       if [[ -n "$outdated_json" && "$outdated_json" != "{}" ]]; then
         local cur_ver
-        cur_ver=$(command claude --version 2>/dev/null | head -1)
+        cur_ver=$("$claude_bin" --version 2>/dev/null | head -1)
         mise upgrade 'npm:@anthropic-ai/claude-code'
+        rehash
+        claude_bin="$(mise which 'npm:@anthropic-ai/claude-code' 2>/dev/null)"
         local new_ver semver release_url
-        new_ver=$(command claude --version 2>/dev/null | head -1)
+        new_ver=$("$claude_bin" --version 2>/dev/null | head -1)
         semver=$(echo "$new_ver" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
         release_url="https://github.com/anthropics/claude-code/releases/tag/v${semver}"
         echo "Updated $cur_ver → $new_ver — $release_url"
@@ -81,7 +87,7 @@ function claude() {
   fi
 
   printf "\033]0;Claude | %s\007" "$project"
-  command claude "$@"
+  "$claude_bin" "$@"
   printf "\033]0;%s\007" "$project"
 
   if [[ "$TERM_PROGRAM" == "WarpTerminal" ]]; then

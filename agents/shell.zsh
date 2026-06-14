@@ -3,7 +3,7 @@
 
 alias c="claude"
 
-# Claude Code Upgrade - upgrades claude-code via brew and shows version
+# Claude Code Upgrade - upgrades claude-code via mise's npm backend and shows version
 # Usage: ccu [-n|--notes] to open release notes after upgrade
 ccu() {
   local show_notes=false
@@ -18,7 +18,7 @@ ccu() {
       -h|--help)
         echo "Usage: ccu [-n|--notes] [-h|--help]"
         echo ""
-        echo "Upgrade Claude Code via Homebrew"
+        echo "Upgrade Claude Code via mise"
         echo ""
         echo "Options:"
         echo "  -n, --notes  Open release notes in browser after upgrade"
@@ -33,13 +33,14 @@ ccu() {
     esac
   done
 
-  echo "Upgrading Claude Code..."
+  echo "Upgrading Claude Code via mise..."
   echo ""
 
-  brew upgrade claude-code
+  mise upgrade 'npm:@anthropic-ai/claude-code'
+  rehash
 
   echo ""
-  local version=$(brew info claude-code --json=v2 2>/dev/null | grep -o '"installed": "[^"]*"' | head -1 | cut -d'"' -f4)
+  local version=$(mise exec 'npm:@anthropic-ai/claude-code' -- claude --version 2>/dev/null | head -1)
   echo "Installed version: $version"
 
   if $show_notes; then
