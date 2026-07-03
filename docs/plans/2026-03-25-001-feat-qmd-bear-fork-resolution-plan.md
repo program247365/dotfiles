@@ -1,9 +1,16 @@
 ---
 title: "feat: Resolve qmd fork dependency for Bear Notes integration"
 type: feat
-status: completed
+status: superseded
 date: 2026-03-25
 ---
+
+> **Superseded 2026-07-03.** The rebase-the-fork approach was never executed
+> (fork main stayed on v1.1.0; upstream reached v2.5.3, 302 commits ahead).
+> Replaced by a fork-free design: `tools/qmd/bear-sync.ts` mirrors Bear notes
+> to `~/.local/share/qmd-bear` via `bearcli` (incremental, content-hash diff),
+> and stock upstream qmd indexes it as a filesystem collection whose
+> `update` command runs the sync. See `tools/qmd/install.sh`.
 
 # Resolve qmd Fork Dependency for Bear Notes Integration
 
