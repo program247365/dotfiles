@@ -2,16 +2,19 @@
 #
 # QMD — local hybrid search engine for notes, docs, and transcripts
 #
-# Upstream (tobi/qmd) has no Bear Notes support (PR #301 was closed).
-# Installs from the fork which adds a source plugin for Bear. If upstream
-# ever adopts source plugins, auto-switches to `npm install -g @tobilu/qmd`.
+# Installs upstream @tobilu/qmd from npm (no fork — PR #301 was closed).
+# Bear notes are mirrored into ~/.local/share/qmd-bear by bear-sync.ts
+# (incremental, via bearcli) and indexed as a plain filesystem collection.
+# The collection's update command runs the sync, so `qmd update` always
+# pulls fresh notes first.
 
 set -e
 
 UPSTREAM_PKG="@tobilu/qmd"
-FORK_REPO="https://github.com/program247365/qmd.git"
-FORK_DIR="$HOME/.kevin/tools/qmd"
+OLD_FORK_DIR="$HOME/.kevin/tools/qmd"
 BIN_DIR="$HOME/.kevin/bin"
+MIRROR_DIR="$HOME/.local/share/qmd-bear"
+SYNC_SCRIPT="$HOME/.dotfiles/tools/qmd/bear-sync.ts"
 
 echo "Setting up QMD..."
 
@@ -30,6 +33,18 @@ if [ "$NODE_MAJOR" -lt 22 ]; then
   exit 1
 fi
 
+# bun runs bear-sync.ts
+if ! command -v bun >/dev/null 2>&1; then
+  echo "  Error: bun not found. Run: brew install oven-sh/bun/bun"
+  exit 1
+fi
+
+# bearcli reads Bear notes (ships with Bear 2.8+)
+if ! command -v bearcli >/dev/null 2>&1; then
+  echo "  Error: bearcli not found. Run: ~/.dotfiles/tools/bearcli/install.sh"
+  exit 1
+fi
+
 # brew sqlite (needed for FTS5 / sqlite-vec extensions)
 if ! brew list sqlite >/dev/null 2>&1; then
   echo "  Installing sqlite via brew..."
@@ -38,69 +53,28 @@ fi
 
 # --- Install ---
 
+echo "  Installing from npm ($UPSTREAM_PKG)..."
+npm install -g "$UPSTREAM_PKG"
+
+if [ -d "$OLD_FORK_DIR" ]; then
+  echo "  Removing old fork clone (replaced by upstream npm package)..."
+  rm -rf "$OLD_FORK_DIR"
+fi
+
 mkdir -p "$BIN_DIR"
+ln -sf "$(npm prefix -g)/bin/qmd" "$BIN_DIR/qmd"
+echo "  Linked $BIN_DIR/qmd -> $(npm prefix -g)/bin/qmd"
 
-# Check if upstream PR merged (src/sources/ directory exists on tobi/qmd main)
-UPSTREAM_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-  "https://api.github.com/repos/tobi/qmd/contents/src/sources" 2>/dev/null || echo "000")
+# --- Bear mirror + collection ---
 
-if [ "$UPSTREAM_STATUS" = "200" ]; then
-  # Upstream merged — use published npm package (has prebuilt binaries)
-  echo "  Installing from npm ($UPSTREAM_PKG)..."
-  npm install -g "$UPSTREAM_PKG"
+echo "Syncing Bear notes to $MIRROR_DIR..."
+bun "$SYNC_SCRIPT"
 
-  # Clean up fork clone if it exists
-  if [ -d "$FORK_DIR" ]; then
-    echo "  Removing fork clone (no longer needed)..."
-    rm -rf "$FORK_DIR"
-  fi
-
-  QMD_EXEC="$(npm prefix -g)/bin/qmd"
-else
-  # Fork — clone + npm install (README dev install path)
-  echo "  Upstream lacks Bear support — installing from fork..."
-
-  if [ -d "$FORK_DIR/.git" ]; then
-    echo "  Updating existing clone..."
-    cd "$FORK_DIR"
-    git stash
-    git pull --ff-only
-    git stash pop 2>/dev/null || true
-  else
-    echo "  Cloning fork..."
-    mkdir -p "$(dirname "$FORK_DIR")"
-    git clone "$FORK_REPO" "$FORK_DIR"
-    cd "$FORK_DIR"
-  fi
-
-  npm install
-
-  echo "  Building..."
-  QMD_EXEC="$FORK_DIR/dist/cli/qmd.js"
-  npm run build
-  chmod +x "$QMD_EXEC"
-fi
-
-# Symlink to ~/.kevin/bin
-if [ -f "$QMD_EXEC" ]; then
-  ln -sf "$QMD_EXEC" "$BIN_DIR/qmd"
-  echo "  Linked $BIN_DIR/qmd -> $QMD_EXEC"
-else
-  echo "  Error: qmd binary not found at $QMD_EXEC"
-  exit 1
-fi
-
-# --- Collections & embeddings ---
-
-echo "Setting up Bear notes collection..."
-
-# Add collection only if not already registered
-if ! qmd collection list 2>/dev/null | grep -q "^bear"; then
-  qmd collection add --type bear --name bear
-  echo "  Registered Bear collection"
-else
-  echo "  Bear collection already registered, skipping"
-fi
+# Old fork installs registered a `type: bear` collection with no path;
+# stock qmd can't use it. Re-register against the mirror directory.
+qmd collection remove bear >/dev/null 2>&1 || true
+qmd collection add "$MIRROR_DIR" --name bear --mask '**/*.md'
+qmd collection update-cmd bear "bun $SYNC_SCRIPT"
 
 echo "Indexing Bear notes..."
 qmd update

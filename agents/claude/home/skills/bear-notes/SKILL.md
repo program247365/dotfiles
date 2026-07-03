@@ -129,7 +129,7 @@ QMD returns docids (`#abc123`), scores, titles, and snippets. The `path` field i
 **Use `bearcli search` directly when:**
 - You need Bear's date/state operators (`@today`, `@last7days`, `@todo`, `@untagged`, `@images`)
 - You need exact-match tag filtering (`!#tag`, `#*/subtag`)
-- The QMD index is stale (tell user to run `qmd update`)
+- The QMD index is stale (tell user to run `qmd update` — it mirrors Bear notes via bear-sync first, then re-indexes)
 
 **Always use bearcli for mutations** (`create`, `edit`, `write`, `append`, `tags`, `attachments`, `trash`, `open`).
 
