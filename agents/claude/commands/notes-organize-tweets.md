@@ -357,12 +357,17 @@ def run(*args, **kwargs):
         return subprocess.run(args, check=False, capture_output=True, **kwargs)
     return subprocess.run(args, check=False, capture_output=True, text=True, **kwargs)
 
+def overwrite(note_id, body):
+    # stdin path — `--content` interprets \n/\t escapes and would mangle tweet text
+    return subprocess.run(['bearcli', 'overwrite', note_id],
+                          input=body, check=False, capture_output=True, text=True)
+
 def get_content(note_id):
     return run('bearcli', 'cat', note_id).stdout
 
 def get_topical_tags(note_id):
     """Tags currently on the note that aren't part of the inbox/* hierarchy.
-    Captured before any body-rewrite so we can re-add them after `bearcli write`
+    Captured before any body-rewrite so we can re-add them after `bearcli overwrite`
     (which sets tags from the body markdown alone, dropping anything not present)."""
     r = run('bearcli', 'tags', 'list', note_id, '--format', 'json')
     if r.returncode != 0: return []
@@ -484,7 +489,7 @@ for note_id, note in todo.items():
     annotation = note.get('annotation')
 
     # Capture topical tags BEFORE any body rewrite so we can re-add them after.
-    # bearcli write reads tags from the body markdown, so non-inbox tags would be lost.
+    # bearcli overwrite reads tags from the body markdown, so non-inbox tags would be lost.
     preserved_topical = get_topical_tags(note_id)
 
     # 1. Inbox tag
@@ -533,7 +538,7 @@ for note_id, note in todo.items():
             # Remove any existing thread:* marker first, then append
             cleaned = re.sub(r'\n*<!--\s*thread:[^>]+-->\s*\n*$', '\n', cur)
             new_body = cleaned.rstrip('\n') + '\n\n' + stamp + '\n'
-            r = run('bearcli', 'write', note_id, '--content', new_body)
+            r = overwrite(note_id, new_body)
             if r.returncode == 0:
                 counts['thread_auth_needed'] += 1
             else:
@@ -548,7 +553,7 @@ for note_id, note in todo.items():
             cur = get_content(note_id)
             cleaned = re.sub(r'\n*<!--\s*thread:[^>]+-->\s*\n*$', '\n', cur)
             new_body = cleaned.rstrip('\n') + '\n\n' + thread_marker(1) + '\n'
-            r = run('bearcli', 'write', note_id, '--content', new_body)
+            r = overwrite(note_id, new_body)
             if r.returncode == 0:
                 counts['thread_marker_only'] += 1
             else:
@@ -556,7 +561,7 @@ for note_id, note in todo.items():
                 counts['failed'] += 1
 
     if write_body is not None:
-        r = run('bearcli', 'write', note_id, '--content', write_body)
+        r = overwrite(note_id, write_body)
         if r.returncode == 0:
             counts[write_kind] += 1
             # Re-add any topical tags Bear stripped during the rewrite.
@@ -613,7 +618,7 @@ for note_id, note in todo.items():
         cur = get_content(note_id)
         deduped = re.sub(r'\n!\[\]\(tweet_\d+\.png\)\s*\n', '\n', cur)
         if deduped != cur:
-            run('bearcli', 'write', note_id, '--content', deduped)
+            overwrite(note_id, deduped)
 
     print(f'  applied id={note_id} needs={needs} status={status} thread_size={thread_size}')
 
