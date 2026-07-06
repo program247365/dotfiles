@@ -65,15 +65,15 @@ If the body has a `# heading` matching the title, Bear strips the duplicate auto
 ```bash
 bearcli append NOTE_ID --content "text to append"
 bearcli append NOTE_ID --content "text" --position beginning   # prepend (after title/tags)
-bearcli edit NOTE_ID --at "old text" --replace "new text"      # surgical, exact match
-bearcli edit NOTE_ID --at "## Section" --insert "\nNew line"   # insert after match
-bearcli edit NOTE_ID --at "cat" --replace "dog" --all --word   # whole-word, all matches
-printf '%s' "replacement body" | bearcli write NOTE_ID         # overwrite entire content
+bearcli edit NOTE_ID --find "old text" --replace "new text"          # surgical, exact match
+bearcli edit NOTE_ID --find "## Section" --insert-after "\nNew line" # insert after match
+bearcli edit NOTE_ID --find "cat" --replace "dog" --all --word       # whole-word, all matches
+printf '%s' "replacement body" | bearcli overwrite NOTE_ID           # overwrite entire content
 ```
 
-`bearcli write` reads from stdin when `--content` is omitted. `bearcli write` accepts `--base <hash>` (from `bearcli show --fields hash`) for optimistic concurrency — pass it when the note may have been edited concurrently.
+`bearcli overwrite` reads from stdin when `--content` is omitted (prefer stdin — `--content` interprets `\n`/`\t` escapes). It accepts `--base <hash>` (from `bearcli show --fields hash`) for optimistic concurrency — pass it when the note may have been edited concurrently. Overwrites that drop an existing attachment reference are rejected unless `--force` is passed.
 
-> **Editor flow:** for an interactive edit, do `bearcli cat ID > /tmp/note.md && $EDITOR /tmp/note.md && bearcli write ID < /tmp/note.md`.
+> **Editor flow:** for an interactive edit, do `bearcli cat ID > /tmp/note.md && $EDITOR /tmp/note.md && bearcli overwrite ID < /tmp/note.md`.
 
 ### Tags
 
@@ -154,8 +154,8 @@ Use this when the user asks to enrich, process, or title their saved tweet notes
 2. **Playwright** fetch tweet content + screenshot for notes needing `image` or `body`.
 3. **Mutate** via `bearcli`:
    - Image: `bearcli attachments add ID --filename tweet_screenshot.png < /tmp/tweet_<id>.png`
-   - Structured body: `bearcli write ID --content "..."` (Bear derives the title from the first heading)
-   - Image markdown line: `bearcli edit ID --at "<anchor>" --insert "\n![tweet_screenshot.png](tweet_screenshot.png)"`
+   - Structured body: `printf '%s' "..." | bearcli overwrite ID` (Bear derives the title from the first heading)
+   - Image markdown line: `bearcli edit ID --find "<anchor>" --insert-after "\n![tweet_screenshot.png](tweet_screenshot.png)"`
    - Inbox tag: `bearcli tags add ID inbox/saved-tweets`
    - Extra tags: `bearcli tags add ID #learn/something`
 
@@ -167,7 +167,7 @@ The whole flow is one line:
 
 ```bash
 bearcli attachments add "$NOTE_ID" --filename screenshot.png < /tmp/screenshot.png
-bearcli edit "$NOTE_ID" --at "<anchor line>" --insert "\n![screenshot.png](screenshot.png)"
+bearcli edit "$NOTE_ID" --find "<anchor line>" --insert-after "\n![screenshot.png](screenshot.png)"
 ```
 
 Or, for a fresh note created with the image at the bottom:
@@ -185,7 +185,7 @@ Bear renders the image immediately — no app restart. The attachment is stored 
 - **bearcli IDs are Bear's `ZUNIQUEIDENTIFIER`** — interchangeable with the Bear URL scheme: `bear://x-callback-url/open-note?id=<bearcli_id>`. Prefer `bearcli open ID` over the URL scheme.
 - **No auth, no cache, no sync.** `bearcli` reads/writes Bear's running database in place. Drop any retry-on-rate-limit logic — there are no rate limits.
 - **No Bear restart needed for any operation**, including attachments and tag changes. This was the single biggest pain point of the previous `bcli` (CloudKit) workflow.
-- **Optimistic concurrency:** for risky writes, capture `hash` from `bearcli show --fields hash` and pass `--base <hash>` to `bearcli write` — the write is rejected if the note changed since the read.
+- **Optimistic concurrency:** for risky writes, capture `hash` from `bearcli show --fields hash` and pass `--base <hash>` to `bearcli overwrite` — the write is rejected if the note changed since the read.
 - **Tags can be hierarchical:** `work/projects/2025`. `bearcli tags add ID a b/c` adds both, leaving the body untouched.
 - **Wiki links syntax (in note body):** `[[note title]]`, `[[note title|alias]]`. `@wikilinks` / `@backlinks` in search find them.
 - **Locked notes** return metadata via `bearcli show` but reject `--fields content`.
