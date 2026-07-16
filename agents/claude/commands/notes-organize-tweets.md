@@ -5,7 +5,7 @@ The workflow is fully idempotent — run it any time to catch up on anything tha
 > **Three-tier fetching strategy:**
 >
 > 1. **Tier 1 (always):** `cdn.syndication.twimg.com/tweet-result?id=<id>` — X's own embed API. Returns full JSON for any single tweet (text, author, photos, video, conversation_count). No login, no bot detection. The `token` parameter isn't validated.
-> 2. **Tier 2 (thread enrichment, opt-in):** `@the-convocation/twitter-scraper` Node lib calling X's authenticated GraphQL via the user's exported cookies. Used only to fetch self-thread continuations when a tweet has `conversation_count > 0`. Skipped silently if cookies are missing or stale.
+> 2. **Tier 2 (thread enrichment, opt-in):** `@the-convocation/twitter-scraper` Node lib calling X's authenticated GraphQL via the user's exported cookies. Used only to fetch self-thread continuations when a tweet has `conversation_count > 0`. Skipped silently if cookies are missing or stale. A first-pass single body is stamped `thread:unchecked`; a later run re-flags it for Tier 2 and upgrades it to a thread (or settles it at `thread:complete count=1`). Set `FORCE_THREAD_RECHECK=1` to re-open already-settled notes for backfill.
 > 3. **Tier 3 (screenshot fallback):** Playwright loads `platform.twitter.com/embed/Tweet.html?id=<id>` and screenshots the rendered tweet card. Runs only when Tier 1 returned no embedded photo, so text-only and link-card tweets still get a visual attachment. No auth required.
 >
 > Cookies live at `~/.config/notes-organize-tweets/x-cookies.json` (gitignored). Run `~/.dotfiles/agents/claude/tools/refresh-x-cookies.sh` for setup instructions.
@@ -19,8 +19,13 @@ Two `bearcli search` calls cover the audit surface: a text search for `x.com` (c
 Tweet-save notes are recognized by **title prefix** — Bear auto-derives the title from the first content line, so a title starting with `https://x.com/.../status/...` is a high-confidence signal regardless of body shape. This catches: bare URLs, URL + user annotation (`* note: …`), markdown-link-wrapped `[url](url)`, and notes where the user typed `#inbox/saved-tweets` inline but Bear failed to promote it to a structured tag. Any text following the URL is captured as `annotation` and rendered into a `**My note**` block by Step B.
 
 ```python
-import json, re, subprocess
+import json, os, re, subprocess
 from datetime import date, timedelta
+
+# Set FORCE_THREAD_RECHECK=1 to re-flag already-settled (thread:complete) notes so a re-run
+# re-fetches them via Tier 2. Use to backfill threads saved before thread:unchecked tracking
+# existed, or to pick up self-replies added since a note was last enriched.
+FORCE_THREAD_RECHECK = os.environ.get('FORCE_THREAD_RECHECK') == '1'
 
 def _search(query):
     raw = subprocess.check_output([
@@ -82,13 +87,19 @@ for n in notes:
     )
 
     # Parse thread markers — they're the idempotency anchor.
-    #   <!-- thread:complete count=N fetched=YYYY-MM-DD -->
-    #   <!-- thread:auth-needed fetched=YYYY-MM-DD -->
+    #   <!-- thread:complete count=N fetched=YYYY-MM-DD -->   settled: Tier 2 has run, trust it
+    #   <!-- thread:unchecked fetched=YYYY-MM-DD -->          provisional: text captured, Tier 2 pending
+    #   <!-- thread:auth-needed fetched=YYYY-MM-DD -->        Tier 2 wanted cookies, none available
     thread_complete_count = None
     thread_auth_needed_date = None
+    thread_unchecked = False
     m = re.search(r'<!--\s*thread:complete\s+count=(\d+)\s+fetched=(\d{4}-\d{2}-\d{2})', text)
     if m:
         thread_complete_count = int(m.group(1))
+    elif re.search(r'<!--\s*thread:unchecked\b', text):
+        # First-pass single body: text is captured, but Tier 2 hasn't looked for a
+        # self-thread continuation yet. Treated as "still needs a thread check" below.
+        thread_unchecked = True
     else:
         m2 = re.search(r'<!--\s*thread:auth-needed\s+fetched=(\d{4}-\d{2}-\d{2})', text)
         if m2:
@@ -112,14 +123,11 @@ for n in notes:
 
     # Thread states — only when the body is structured. Tombstones and link-only never thread-check.
     if has_body and not is_tombstone and not is_link_only and thread_auth_needed_date is None:
-        if thread_complete_count is None:
-            # We've never tried thread-checking this note. Tier 1 will set conversation_count;
-            # Step A2 decides whether to enrich. Mark intent here.
+        # thread_complete_count is None for both freshly-built bodies marked thread:unchecked
+        # and legacy bodies with no marker — in either case Tier 2 hasn't run, so check.
+        # FORCE_THREAD_RECHECK re-opens already-settled (count=N) notes for backfill.
+        if thread_complete_count is None or FORCE_THREAD_RECHECK:
             needs.append('thread_check')
-        # thread_grew is detected mid-Step-A2 (we re-fetch and compare to count). The audit
-        # only flags it when the live thread is known to be larger; we can't know that without
-        # an API call, so we re-flag every thread_complete note IF the user passes
-        # FORCE_THREAD_RECHECK=1 (rare). Default behaviour: trust the marker.
 
     if needs:
         todo.append({
@@ -230,6 +238,13 @@ from datetime import date
 
 todo = {n['id']: n for n in json.load(open('/tmp/tweet_todo.json'))}
 syn = {r['id']: r for r in json.load(open('/tmp/tweet_syndication.json'))}
+
+# Clear any stale thread-error manifest from a prior run. The fetcher rewrites it when it runs;
+# clearing here guarantees a no-candidate run doesn't leave last run's errors for Step B to read.
+try:
+    os.remove('/tmp/tweet_thread_errors.json')
+except FileNotFoundError:
+    pass
 
 candidates = []
 for note_id, n in todo.items():
@@ -352,6 +367,14 @@ try:
 except FileNotFoundError:
     pass
 
+# Notes whose Tier 2 fetch hit a transient error (e.g. 503). These must NOT be settled to
+# count=1 — a transient failure is not evidence the tweet has no self-thread.
+thread_errors = set()
+try:
+    thread_errors = set(json.load(open('/tmp/tweet_thread_errors.json'))['note_ids'])
+except FileNotFoundError:
+    pass
+
 def run(*args, **kwargs):
     if isinstance(kwargs.get('input'), (bytes, bytearray)):
         return subprocess.run(args, check=False, capture_output=True, **kwargs)
@@ -396,7 +419,17 @@ def thread_marker(count):
 def auth_needed_marker(date_iso):
     return f'<!-- thread:auth-needed fetched={date_iso} -->'
 
-def build_single_body(syn_entry, url, count_marker=thread_marker(1), annotation=None):
+def unchecked_marker():
+    # Provisional marker for a first-pass single-tweet body: text is captured, but Tier 2
+    # has not yet checked for a self-thread. A later run re-flags this note thread_check.
+    return f'<!-- thread:unchecked fetched={today_iso} -->'
+
+def build_single_body(syn_entry, url, count_marker=None, annotation=None):
+    # count_marker is the trailing marker for a real-text single tweet. First-pass callers
+    # pass unchecked_marker() so a later run will thread-check it. Link-only bodies ignore it
+    # and stamp count=1, since a link card never has a self-thread to fetch.
+    if count_marker is None:
+        count_marker = unchecked_marker()
     tweet_text = clean_text(syn_entry.get('tweetText') or '')
     author = (syn_entry.get('author') or '').strip()
     handle = (syn_entry.get('handle') or '').strip()
@@ -432,12 +465,14 @@ def build_single_body(syn_entry, url, count_marker=thread_marker(1), annotation=
     if annotation:
         lines += ['**My note**:', '', blockquote(annotation), '']
 
+    # Link-only bodies have no thread to fetch → settle them immediately at count=1.
+    trailing_marker = thread_marker(1) if kind == 'body_link_only' else count_marker
     lines += [
         f'**@{handle}** · [View on X]({url})',
         '',
         '#inbox/saved-tweets',
         '',
-        count_marker,
+        trailing_marker,
     ]
     return '\n'.join(lines) + '\n', kind
 
@@ -503,7 +538,8 @@ for note_id, note in todo.items():
     # Decide which body to write. Order of precedence:
     #   - thread_check + we have a thread fetch with N>1 → thread body
     #   - thread_check + auth needed → leave body but stamp auth-needed marker
-    #   - body in needs + status ok → single/link-only body with count=1 marker
+    #   - body in needs + status ok → single body stamped thread:unchecked (real text)
+    #                                   or count=1 (link-only); a later run thread-checks it
     #   - body in needs + status no_article → tombstone body
     #   - thread_check only (no body needs) → just stamp count marker
 
@@ -524,14 +560,21 @@ for note_id, note in todo.items():
                 write_body = build_thread_body(pr, url, thread_data, annotation=annotation)
                 write_kind = 'body_thread'
             else:
-                write_body, write_kind = build_single_body(pr, url, thread_marker(1), annotation=annotation)
+                # First-pass single body: stamp thread:unchecked so a re-run thread-checks it
+                # (build_single_body downgrades link-only bodies to count=1 internally).
+                write_body, write_kind = build_single_body(pr, url, unchecked_marker(), annotation=annotation)
         elif status == 'no_article':
             write_body = build_tombstone_body(url)
             write_kind = 'body_tombstone'
         else:
             counts['skipped_no_data'] += 1
     elif 'thread_check' in needs:
-        if note_id in auth_needed:
+        if note_id in thread_errors:
+            # Tier 2 hit a transient error (503/network). Leave the existing marker untouched —
+            # thread:unchecked for a first-pass body, or a prior count=N under FORCE — so a later
+            # run retries. Crucially, do NOT fall through to the count=1 settle below.
+            counts['thread_retry_pending'] += 1
+        elif note_id in auth_needed:
             # Stamp auth-needed marker without rewriting the body.
             cur = get_content(note_id)
             stamp = auth_needed_marker(auth_needed_date)
@@ -690,7 +733,7 @@ print(f'Done: {len(TAG_ASSIGNMENTS)} notes tagged')
 
 ---
 
-**Final report**: counts per category — `body`, `body_thread`, `body_thread_enrich`, `body_link_only`, `body_tombstone`, `thread_marker_only`, `thread_auth_needed`, `image` (covers both embedded photos and Tier 3 screenshots — same attachment slot), `thread_image`, `inbox_tag`, `extra_tags`. Plus `no_article`, `no_photo_available`, `skipped_no_data`, `failed`. If `thread_auth_needed > 0`, surface the cookie-refresh hint:
+**Final report**: counts per category — `body`, `body_thread`, `body_thread_enrich`, `body_link_only`, `body_tombstone`, `thread_marker_only`, `thread_auth_needed`, `thread_retry_pending` (Tier 2 hit a transient error — left unchecked for a later run), `image` (covers both embedded photos and Tier 3 screenshots — same attachment slot), `thread_image`, `inbox_tag`, `extra_tags`. Plus `no_article`, `no_photo_available`, `skipped_no_data`, `failed`. If `thread_auth_needed > 0`, surface the cookie-refresh hint:
 
 > `~/.dotfiles/agents/claude/tools/refresh-x-cookies.sh`
 
