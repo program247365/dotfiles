@@ -7,4 +7,4 @@
 - Use `kpr update <id> ...` to edit; ids are on the `id:` line of listings.
 - `kpr tags --json` lists top tags — check it before inventing new tags.
 - Do NOT run `kpr rm <id>` without explicit confirmation — deletion is immediate and permanent.
-- Full reference: ~/.kevin/code/keeper/cli/README.md. Config: ~/.config/kpr/config.json (never read or print the token).
+- Full reference: ~/.kevin/code/keeper-cli/README.md (repo: github.com/program247365/keeper-cli — the CLI lives there, not in the keeper web-app repo). Config: ~/.config/kpr/config.json (never read or print the token).
