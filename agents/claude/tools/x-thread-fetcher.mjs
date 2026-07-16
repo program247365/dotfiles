@@ -81,6 +81,9 @@ async function fetchThreads() {
 
   const scraper = await makeScraper();
   const summary = { ok: 0, single: 0, error: 0, total: batch.length };
+  // note_ids whose fetch was indeterminate (transient 503 / network error). The caller must
+  // NOT settle these to count=1 — they stay thread:unchecked for a later retry.
+  const errorIds = [];
 
   for (const item of batch) {
     const { note_id, head_id, author } = item;
@@ -132,6 +135,17 @@ async function fetchThreads() {
           console.error(`getTweet(${head_id}) fallback failed: ${e.message}`);
         }
       }
+
+      // Neither the conversation search nor the head fallback returned anything → the fetch
+      // was indeterminate (transient 503 / rate limit), NOT a confirmed single tweet. Signal
+      // an error and skip writing a misleading "single" file so the caller leaves it unchecked.
+      if (tweets.length === 0) {
+        summary.error++;
+        errorIds.push(note_id);
+        console.error(`err ${note_id}: no conversation tweets and head fetch failed (transient) — leaving unchecked`);
+        continue;
+      }
+
       tweets.sort((a, b) => BigInt(a.id) < BigInt(b.id) ? -1 : 1);
 
       // Filter to the actual self-reply chain. searchTweets("conversation_id:X from:Y")
@@ -172,9 +186,13 @@ async function fetchThreads() {
       }
     } catch (e) {
       summary.error++;
+      errorIds.push(note_id);
       console.error(`err ${note_id}: ${e.message}`);
     }
   }
+  // Always (re)write the manifest — empty list overwrites any stale one from a prior run, so
+  // the caller never mistakes last run's errors for this run's.
+  await fs.writeFile("/tmp/tweet_thread_errors.json", JSON.stringify({ note_ids: errorIds }, null, 2));
   console.log(`SUMMARY threads_fetched=${summary.ok} single_tweet=${summary.single} errors=${summary.error} total=${summary.total}`);
 }
 
