@@ -8,3 +8,4 @@ AGENTS.md
 .config/notes-organize-tweets/
 agents/claude/tools/node_modules/
 agents/claude/tools/package-lock.json
+agents/claude/project/scheduled_tasks.lock
