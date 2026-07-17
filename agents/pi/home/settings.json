@@ -10,6 +10,7 @@
     "apfel/apple-foundation-model"
   ],
   "quietStartup": false,
-  "lastChangelogVersion": "0.73.0",
-  "defaultThinkingLevel": "medium"
+  "lastChangelogVersion": "0.80.9",
+  "defaultThinkingLevel": "medium",
+  "theme": "dark"
 }
