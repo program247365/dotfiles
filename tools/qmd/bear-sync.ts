@@ -3,9 +3,9 @@
  * Mirror Bear notes into ~/.local/share/qmd-bear as {uuid}.md files for
  * qmd to index as a plain filesystem collection.
  *
- * Incremental: bearcli exposes a content hash per note, so only notes whose
- * hash changed since the last run are rewritten. Wired in as the qmd
- * collection's update command, so `qmd update` always syncs first.
+ * Incremental: only notes whose modified timestamp changed since the last
+ * run are rewritten. Wired in as the qmd collection's update command, so
+ * `qmd update` always syncs first.
  */
 import { execFileSync } from "node:child_process";
 import {
@@ -35,9 +35,9 @@ function bearcli(args: string[]): string {
 
 mkdirSync(MIRROR, { recursive: true });
 
-type Meta = { id: string; hash: string; locked: string; location: string };
+type Meta = { id: string; modified: string; locked: string; location: string };
 const all: Meta[] = JSON.parse(
-  bearcli(["list", "--location", "all", "--format", "json", "--fields", "id,hash,locked,location"])
+  bearcli(["list", "--location", "all", "--format", "json", "--fields", "id,modified,locked,location"])
 );
 // Locked note content is not accessible through bearcli.
 const notes = all.filter((n) => n.location !== "trash" && n.locked !== "yes");
@@ -49,7 +49,7 @@ if (existsSync(MANIFEST)) {
   } catch {}
 }
 
-const changed = notes.filter((n) => manifest[n.id] !== n.hash);
+const changed = notes.filter((n) => manifest[n.id] !== n.modified);
 
 const contentById = new Map<string, string>();
 if (changed.length > BULK_THRESHOLD) {
@@ -79,7 +79,7 @@ for (const f of readdirSync(MIRROR)) {
 }
 
 const next: Record<string, string> = {};
-for (const n of notes) next[n.id] = n.hash;
+for (const n of notes) next[n.id] = n.modified;
 writeFileSync(MANIFEST + ".tmp", JSON.stringify(next));
 renameSync(MANIFEST + ".tmp", MANIFEST);
 
