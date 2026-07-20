@@ -43,6 +43,11 @@ alias fh='fzf-make history'
 # My Apps
 alias r='rem-tui'
 alias q='qmd'
+# TODO(kit): self-alias hacks so kit indexes tools installed outside its sources
+# (kpr: keeper-cli/install.sh → ~/.bun/bin; spark: installed by Spark Desktop.app).
+# Teach kit a real source for non-brew tools, then delete these lines.
+alias kpr='kpr' # Keeper bookmarks CLI for kpr.sh
+alias spark='spark' # Spark Desktop email CLI (SparklyRemote)
 
 # Wrap claude to auto-update and auto-rename the Warp tab while it's running.
 # In Warp, disable auto-title so OSC 0 sticks across split panes.
