@@ -71,5 +71,6 @@ cask 'font-source-sans-pro'
 cask 'google-chrome'
 cask 'raycast'
 cask 'slack'
+cask 'tldraw' # tldraw offline — desktop whiteboard, offline.tldraw.com
 cask 'warp'
 cask 'xscope'
