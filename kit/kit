@@ -21,6 +21,8 @@ main() {
     recent)   shift; cmd_recent "$@" ;;
     missing)  shift; cmd_missing "$@" ;;
     add)      shift; cmd_add "$@" ;;
+    _preview) shift; cmd_preview "$@" ;;
+    _help)    shift; cmd_help "$@" ;;
     -h|--help)
       echo "kit — Kevin's installed tools"
       echo ""
@@ -33,7 +35,7 @@ main() {
       echo "  kit add <name>   add formula to Brewfile, install, and reindex"
       echo ""
       echo "Picker keys:"
-      echo "  Enter            run selected tool"
+      echo "  Enter            run selected tool (casks: open the app)"
       echo "  ctrl-h           show --help for selected tool"
       ;;
     *)        cmd_search "${1:-}" ;;
@@ -41,6 +43,12 @@ main() {
 }
 
 # ── helpers ──────────────────────────────────────────────────────────────────
+
+_timeout() {
+  # GNU 'timeout' isn't on stock macOS; perl's alarm survives exec
+  local secs="$1"; shift
+  perl -e 'alarm shift; exec @ARGV' "$secs" "$@"
+}
 
 _require() {
   for cmd in "$@"; do
@@ -296,8 +304,22 @@ cmd_index() {
           else .description end)
         else $entry end
       elif $entry.type == "cask" then
+        ([$info[0].casks[]? | select(.token == $entry.name)] | first) as $c |
+        (($c.artifacts // []) | map(.app // empty) | flatten | map(select(type == "string"))) as $apps |
         if ($entry.name as $n | installed_casks | any(. == $n)) then
-          $entry | .installed = true
+          $entry
+          | .installed = true
+          | .app = ($apps | first // "")
+          | .description = (if .description == "" then ($c.desc // "") else .description end)
+          # Pre-build the preview blurb from brew info so the preview pane
+          # never shells out to brew (slow) or runs --help (wrong for apps)
+          | .help_text = ([
+              (($c.name // [])[0] // $entry.name),
+              ($c.desc // ""),
+              ($c.homepage // ""),
+              (if $c then "version: " + (($c.installed // $c.version // "unknown") | tostring | split(",")[0]) else "" end),
+              (if ($apps | length) > 0 then "app: " + ($apps | join(", ")) else "" end)
+            ] | map(select(. != "")) | join("\n"))
         else $entry end
       else $entry end
     )
@@ -316,7 +338,7 @@ cmd_index() {
     [[ "$installed" != "true" ]] && continue
     command -v "$name" >/dev/null 2>&1 || continue
     (
-      timeout 2 bash -c "$name $help_flag 2>&1 | head -80" \
+      _timeout 2 bash -c "$name $help_flag </dev/null 2>&1 | head -80" \
         > "$help_tmp_dir/$name" 2>/dev/null || true
     ) &
   done < <(jq -r '.[] | [.name, (.installed | tostring), (.help_flag // "--help")] | @tsv' "$INDEX")
@@ -330,7 +352,8 @@ cmd_index() {
     name=$(printf '%s' "$entry" | jq -r '.name')
     help_text=""
     [[ -f "$help_tmp_dir/$name" ]] && help_text=$(cat "$help_tmp_dir/$name")
-    printf '%s' "$entry" | jq --arg ht "$help_text" '. + {help_text: $ht}' >> "$tmp3"
+    printf '%s' "$entry" | jq --arg ht "$help_text" \
+      '.help_text = (if $ht == "" then (.help_text // "") else $ht end)' >> "$tmp3"
   done < <(jq -c '.[]' "$INDEX")
   jq -s '.' "$tmp3" > "$INDEX"
   rm -f "$tmp3"
@@ -369,9 +392,9 @@ cmd_search() {
          --print-query \
          --delimiter $'\t' \
          --with-nth 1 \
-         --preview 'cmd=$(echo {} | awk "{print \$1}"); ($cmd --help 2>&1 | head -50) || echo "(no --help)"' \
+         --preview 'kit _preview "$(echo {} | awk "{print \$1}")"' \
          --preview-window 'right:50%:wrap' \
-         --bind 'ctrl-h:execute($SHELL -c "cmd=\$(echo {} | awk \"{print \\\$1}\"); \$cmd --help 2>&1 | less -R")'
+         --bind 'ctrl-h:execute(kit _help "$(echo {} | awk "{print \$1}")" | less -R)'
   ) || sk_exit=$?
 
   # --print-query always outputs the final query on line 1.
@@ -411,6 +434,20 @@ cmd_search() {
       echo "$name ($type): $desc"
       return 0
     fi
+    if [[ "$type" == "cask" ]]; then
+      local app
+      app=$(printf '%s' "$entry" | jq -r '.app // ""')
+      if [[ -n "$app" ]]; then
+        echo "Opening $app..."
+        open -a "$app"
+      elif open -a "$name" 2>/dev/null; then
+        echo "Opening $name..."
+      else
+        # No app artifact (e.g. font casks) — nothing to launch
+        echo "$name is a cask with no app to open."
+      fi
+      return 0
+    fi
     # If the query was "name arg1 arg2 ...", pass those args through
     local args=""
     if [[ "$sk_query" =~ ^"$name"[[:space:]]+(.+)$ ]]; then
@@ -426,6 +463,67 @@ cmd_search() {
       echo "  brew install $name"
     fi
   fi
+}
+
+cmd_preview() {
+  # Renders the sk preview pane for one entry. Internal — called by cmd_search.
+  local name="${1:-}"
+  [[ -z "$name" || ! -f "$INDEX" ]] && return 0
+
+  local entry
+  entry=$(jq -c --arg n "$name" 'first(.[] | select(.name == $n)) // empty' "$INDEX")
+  [[ -z "$entry" ]] && return 0
+
+  local type installed desc help_text
+  type=$(printf '%s' "$entry" | jq -r '.type')
+  installed=$(printf '%s' "$entry" | jq -r '.installed')
+  desc=$(printf '%s' "$entry" | jq -r '.description // ""')
+  help_text=$(printf '%s' "$entry" | jq -r '.help_text // ""')
+
+  case "$type" in
+    alias|function)
+      echo "$name [$type]"
+      [[ -n "$desc" ]] && { echo; echo "$desc"; }
+      ;;
+    cask)
+      if [[ -n "$help_text" ]]; then
+        echo "$help_text"
+      else
+        echo "$name [cask]"
+        [[ -n "$desc" ]] && echo "$desc"
+      fi
+      if [[ "$installed" != "true" ]]; then
+        echo
+        echo "not installed — brew install --cask $name"
+      fi
+      ;;
+    *)
+      if [[ -n "$help_text" ]]; then
+        echo "$help_text"
+      elif command -v "$name" >/dev/null 2>&1; then
+        local help_flag
+        help_flag=$(printf '%s' "$entry" | jq -r '.help_flag // "--help"')
+        _timeout 2 bash -c "$name $help_flag </dev/null 2>&1 | head -50" || true
+      elif [[ "$installed" != "true" ]]; then
+        [[ -n "$desc" ]] && echo "$desc"
+        echo
+        echo "not installed — brew install $name"
+      else
+        echo "${desc:-(no help available)}"
+      fi
+      ;;
+  esac
+}
+
+cmd_help() {
+  # Full help for one entry, honoring its help_flag. Internal — ctrl-h binding.
+  local name="${1:-}"
+  [[ -z "$name" ]] && return 0
+  command -v "$name" >/dev/null 2>&1 || { echo "(not a runnable command)"; return 0; }
+  local help_flag="--help"
+  [[ -f "$INDEX" ]] && help_flag=$(jq -r --arg n "$name" \
+    '[.[] | select(.name == $n)] | first | .help_flag // "--help"' "$INDEX" 2>/dev/null || echo "--help")
+  _timeout 5 bash -c "$name $help_flag </dev/null 2>&1" || true
 }
 
 cmd_recent() {
