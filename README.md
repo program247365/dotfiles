@@ -2,6 +2,12 @@
 
 > How I'm doing dotfiles.
 
+## Architecture
+
+![dotfiles architecture](docs/img/dotfiles-architecture.png)
+
+Source: [`docs/dotfiles-architecture.tldraw`](docs/dotfiles-architecture.tldraw) — open with [tldraw offline](https://offline.tldraw.com).
+
 ## Setup
 
 ```zsh
