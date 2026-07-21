@@ -398,6 +398,34 @@ def get_topical_tags(note_id):
     except Exception: return []
     return [t for t in tags if not t.startswith('inbox')]
 
+def reference_existing_attachments(note_id, body):
+    """bearcli overwrite rejects any write that drops the last reference to an existing
+    attachment. Rebuilt bodies — especially thread upgrades over a note that already has
+    tweet_screenshot.png — must therefore keep every attached file referenced. The
+    head-tweet screenshot lands at the end of the Tweet 1 section; anything else goes
+    above the @handle footer (or above the trailing marker as a last resort)."""
+    r = run('bearcli', 'attachments', 'list', note_id, '--format', 'json')
+    if r.returncode != 0:
+        return body
+    try:
+        attached = [e.get('filename') or e.get('name') or '' for e in json.loads(r.stdout)]
+    except Exception:
+        return body
+    for fname in [f for f in attached if f]:
+        if f']({fname})' in body:
+            continue
+        ref = f'![{fname}]({fname})\n\n'
+        m = re.search(r'^## Tweet 2 of \d+$', body, re.MULTILINE)
+        if fname == ATTACH_NAME and m:
+            body = body[:m.start()] + ref + body[m.start():]
+        elif '**@' in body:
+            body = body.replace('**@', ref + '**@', 1)
+        elif '<!--' in body:
+            body = body.replace('<!--', ref + '<!--', 1)
+        else:
+            body = body.rstrip('\n') + '\n\n' + ref
+    return body
+
 def clean_text(t):
     return re.sub(r'\s*https://t\.co/\S+\s*$', '', t).strip()
 
@@ -604,6 +632,8 @@ for note_id, note in todo.items():
                 counts['failed'] += 1
 
     if write_body is not None:
+        # Keep every existing attachment referenced so bearcli's overwrite guard passes.
+        write_body = reference_existing_attachments(note_id, write_body)
         r = overwrite(note_id, write_body)
         if r.returncode == 0:
             counts[write_kind] += 1
