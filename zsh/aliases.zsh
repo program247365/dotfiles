@@ -45,11 +45,13 @@ alias r='rem-tui'
 alias q='qmd'
 # TODO(kit): self-alias hacks so kit indexes tools installed outside its sources
 # (kpr: keeper-cli/install.sh → ~/.bun/bin; spark: installed by Spark Desktop.app;
-# livediff: tools/livediff/install.sh → ~/.cargo/bin).
+# livediff: tools/livediff/install.sh → ~/.cargo/bin;
+# search: tools/search/install.sh → ~/.kevin/bin).
 # Teach kit a real source for non-brew tools, then delete these lines.
 alias kpr='kpr' # Keeper bookmarks CLI for kpr.sh
 alias spark='spark' # Spark Desktop email CLI (SparklyRemote)
 alias livediff='livediff' # Real-time diff TUI — live git diff while files change
+alias search='search' # Unified personal search — kpr bookmarks + Bear notes, RRF-fused
 
 # Wrap claude to auto-update and auto-rename the Warp tab while it's running.
 # In Warp, disable auto-title so OSC 0 sticks across split panes.
