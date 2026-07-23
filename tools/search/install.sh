@@ -3,14 +3,23 @@
 # search — unified personal search across kpr bookmarks and Bear notes.
 #
 # Fuses kpr (bookmarks), qmd (semantic Bear index), and bearcli (live Bear
-# DB) into one RRF-ranked list. Source lives at ~/.kevin/personal-code/search
-# (github.com/program247365/search); compiled with bun into ~/.kevin/bin,
-# which is on PATH. Rebuilds from the local checkout on every `dot` run so
-# the binary tracks local main.
+# DB) into one RRF-ranked list. Source (github.com/program247365/search)
+# lives at ~/.kevin/personal-code/search on the work machine and
+# ~/.kevin/code/search on the personal machine — whichever exists is used;
+# fresh machines clone to ~/.kevin/code/search. Compiled with bun into
+# ~/.kevin/bin, which is on PATH. Rebuilds from the local checkout on every
+# `dot` run so the binary tracks local main.
 
 set -e
 
-REPO_DIR="$HOME/.kevin/personal-code/search"
+REPO_DIR=""
+for dir in "$HOME/.kevin/personal-code/search" "$HOME/.kevin/code/search"; do
+  if [ -d "$dir" ]; then
+    REPO_DIR="$dir"
+    break
+  fi
+done
+[ -n "$REPO_DIR" ] || REPO_DIR="$HOME/.kevin/code/search"
 BIN_DIR="$HOME/.kevin/bin"
 
 echo "Setting up search..."
