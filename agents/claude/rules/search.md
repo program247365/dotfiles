@@ -2,13 +2,14 @@
 
 - `search` is on PATH — one-shot personal search fusing kpr bookmarks, qmd
   (semantic Bear index), bearcli (live Bear DB), Spark email (keyword search
-  via spark CLI), and local browser history (bh: Safari/Chrome/Firefox),
-  ranked by RRF + recency.
+  via spark CLI), local browser history (bh: Safari/Chrome/Firefox), and
+  stoa RSS entries, ranked by RRF + recency.
 - For any "where did Kevin see/save/write/mention X" lookup, run
   `search "query" --json` FIRST — it replaces separate kpr/qmd/bearcli searches.
 - `--deep` swaps in qmd semantic query (~16s) when keyword search misses.
-- `--source kpr,bear` restricts sources (kpr,qmd,bear,spark,browser-history);
-  `--recency 0` disables recency decay; `--limit n` sizes output.
+- `--source kpr,bear` restricts sources
+  (kpr,qmd,bear,spark,browser-history,stoa); `--recency 0` disables recency
+  decay; `--limit n` sizes output.
 - Sources are enabled by presence in the config's `sources` block (unlisted =
   off; no config = all on). spark needs Spark Desktop running with CLI access
   enabled — if it isn't, search warns and the other sources still return.
