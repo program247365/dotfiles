@@ -14,7 +14,9 @@
 #
 # Also clones/builds bh (github.com/program247365/bh, Rust) so the
 # browser-history source works out of the box; skipped with a note when
-# cargo is missing. spark is installed by Spark Desktop.app itself.
+# cargo is missing. Likewise stoa (github.com/program247365/stoa-mono,
+# bun + pnpm) for the RSS-entries source. spark is installed by Spark
+# Desktop.app itself.
 
 set -e
 
@@ -60,6 +62,26 @@ if command -v cargo >/dev/null 2>&1; then
   echo "  bh $("$BIN_DIR/bh" --version | cut -d' ' -f2) (browser-history source)"
 else
   echo "  Note: cargo not found — skipping bh, the browser-history source. Run: brew install rust"
+fi
+
+# stoa — the RSS-entries source, built from the stoa-mono workspace.
+STOA_DIR=""
+for dir in "$HOME/.kevin/personal-code/stoa-mono" "$HOME/.kevin/code/stoa-mono"; do
+  if [ -d "$dir" ]; then
+    STOA_DIR="$dir"
+    break
+  fi
+done
+[ -n "$STOA_DIR" ] || STOA_DIR="$HOME/.kevin/code/stoa-mono"
+
+if command -v pnpm >/dev/null 2>&1; then
+  if [ ! -d "$STOA_DIR" ]; then
+    git clone https://github.com/program247365/stoa-mono.git "$STOA_DIR"
+  fi
+  (cd "$STOA_DIR" && pnpm install --silent && cd packages/cli && bun build.ts >/dev/null && cp dist/stoa "$BIN_DIR/stoa")
+  echo "  stoa $("$BIN_DIR/stoa" --version 2>/dev/null || echo "?") (RSS-entries source)"
+else
+  echo "  Note: pnpm not found — skipping stoa, the RSS-entries source. Run: brew install pnpm"
 fi
 
 # Config is committed in the search repo and shared across machines via
