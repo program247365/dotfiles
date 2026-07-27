@@ -8,6 +8,9 @@
 - `--source kpr,bear` restricts sources; `--recency 0` disables recency decay;
   `--limit n` sizes output.
 - `search doctor` diagnoses missing CLIs and index staleness.
+- `search update qmd` refreshes the qmd index (runs `qmd update`, then
+  `qmd embed` only if vectors are needed) and prints a summary. Searches
+  against a stale index (>7d) run it automatically before showing results.
 - Repo: ~/.kevin/personal-code/search (work machine) or ~/.kevin/code/search
   (personal machine) — use whichever exists. Config: ~/.config/search/config.json
   (weights, rrf_k, half_life_days). Tune weights only with `search eval`.
