@@ -6,7 +6,9 @@
   stoa RSS entries, ranked by RRF + recency.
 - For any "where did Kevin see/save/write/mention X" lookup, run
   `search "query" --json` FIRST — it replaces separate kpr/qmd/bearcli searches.
-- `--deep` swaps in qmd semantic query (~16s) when keyword search misses.
+- `--deep` swaps in qmd semantic query when keyword search misses (~3s for
+  previously-seen queries; a novel query pays 10-30s of LLM query expansion
+  once, then it's cached).
 - `--source kpr,bear` restricts sources
   (kpr,qmd,bear,spark,browser-history,stoa); `--recency 0` disables recency
   decay; `--limit n` sizes output.
