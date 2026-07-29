@@ -15,6 +15,7 @@ import {
   readdirSync,
   renameSync,
   unlinkSync,
+  utimesSync,
   writeFileSync,
 } from "node:fs";
 import { homedir } from "node:os";
@@ -66,7 +67,12 @@ for (const n of changed) {
   if (content === undefined) {
     content = JSON.parse(bearcli(["cat", n.id, "--format", "json"])).content;
   }
-  writeFileSync(join(MIRROR, `${n.id}.md`), content!);
+  const path = join(MIRROR, `${n.id}.md`);
+  writeFileSync(path, content!);
+  // Stamp the note's modified time onto the file so mtime carries the note
+  // date downstream (search dates qmd hits by statting the mirror).
+  const modified = new Date(n.modified);
+  utimesSync(path, modified, modified);
 }
 
 const keep = new Set(notes.map((n) => `${n.id}.md`));
