@@ -76,6 +76,9 @@ qmd collection remove bear >/dev/null 2>&1 || true
 qmd collection add "$MIRROR_DIR" --name bear --mask '**/*.md'
 qmd collection update-cmd bear "bun $SYNC_SCRIPT"
 
+# Human-written summary qmd feeds into search relevance (re-add overwrites)
+qmd context add "qmd://bear/" "Kevin's personal Bear notes: project logs and worklogs, saved tweets and articles, writing drafts, meeting notes, recipes, family and kids' sports notes, code snippets, and reference material saved since ~2017."
+
 echo "Indexing Bear notes..."
 qmd update
 
