@@ -82,4 +82,53 @@ qmd update
 echo "Generating embeddings..."
 qmd embed
 
+# --- Daily sync (launchd) ---
+# Primary freshness path: `search update qmd` at 5:00 AM (launchd runs it on
+# first wake if the Mac was asleep). The search-time auto-update gate (>7d)
+# stays as the backstop if this agent breaks. Generated, not committed:
+# plists need absolute paths and $HOME differs across machines.
+
+AGENT_LABEL="com.kevin.qmd-sync"
+AGENT_PLIST="$HOME/Library/LaunchAgents/$AGENT_LABEL.plist"
+
+echo "Installing daily sync agent ($AGENT_LABEL)..."
+mkdir -p "$HOME/Library/LaunchAgents" "$HOME/Library/Logs"
+cat > "$AGENT_PLIST" <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>$AGENT_LABEL</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>$HOME/.kevin/bin/search</string>
+    <string>update</string>
+    <string>qmd</string>
+  </array>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>$HOME/.kevin/bin:$HOME/.bun/bin:$HOME/.local/share/mise/shims:/opt/homebrew/bin:/usr/bin:/bin</string>
+  </dict>
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key>
+    <integer>5</integer>
+    <key>Minute</key>
+    <integer>0</integer>
+  </dict>
+  <key>RunAtLoad</key>
+  <false/>
+  <key>StandardOutPath</key>
+  <string>$HOME/Library/Logs/qmd-sync.log</string>
+  <key>StandardErrorPath</key>
+  <string>$HOME/Library/Logs/qmd-sync.log</string>
+</dict>
+</plist>
+EOF
+launchctl bootout "gui/$(id -u)/$AGENT_LABEL" 2>/dev/null || true
+launchctl bootstrap "gui/$(id -u)" "$AGENT_PLIST"
+echo "  Loaded $AGENT_PLIST (daily at 5:00 AM, log: ~/Library/Logs/qmd-sync.log)"
+
 echo "Done setting up QMD"
