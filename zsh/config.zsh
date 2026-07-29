@@ -1,6 +1,11 @@
 export LSCOLORS="exfxcxdxbxegedabagacad"
 export CLICOLOR=true
 
+# qmd's llama.cpp GPU auto-detect falls back to CPU on Apple Silicon,
+# making query/embed 2.5-4x slower; force Metal for interactive runs.
+# (search and the launchd sync agent set this themselves.)
+export QMD_LLAMA_GPU=metal
+
 fpath=($ZSH/functions $fpath)
 
 autoload -U $ZSH/functions/*(:t)

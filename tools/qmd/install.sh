@@ -113,6 +113,8 @@ cat > "$AGENT_PLIST" <<EOF
   <dict>
     <key>PATH</key>
     <string>$HOME/.kevin/bin:$HOME/.bun/bin:$HOME/.local/share/mise/shims:/opt/homebrew/bin:/usr/bin:/bin</string>
+    <key>QMD_LLAMA_GPU</key>
+    <string>metal</string>
   </dict>
   <key>StartCalendarInterval</key>
   <dict>
