@@ -30,3 +30,23 @@
   - Consider filing the Apple Silicon GPU auto-detect fallback upstream
     (tobi/qmd) — QMD_LLAMA_GPU=metal shouldn't be necessary.
   - Plan checklist lives in Bear: "QMD for Bear Notes" note (all items done).
+
+## 2026-07-29: search install.sh stoa failure — bun compile naming bug
+- What changed
+  - stoa-mono 932ba9f: build.ts used `compile: true, naming: "stoa"`, but
+    Bun.build ignores `naming` for compiled executables (bun 1.3.x names
+    them after the entrypoint → dist/src). Fixed with
+    `compile: { outfile: "stoa" }`. Pushed.
+  - Fast-forwarded this machine's search checkout
+    (~/.kevin/personal-code/search) to 4d90f57; installer now builds
+    search 0.3.0 with all nine sources ok per `search doctor`.
+- What we decided and why
+  - Root cause was in stoa-mono, not install.sh — the installer's
+    `cp dist/stoa` was correct; fixing the copy path would have papered
+    over the misnamed binary. build.ts also hardcodes its
+    "Built dist/stoa" log line, which is why the build "succeeded".
+- What to revisit next time
+  - `search doctor` here flags bear sync never ran — run
+    `search update qmd` once on this machine.
+  - Work machine still needs a dot run to pick up both fixes; verify
+    `search doctor` there (first real test of parsePi).
