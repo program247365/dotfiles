@@ -15,8 +15,10 @@
 # Also clones/builds bh (github.com/program247365/bh, Rust) so the
 # browser-history source works out of the box; skipped with a note when
 # cargo is missing. Likewise stoa (github.com/program247365/stoa-mono,
-# bun + pnpm) for the RSS-entries source. spark is installed by Spark
-# Desktop.app itself.
+# bun + pnpm — sparse-cloned to just packages/cli + packages/shared) for
+# the RSS-entries source. spark is installed by Spark Desktop.app itself.
+# The agent-session sources (claude/codex/pi) need only ripgrep, which the
+# Brewfile installs.
 
 set -e
 
@@ -76,9 +78,16 @@ done
 
 if command -v pnpm >/dev/null 2>&1; then
   if [ ! -d "$STOA_DIR" ]; then
-    git clone https://github.com/program247365/stoa-mono.git "$STOA_DIR"
+    # Partial + sparse clone: only the CLI and its workspace dep. Skips the
+    # apps/* bulk, whose root-level install is what broke fresh machines
+    # (pnpm exited 0 with an empty .pnpm store; the build then failed on
+    # missing deps).
+    git clone --filter=blob:none --sparse https://github.com/program247365/stoa-mono.git "$STOA_DIR"
+    git -C "$STOA_DIR" sparse-checkout set packages/cli packages/shared
   fi
-  (cd "$STOA_DIR" && pnpm install --silent && cd packages/cli && bun build.ts >/dev/null && cp dist/stoa "$BIN_DIR/stoa")
+  # --filter scopes the install to the CLI + its deps; also repairs full
+  # checkouts from before the sparse-clone change.
+  (cd "$STOA_DIR" && pnpm install --silent --filter "@stoa/cli..." && cd packages/cli && bun build.ts >/dev/null && cp dist/stoa "$BIN_DIR/stoa")
   echo "  stoa $("$BIN_DIR/stoa" --version 2>/dev/null || echo "?") (RSS-entries source)"
 else
   echo "  Note: pnpm not found — skipping stoa, the RSS-entries source. Run: brew install pnpm"
