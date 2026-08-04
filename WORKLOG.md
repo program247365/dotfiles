@@ -50,3 +50,35 @@
     `search update qmd` once on this machine.
   - Work machine still needs a dot run to pick up both fixes; verify
     `search doctor` there (first real test of parsePi).
+
+## 2026-08-02: Email triage via spark CLI — inbox/trash analysis and deletion report
+- Dumped unified inbox (4,175) and recent trash (1,000) with `spark emails`; aggregated senders in scratchpad
+- Found k@kbr.sh mirrors kridgway@gmail.com — 3,477 of 4,175 inbox msgs are the mirror backlog; 1,800 msgs are from 197 senders Kevin already routinely deletes
+- Wrote triage report (scratchpad/email-triage-report.md) with Spark search strings per delete bucket; all accounts read-only so no actions taken
+- Revisit: grant Spark triage access for agent-driven cleanup; fix kridgway→k@kbr.sh duplication at the source
+
+## 2026-08-04: search rule updated for reminders source, doctor upgrades, web UI
+- What changed
+  - agents/claude/rules/search.md now covers: reminders source (open todos
+    only, `--completed` opts in; same Full Disk Access grant as imessage),
+    `reminders` in the `--source` list, `--list`, streaming picker with
+    session-resume on enter, doctor's FDA probes + stale-binary rebuild,
+    and a one-liner on the web PWA (`make serve`, port 3847;
+    `make install-launchdaemon` for the login server — renamed mid-session
+    from install-agent).
+  - Verified every claim against search 0.5.0 (`--source imessage,reminders`
+    works despite the help text) and GREEN-tested with a fresh-agent
+    retrieval quiz on the updated file.
+  - Fixed the upstream stale help too: cli.ts USAGE `--source` list now
+    derives from DEFAULT_CONFIG.sources (search repo 4f9feea, not pushed).
+  - After Kevin added `search sources`, the rule delegates the source
+    roster to `search sources --json` instead of hardcoding 11 names —
+    same single-source-of-truth fix as cli.ts.
+- What we decided and why
+  - Kept the web UI to one line marked "for Kevin's use, not agents" —
+    the rule loads into every session, so lines cost permanent context.
+  - Rule keeps source *concepts* in prose (quirks like `--completed`,
+    session-source semantics) but not the name list, which changes with
+    every new source and goes stale.
+- What to revisit next time
+  - Push search repo 4f9feea (and Kevin's sources/Makefile work) when ready.
