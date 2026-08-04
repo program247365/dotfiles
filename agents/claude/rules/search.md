@@ -15,17 +15,17 @@
 - `--deep` swaps in qmd semantic query when keyword search misses (~3s for
   previously-seen queries; a novel query pays 10-30s of LLM query expansion
   once, then it's cached).
-- `--source kpr,bear` restricts sources
-  (kpr,qmd,bear,spark,browser-history,stoa,imessage,reminders,claude,codex,pi);
-  `--recency 0` disables recency decay; `--limit n` sizes output. The
-  reminders source returns open todos only — `--completed` includes
-  completed ones. The agent-session
-  sources answer "where did Kevin discuss X with Claude/Codex/pi"; the
-  claude one excludes the running session. A machine without a given agent
-  installed silently contributes nothing for that source.
-- `search sources --json` lists every source with a description and whether
-  this machine's config enables it — run it when unsure what a source covers
-  or why one returns nothing.
+- `search sources --json` is the authority on sources: every source name
+  with a description and whether this machine's config enables it. Consult
+  it before using `--source`, when unsure what a source covers, or when a
+  source returns nothing — don't rely on a memorized roster.
+- `--source kpr,bear` restricts a run to those sources; `--recency 0`
+  disables recency decay; `--limit n` sizes output. The reminders source
+  returns open todos only — `--completed` includes completed ones. The
+  agent-session sources (claude, codex, pi) answer "where did Kevin discuss
+  X with Claude/Codex/pi"; the claude one excludes the running session. A
+  machine without a given agent installed silently contributes nothing for
+  that source.
 - Sources are enabled by presence in the config's `sources` block (unlisted =
   off; no config = all on). spark needs Spark Desktop running with CLI access
   enabled — if it isn't, search warns and the other sources still return.
