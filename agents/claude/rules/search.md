@@ -3,8 +3,9 @@
 - `search` is on PATH — one-shot personal search fusing kpr bookmarks, qmd
   (semantic Bear index), bearcli (live Bear DB), Spark email (keyword search
   via spark CLI), local browser history (bh: Safari/Chrome/Firefox), stoa
-  RSS entries, iMessage/SMS, Apple Reminders (both read their DBs directly;
-  the terminal needs Full Disk Access), and coding-agent session transcripts
+  RSS entries, iMessage/SMS, Apple Reminders todos (open todos by default,
+  `--completed` adds done ones; both DB-read sources need Full Disk Access),
+  and coding-agent session transcripts
   (Claude Code ~/.claude/projects, Codex ~/.codex/sessions, pi
   ~/.pi/agent/sessions), ranked by RRF + recency. On a TTY it opens an fzf
   picker by default (results stream in; enter opens the hit — agent-session
