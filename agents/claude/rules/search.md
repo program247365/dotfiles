@@ -3,7 +3,8 @@
 - `search` is on PATH — one-shot personal search fusing kpr bookmarks, qmd
   (semantic Bear index), bearcli (live Bear DB), Spark email (keyword search
   via spark CLI), local browser history (bh: Safari/Chrome/Firefox), stoa
-  RSS entries, iMessage/SMS, Apple Reminders todos (open todos by default,
+  RSS entries, kbr.sh blog posts (public /api/posts/search/ endpoint via
+  curl), iMessage/SMS, Apple Reminders todos (open todos by default,
   `--completed` adds done ones; both DB-read sources need Full Disk Access),
   and coding-agent session transcripts
   (Claude Code ~/.claude/projects, Codex ~/.codex/sessions, pi
