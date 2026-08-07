@@ -37,6 +37,15 @@
 - `search update qmd` refreshes the qmd index (runs `qmd update`, then
   `qmd embed` only if vectors are needed) and prints a summary. Searches
   against a stale index (>7d) run it automatically before showing results.
+- `search discovery` is browsing, not lookup — a rabbit-hole walk over the
+  same corpus for "surface something forgotten/related," no query needed.
+  Agents use the stateless JSON contract: `search discovery --json` returns
+  one step `{current, neighbors: {topic, time, semantic}}`; continue a walk
+  by feeding a neighbor's ref back via `--json --from "<ref>"`; a positional
+  query seeds from its top hit; `--source` scopes seeds and shelves. Walk
+  state lives in the caller. The first run (or >24h) crawls a local index
+  first (~20s, progress on stderr). The card REPL on a TTY and the PWA's 🎲
+  button are the human faces — agents stick to `--json`.
 - A web UI (mobile PWA + API) exists: `make serve` in the repo (port 3847),
   or `make install-launchdaemon` to run it at login via launchd
   (com.kevin.search; `make uninstall-launchdaemon` removes it).
