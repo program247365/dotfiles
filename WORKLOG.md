@@ -82,3 +82,13 @@
     every new source and goes stale.
 - What to revisit next time
   - Push search repo 4f9feea (and Kevin's sources/Makefile work) when ready.
+## 2026-08-10: OOO meeting catch-up — Supernormal summaries into a Bear note
+- Confirmed OOO window Jul 30–Aug 9 (last recording + last commit Jul 29; back Aug 10).
+- Found NO Supernormal recordings exist for that window (own capture off, no teammate
+  captures visible; Supernormal's own Aug 6 brief confirms the transcription gap).
+- Reconstructed gists from daily personal brief emails (Spark IDs 5122–5192) and
+  calendar recaps; wrote Bear note 71297200-58CD-4D11-ACEC-A51758B5A596
+  ("OOO Catch-up: Jul 30 – Aug 9, 2026", #supernormal/_today).
+- Learned: Supernormal MCP `list meetings` only returns own captures; meeting URLs are
+  app.supernormal.com/meetings/<id>; brief emails wrap all links in SendGrid trackers
+  (underlying URLs unrecoverable without following redirects).
