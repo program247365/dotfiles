@@ -44,7 +44,9 @@ if [ ! -d "$REPO_DIR" ]; then
 fi
 
 mkdir -p "$BIN_DIR"
-(cd "$REPO_DIR" && bun build --compile search.ts --outfile "$BIN_DIR/search" >/dev/null)
+# cli.ts is the entrypoint (search.ts is a library — compiling it yields a
+# no-op binary); the BUILD_COMMIT define mirrors the repo's `bun run build`.
+(cd "$REPO_DIR" && bun build --compile cli.ts --outfile "$BIN_DIR/search" --define "BUILD_COMMIT='$(git rev-parse --short HEAD)'" >/dev/null)
 
 # bh — the browser-history source, same two-location repo convention.
 BH_DIR=""
