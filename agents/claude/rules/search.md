@@ -1,22 +1,28 @@
 # search (unified personal search)
 
-- `search` is on PATH — one-shot personal search fusing kpr bookmarks, qmd
-  (semantic Bear index), bearcli (live Bear DB), Spark email (keyword search
-  via spark CLI), local browser history (bh: Safari/Chrome/Firefox), stoa
-  RSS entries, kbr.sh blog posts (public /api/posts/search/ endpoint via
-  curl), iMessage/SMS, Apple Reminders todos (open todos by default,
-  `--completed` adds done ones; both DB-read sources need Full Disk Access),
-  and coding-agent session transcripts
-  (Claude Code ~/.claude/projects, Codex ~/.codex/sessions, pi
-  ~/.pi/agent/sessions), ranked by RRF + recency. On a TTY it opens an fzf
-  picker by default (results stream in; enter opens the hit — agent-session
-  hits resume that session); piped/`--json` output is a plain list (agents
-  are unaffected); `--list` forces the static list on a TTY.
+- `search` is on PATH — one-shot personal search. Its backbone since 0.7.0
+  is a local FTS5 full-text **index** over everything enumerable: Bear
+  notes, iMessage, Reminders, kpr bookmarks, stoa RSS entries, and
+  coding-agent session transcripts (Claude Code ~/.claude/projects, Codex
+  ~/.codex/sessions, pi ~/.pi/agent/sessions). Fused with it live: bearcli
+  (Bear DB), Spark email, bh browser history (Safari/Chrome/Firefox),
+  kbr.sh blog posts, iMessage/SMS, Reminders (open todos by default,
+  `--completed` adds done ones; DB-read sources need Full Disk Access), and
+  the agent-transcript rg sources — ranked by RRF + recency. kpr and stoa
+  are index-only (their live CLIs were the slow spawns; the index covers
+  their whole corpus). On a TTY it opens an fzf picker by default (results
+  stream in; enter opens the hit — agent-session hits resume that session);
+  piped/`--json` output is a plain list (agents are unaffected); `--list`
+  forces the static list on a TTY.
 - For any "where did Kevin see/save/write/mention X" lookup, run
-  `search "query" --json` FIRST — it replaces separate kpr/qmd/bearcli searches.
-- `--deep` swaps in qmd semantic query when keyword search misses (~3s for
+  `search "query" --json` FIRST — it replaces separate kpr/qmd/bearcli
+  searches. Phrase the query the way the thing is remembered: the index
+  matches full body text, so words from inside a note/message/session hit
+  even when no title contains them (`search help` shows examples).
+- `--deep` adds qmd semantic query when keyword search misses (~3s for
   previously-seen queries; a novel query pays 10-30s of LLM query expansion
-  once, then it's cached).
+  once, then it's cached). qmd is deep-only now — it contributes nothing
+  without `--deep`, since its default BM25 duplicated the index.
 - `search sources --json` is the authority on sources: every source name
   with a description and whether this machine's config enables it. Consult
   it before using `--source`, when unsure what a source covers, or when a
@@ -28,15 +34,23 @@
   X with Claude/Codex/pi"; the claude one excludes the running session. A
   machine without a given agent installed silently contributes nothing for
   that source.
-- Sources are enabled by presence in the config's `sources` block (unlisted =
-  off; no config = all on). spark needs Spark Desktop running with CLI access
+- Sources are enabled by presence in the config's `sources` block (unlisted
+  = off; no config = shipped defaults, which is everything on except kpr,
+  stoa, and index-recent). spark needs Spark Desktop running with CLI access
   enabled — if it isn't, search warns and the other sources still return.
-- `search doctor` diagnoses missing CLIs and index staleness, probes
-  chat.db and the reminders stores (missing Full Disk Access shows as FAIL,
-  not ok), and rebuilds the installed binary if it's older than the checkout.
+- `search doctor` diagnoses missing CLIs, qmd sync age, and FTS index
+  staleness, probes chat.db and the reminders stores (missing Full Disk
+  Access shows as FAIL, not ok), and rebuilds the installed binary if it's
+  older than the checkout.
 - `search update qmd` refreshes the qmd index (runs `qmd update`, then
   `qmd embed` only if vectors are needed) and prints a summary. Searches
   against a stale index (>7d) run it automatically before showing results.
+- `search update index` rebuilds the FTS5 index (~35s, per-source progress
+  on stderr); it also auto-runs when the index is missing or >7d stale, and
+  a daily launchd daemon (com.kevin.search-index, 05:30) keeps it fresh.
+- `search restart` restarts the web/server launchd daemon (com.kevin.search)
+  — needed after installing a new search version, since the long-lived
+  server keeps running old code until restarted.
 - `search discovery` is browsing, not lookup — a rabbit-hole walk over the
   same corpus for "surface something forgotten/related," no query needed.
   Agents use the stateless JSON contract: `search discovery --json` returns
