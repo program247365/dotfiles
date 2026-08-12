@@ -12,6 +12,29 @@ The workflow is fully idempotent — run it any time to catch up on anything tha
 
 ---
 
+**Step 0 — Sync guard (let iCloud settle before auditing)**
+
+The audit reads only this machine's local Bear database. If another machine already enriched a note and that version hasn't synced down yet, this run will re-edit the stale local copy and CloudKit will resolve the collision by duplicating the note (red fork icon in Bear's note list — this happened 2026-08-11). `bearcli` has no sync command and CloudKit only syncs while the Bear app is running, so the guard is: make sure Bear is open, then give sync a settle window before touching anything.
+
+```python
+import subprocess, time
+
+bear_running = subprocess.run(['pgrep', '-x', 'Bear'], capture_output=True).returncode == 0
+subprocess.run(['open', '-g', '-a', 'Bear'])  # background launch; no-op if already running
+if not bear_running:
+    print('Bear was not running — launched it; waiting 60s for CloudKit to pull remote changes')
+    time.sleep(60)
+else:
+    print('Bear already running — waiting 15s for any in-flight sync to land')
+    time.sleep(15)
+```
+
+This does not make conflicts impossible (a remote edit can always land mid-run), but it closes the common case: running the workflow right after login/wake, before Bear has caught up with edits made elsewhere.
+
+If duplicates appear anyway, the **bear-notes skill → iCloud Sync Conflicts** section has the full playbook: keep the copy with the `thread:complete` marker, trash the other, and if the survivor still shows the red fork icon (the conflict stamp is UI-cleared only — `bearcli trash`/`overwrite` can't remove it), recreate it under a fresh ID. The pre-check below detects such pairs automatically and excludes them from the run.
+
+---
+
 **Pre-check — Audit all tweet notes and classify what needs work**
 
 Two `bearcli search` calls cover the audit surface: a text search for `x.com` (catches notes with structured bodies and `#inbox/saved-tweets` tags) plus `@untagged` (catches bare-URL notes that Bear's FTS doesn't tokenize reliably). Results are merged by ID.
@@ -51,6 +74,7 @@ TWEET_URL_RE = re.compile(r'https?://(?:www\.)?x\.com/[^\s\])]+/status/\d+(?:\?\
 TITLE_TWEET_RE = re.compile(r'^\[?https?://(?:www\.)?x\.com/\S+/status/\d+', re.IGNORECASE)
 
 todo = []
+seen_tweets = {}  # status_id -> [(note_id, has_thread_complete)] for conflict-pair detection
 for n in notes:
     text = (n.get('content') or '').strip()
     title = (n.get('title') or '').strip()
@@ -114,6 +138,9 @@ for n in notes:
         thread_auth_needed_date = None
         # Body still has the marker; Step A2 will overwrite it.
 
+    status_id = re.search(r'/status/(\d+)', url).group(1)
+    seen_tweets.setdefault(status_id, []).append((n['id'], thread_complete_count is not None))
+
     needs = []
     if not has_inbox_tag: needs.append('inbox_tag')
     if not has_body:      needs.append('body')
@@ -137,6 +164,22 @@ for n in notes:
             'thread_complete_count': thread_complete_count,
             'annotation': annotation,  # carried into Step B's body builders
         })
+
+# Duplicate guard: two notes for the same tweet are either an iCloud sync-conflict pair
+# (created seconds apart; see bear-notes skill → iCloud Sync Conflicts) or a double-save
+# (same tweet saved twice, days apart — check created dates to tell them apart). Either
+# way, enriching both entrenches the duplicate, so exclude them from this run and surface
+# them for resolution: merge tags into the richer/intact copy, trash the other, and — for
+# conflict pairs only — recreate the survivor under a fresh ID if it carries the fork icon.
+dup_ids = set()
+for tid, entries in seen_tweets.items():
+    if len(entries) > 1:
+        dup_ids.update(nid for nid, _ in entries)
+        detail = ', '.join(f'{nid[:8]}{" (thread:complete)" if c else ""}' for nid, c in entries)
+        print(f'DUPLICATE tweet={tid}: {detail}')
+if dup_ids:
+    todo = [t for t in todo if t['id'] not in dup_ids]
+    print(f'Excluded {len(dup_ids)} notes in duplicate pairs from this run — resolve them first, then re-run.\n')
 
 with open('/tmp/tweet_todo.json', 'w') as f: json.dump(todo, f)
 
@@ -334,8 +377,11 @@ print(f'{len(shot_candidates)} notes need a tweet-card screenshot')
 
 if shot_candidates:
     fetcher = os.path.expanduser('~/.dotfiles/agents/claude/tools/x-screenshot-fetcher.py')
+    # System python3 has no playwright module — uv supplies it per-run. If Chromium isn't
+    # cached yet (~/Library/Caches/ms-playwright), first run:
+    #   uv run --with playwright playwright install chromium
     cp = subprocess.run(
-        ['python3', fetcher],
+        ['uv', 'run', '--with', 'playwright', 'python3', fetcher],
         input=json.dumps(shot_candidates),
         capture_output=True, text=True,
     )
@@ -763,8 +809,23 @@ print(f'Done: {len(TAG_ASSIGNMENTS)} notes tagged')
 
 ---
 
+**Post-run conflict check**
+
+A remote version can sync down mid-run and collide with this run's writes (it happened 2026-08-11: thread bodies enriched on another machine arrived 47s after local writes, duplicating 4 notes). One read-only query catches it:
+
+```bash
+sqlite3 -readonly ~/Library/Group\ Containers/9K33E3U3T4.net.shinyfrog.bear/Application\ Data/database.sqlite \
+  "SELECT ZUNIQUEIDENTIFIER FROM ZSFNOTE WHERE ZCONFLICTUNIQUEIDENTIFIER IS NOT NULL AND ZTRASHED=0"
+```
+
+If rows come back, report them and resolve per **bear-notes skill → iCloud Sync Conflicts** (keep the richer copy, trash the stale one, recreate the survivor if it carries the fork icon — `bearcli` alone cannot clear the stamp).
+
+---
+
 **Final report**: counts per category — `body`, `body_thread`, `body_thread_enrich`, `body_link_only`, `body_tombstone`, `thread_marker_only`, `thread_auth_needed`, `thread_retry_pending` (Tier 2 hit a transient error — left unchecked for a later run), `image` (covers both embedded photos and Tier 3 screenshots — same attachment slot), `thread_image`, `inbox_tag`, `extra_tags`. Plus `no_article`, `no_photo_available`, `skipped_no_data`, `failed`. If `thread_auth_needed > 0`, surface the cookie-refresh hint:
 
 > `~/.dotfiles/agents/claude/tools/refresh-x-cookies.sh`
 
 Re-run the workflow after refreshing cookies to backfill the threads.
+
+If the pre-check excluded conflict pairs or the post-run check found stamped notes, list them in the report with the resolution pointer (bear-notes skill → iCloud Sync Conflicts).
