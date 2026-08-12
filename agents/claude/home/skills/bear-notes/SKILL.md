@@ -196,10 +196,33 @@ bearcli edit "$NOTE_ID" --find "\n![screenshot.png](screenshot.png)" --delete \
 
 Bear renders the image immediately — no app restart. The attachment is stored in Bear's `Note Images` directory by Bear itself, with the correct Core Data relationships in place.
 
+## iCloud Sync Conflicts
+
+Bear syncs via CloudKit, and **CloudKit only syncs while the Bear app is running**. `bearcli` writes to the local database regardless — so a write made before a newer remote version has synced down produces a conflict: CloudKit keeps both versions, creating a duplicate note marked with a red fork icon in the note list. (Observed 2026-08-11: notes enriched on one machine, then edited via bearcli on another before sync caught up.)
+
+Mechanics, learned the hard way:
+
+- The fork icon is driven by `ZSFNOTE.ZCONFLICTUNIQUEIDENTIFIER` — a permanent stamp (`<sibling-note-id>/<timestamp>`) on the conflict-created copy. It means "born from a conflict," not "conflict currently unresolved."
+- Bear's FAQ ([how-bear-pro-handles-conflicted-notes](https://bear.app/faq/how-bear-pro-handles-conflicted-notes/)) says deleting one version or editing the note resolves the conflict — **but that logic runs in Bear's UI layer only**. `bearcli trash` and `bearcli overwrite` do NOT clear the stamp (verified against the DB). Never write the SQLite column directly.
+- Detect flagged notes read-only:
+  ```bash
+  sqlite3 -readonly ~/Library/Group\ Containers/9K33E3U3T4.net.shinyfrog.bear/Application\ Data/database.sqlite \
+    "SELECT ZUNIQUEIDENTIFIER FROM ZSFNOTE WHERE ZCONFLICTUNIQUEIDENTIFIER IS NOT NULL AND ZTRASHED=0"
+  ```
+
+**Resolving a conflict pair via bearcli:**
+
+1. Compare the pair (`cat`, `tags list`, `attachments list`); keep the richer version, trash the stale one.
+2. If the survivor shows the fork icon, clear it by recreating the note under a fresh ID: `bearcli create` a placeholder → copy each attachment (`attachments save` old → `attachments add` new, binary-safe) → `bearcli overwrite` the new note with the original content (stdin) → re-add any tags missing from the body → verify title/content/tags/attachments match → trash the flagged original. Wiki links survive (they resolve by title); the note's created date resets to today.
+
+Not every duplicate is a sync conflict: two near-identical notes created days apart (no conflict stamp in the DB) are a double-save — the user captured the same thing twice. The stamp query above is the discriminator. Double-saves resolve the same way minus the recreate step: merge tags into the better copy, trash the other.
+
+**Prevention:** before a batch of bearcli writes, make sure Bear is running and give sync a settle window — `open -g -a Bear`, then wait ~60s if it was cold-launched (~15s if already running). A local audit cannot distinguish "never edited" from "edited elsewhere, sync pending."
+
 ## Notes
 
 - **bearcli IDs are Bear's `ZUNIQUEIDENTIFIER`** — interchangeable with the Bear URL scheme: `bear://x-callback-url/open-note?id=<bearcli_id>`. Prefer `bearcli app open ID` over the URL scheme.
-- **No auth, no cache, no sync.** `bearcli` reads/writes Bear's running database in place. Drop any retry-on-rate-limit logic — there are no rate limits.
+- **No auth, no cache, no sync roundtrip.** `bearcli` reads/writes Bear's running database in place. Drop any retry-on-rate-limit logic — there are no rate limits. But iCloud sync still runs underneath (see **iCloud Sync Conflicts** above): writing before remote changes have synced down creates conflict duplicates.
 - **No Bear restart needed for any operation**, including attachments and tag changes. This was the single biggest pain point of the previous `bcli` (CloudKit) workflow.
 - **Optimistic concurrency:** for risky writes, capture `hash` from `bearcli cat ID --format json` (whole note, or `--section` for a section-scoped hash) and pass `--base <hash>` to `bearcli overwrite` — the write is rejected if the target changed since the read. Reading is the only source of a hash.
 - **Tags can be hierarchical:** `work/projects/2025`. `bearcli tags add ID a b/c` adds both, leaving the body untouched.

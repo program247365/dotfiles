@@ -92,3 +92,60 @@
 - Learned: Supernormal MCP `list meetings` only returns own captures; meeting URLs are
   app.supernormal.com/meetings/<id>; brief emails wrap all links in SendGrid trackers
   (underlying URLs unrecoverable without following redirects).
+
+## 2026-08-11: Tweet notes enrichment run (/notes-organize-tweets)
+- Enriched 22 Bear tweet notes: 18 fresh saves got structured bodies (12 tweet-text,
+  6 link-only), 18 images (7 embedded photos + 11 Playwright tweet-card screenshots),
+  18 inbox tags; 12 notes got topical tags from the existing taxonomy.
+- 4 thread-check notes (shadcn, lucasmeijer, jamonholmgren, kappaemme1926) stamped
+  thread:auth-needed — no X cookies at ~/.config/notes-organize-tweets/x-cookies.json.
+  Run refresh-x-cookies.sh then re-run the workflow to backfill threads.
+- System Python lacks playwright; ran x-screenshot-fetcher.py via
+  `uv run --with playwright` and installed the Chromium headless shell
+  (~/Library/Caches/ms-playwright). Consider baking uv invocation into the workflow.
+
+## 2026-08-11: iCloud conflict cleanup + sync guard for /notes-organize-tweets
+- Today's run collided with iCloud sync: the 4 thread-check notes had already been
+  thread-enriched on the other machine, but that version hadn't synced down. Local
+  auth-needed stamps + late-arriving cloud versions made CloudKit duplicate all 4
+  (red fork icon in Bear). Kept the enriched "(thread: N tweets)" copies, trashed
+  the 4 stale originals (tags/attachments were identical across each pair).
+- bearcli has no sync command (verified: app subgroup is only open/get-selection),
+  so added Step 0 to commands/notes-organize-tweets.md: ensure Bear is running
+  (open -g -a Bear) and wait 60s cold / 15s warm before the audit.
+- Uncommitted: notes-organize-tweets.md edit + earlier WORKLOG entries.
+
+## 2026-08-11: Cleared persistent Bear conflict icons by recreating notes
+- Bear's fork icon is driven by ZSFNOTE.ZCONFLICTUNIQUEIDENTIFIER, stamped on the
+  conflict-created copy; bearcli trash/overwrite never clears it (verified in DB).
+  Bear's FAQ says deleting one version or editing the note resolves it — that logic
+  evidently lives in Bear's UI layer, and CLI writes bypass it.
+- Fix: recreated all 6 flagged notes (4 tweet threads + Learn Voice + Learn Piano)
+  under fresh IDs via bearcli (content + attachments + tags verified identical),
+  trashed the flagged originals. DB now has zero conflict stamps.
+- Caveat: recreated notes have new IDs and today's created date; wiki links are
+  title-based so they survive.
+
+## 2026-08-11: Baked sync/conflict knowledge into bear-notes skill + tweet workflow
+- bear-notes SKILL.md: new "iCloud Sync Conflicts" section — conflict-stamp mechanics
+  (ZCONFLICTUNIQUEIDENTIFIER), why bearcli can't clear it, read-only detection query,
+  recreate-under-fresh-ID recipe, double-save vs conflict discriminator, prevention.
+  Softened the "no sync" bullet that implied sync couldn't bite.
+- notes-organize-tweets.md: Step 0 now points at the skill section; pre-check gained a
+  duplicate guard (groups notes by tweet status id, excludes pairs from the run); Step A3
+  now invokes the screenshot fetcher via `uv run --with playwright`; added a post-run
+  read-only conflict check before the final report.
+- Validation run of the new pre-check surfaced 6 pre-existing DUPLICATE pairs (12 notes)
+  — double-saves (created days apart, no conflict stamps), not sync conflicts: shadcn,
+  Dan Koe, Machina, Dwarkesh, Thariq, Jerry Liu. Two copies (Thariq 045E9892, Jerry Liu
+  3D4D3DD9) have a leading-blank-line bug → empty Bear titles. Pending user decision on
+  dedupe.
+
+## 2026-08-11: Deduped 6 double-save tweet note pairs
+- Kept the richer/intact copy per pair (shadcn 48187426, Dan Koe 1950EEB2, Machina
+  13FF51C0, Dwarkesh DB48F2F2, Thariq 9B937759, Jerry Liu 76CB9816), merged missing
+  topical tags into keepers, trashed the 6 others. Guarded against losing My-note
+  blocks; only diff found was a redundant parent-tag line (Dwarkesh).
+- Post-dedupe audit: zero duplicate pairs. 4 brand-new saves (businessbarista,
+  unslothai, shannholmberg, aakashgupta) + 12 thread_checks await the next
+  /notes-organize-tweets run (thread backfill still blocked on X cookies).
