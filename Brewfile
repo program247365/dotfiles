@@ -4,6 +4,7 @@ tap 'homebrew/bundle'
 tap 'homebrew/cask-fonts'
 tap 'Arthur-Ficial/tap' # https://github.com/Arthur-Ficial/apfel
 tap 'program247365/tap' # https://github.com/program247365/homebrew-tap
+tap 'b451c/quickmd' # https://github.com/b451c/quickmd
 
 brew '1password-cli'
 brew 'apfel' # https://github.com/Arthur-Ficial/apfel - Apple Intelligence from the CLI (on-device LLM, no API key)
@@ -70,6 +71,7 @@ cask 'font-fira-code-nerd-font'
 cask 'font-source-code-pro'
 cask 'font-source-sans-pro'
 cask 'google-chrome'
+cask 'quickmd' # https://github.com/b451c/quickmd - markdown viewer with live auto-reload
 cask 'raycast'
 cask 'slack'
 cask 'tldraw' # tldraw offline — desktop whiteboard, offline.tldraw.com
