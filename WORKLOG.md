@@ -149,3 +149,11 @@
 - Post-dedupe audit: zero duplicate pairs. 4 brand-new saves (businessbarista,
   unslothai, shannholmberg, aakashgupta) + 12 thread_checks await the next
   /notes-organize-tweets run (thread backfill still blocked on X cookies).
+
+## 2026-08-18: Herdr setup — integrations, skill, and dotfiles adoption
+- Read https://herdr.dev/agent-guide.md; Herdr 0.8.0 was already installed (Homebrew, Brewfile) and this session runs inside a Herdr pane (HERDR_ENV=1), so setup was verification + gap-filling.
+- Installed integrations for claude/codex/pi (`herdr integration install <agent>`) — adds native session restore; state detection stays screen-based. The claude installer wrote a SessionStart hook through the settings.json symlink, so agents/claude/home/settings.json is modified in the repo.
+- Installed the herdr skill via `npx skills add herdrdev/herdr --skill herdr -g`. The CLI's relative symlink broke through the ~/.claude/skills dotfiles symlink; repointed it absolute to ~/.agents/skills/herdr. Saved as a memory (skills-cli-relative-symlink).
+- Added herdr/ (config.toml + install.sh): symlinks only config.toml into ~/.config/herdr (runtime state stays machine-local), then runs the integration installs idempotently and reloads the server config. Uses install.sh so script/install auto-discovers it; the install.zsh files (starship, mise, warp) are the older manually-run generation. Needed because the committed SessionStart hook references ~/.claude/hooks/herdr-agent-state.sh, which only the integration install creates on a fresh machine.
+- The adopt step caught live-config drift (agent_panel_sort = "spaces" appeared after the initial copy) — reconciled. ~/.config/herdr/config.toml.pre-dotfiles is a redundant backup, safe to delete.
+- Revisit: commit Brewfile, settings.json, skills/herdr symlink, and herdr/ together; decide whether other machines want the same integrations.
