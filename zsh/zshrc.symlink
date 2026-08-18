@@ -65,7 +65,7 @@ bindkey "^[[B" down-line-or-beginning-search # Down
 eval "$(starship init zsh)"
 
 # my custom bin files I may use a lot
-export PATH="$PATH":"$HOME/.kevin/bin:$PATH"
+export PATH="$HOME/.kevin/bin:$PATH"
 
 # https://github.com/ajeetdsouza/zoxide
 eval "$(zoxide init zsh)"
