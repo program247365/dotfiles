@@ -27,6 +27,7 @@ brew 'git'
 brew 'git-delta' # https://github.com/dandavison/delta
 brew 'grex' # https://github.com/pemistahl/grex
 brew 'gfold' # https://github.com/nickgerace/gfold
+brew 'herdr', start_service: true # https://herdr.dev - background server that keeps coding-agent terminal sessions alive
 brew 'hyperfine' # https://github.com/sharkdp/hyperfine
 brew 'jless' # https://jless.io/
 brew 'jq'
