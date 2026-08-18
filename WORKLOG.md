@@ -157,3 +157,8 @@
 - Added herdr/ (config.toml + install.sh): symlinks only config.toml into ~/.config/herdr (runtime state stays machine-local), then runs the integration installs idempotently and reloads the server config. Uses install.sh so script/install auto-discovers it; the install.zsh files (starship, mise, warp) are the older manually-run generation. Needed because the committed SessionStart hook references ~/.claude/hooks/herdr-agent-state.sh, which only the integration install creates on a fresh machine.
 - The adopt step caught live-config drift (agent_panel_sort = "spaces" appeared after the initial copy) — reconciled. ~/.config/herdr/config.toml.pre-dotfiles is a redundant backup, safe to delete.
 - Revisit: commit Brewfile, settings.json, skills/herdr symlink, and herdr/ together; decide whether other machines want the same integrations.
+
+## 2026-08-18: Adopted QuickMD as the live markdown viewer for agent-written files
+- Added `b451c/quickmd` tap + cask to Brewfile, installed it (needed new `brew trust`), and verified live reload against appends, wipes, and atomic temp-file renames.
+- Wrote `agents/claude/home/skills/quickmd/SKILL.md` via the writing-skills TDD loop: baseline agent misread "watch the markdown file" as a polling watcher; with the skill it opens QuickMD instead. Committed as 221c6eb.
+- Revisit: brew flagged 10 pre-existing untrusted taps (heroku, stripe, anthropics/tap, illegalstudio, noahgorstein…) it now ignores — trust the ones in use or `brew bundle` will skip them.
