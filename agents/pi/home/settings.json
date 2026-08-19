@@ -3,8 +3,7 @@
   "defaultModel": "qwen2.5-coder:7b",
   "enabledModels": [
     "anthropic/claude-opus-5",
-    "openai/gpt-5.4",
-    "google/gemini-2.5-pro",
+    "openai-codex/gpt-5.5",
     "ollama/qwen2.5-coder:7b",
     "ollama/gemma4:e2b",
     "apfel/apple-foundation-model"
