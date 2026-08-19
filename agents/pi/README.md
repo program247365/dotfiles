@@ -26,7 +26,7 @@ sh ~/.dotfiles/agents/pi/install.sh --install-ollama
 The installer uses:
 
 ```bash
-pnpm add -g @mariozechner/pi-coding-agent
+pnpm add -g @earendil-works/pi-coding-agent
 ```
 
 When `--install-ollama` is passed:

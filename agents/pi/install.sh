@@ -136,7 +136,11 @@ if [ "$INSTALL_OLLAMA" -eq 1 ]; then
 fi
 
 echo "  Installing Pi via pnpm..."
-pnpm add -g @mariozechner/pi-coding-agent
+if pnpm ls -g --depth 0 2>/dev/null | grep -q "@mariozechner/pi-coding-agent"; then
+  echo "  Removing deprecated @mariozechner/pi-coding-agent..."
+  pnpm remove -g @mariozechner/pi-coding-agent
+fi
+pnpm add -g @earendil-works/pi-coding-agent
 
 PNPM_BIN_DIR="$(pnpm bin -g)"
 if [ ! -x "${PNPM_BIN_DIR}/pi" ]; then
