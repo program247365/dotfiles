@@ -162,3 +162,37 @@
 - Added `b451c/quickmd` tap + cask to Brewfile, installed it (needed new `brew trust`), and verified live reload against appends, wipes, and atomic temp-file renames.
 - Wrote `agents/claude/home/skills/quickmd/SKILL.md` via the writing-skills TDD loop: baseline agent misread "watch the markdown file" as a polling watcher; with the skill it opens QuickMD instead. Committed as 221c6eb.
 - Revisit: brew flagged 10 pre-existing untrusted taps (heroku, stripe, anthropics/tap, illegalstudio, noahgorstein…) it now ignores — trust the ones in use or `brew bundle` will skip them.
+
+## 2026-08-19: pi moved to @earendil-works scope; enabledModels provider ids corrected
+- npm deprecated `@mariozechner/pi-coding-agent` in favor of `@earendil-works/pi-coding-agent`.
+  A scope rename is a *new* package to pnpm, so `pnpm add -g` the new one would have left both
+  installed, each declaring a `pi` bin and racing for the same symlink. agents/pi/install.sh now
+  removes the deprecated package first, guarded by a `pnpm ls -g` grep so a fresh machine doesn't
+  trip `pnpm remove -g` under `set -euo pipefail`. Verified: 0.73.1 → 0.84.2, deprecation warning
+  gone, ~/.kevin/bin/pi relinked, second install.sh run is a no-op. Commit 45adafe.
+- enabledModels in agents/pi/home/settings.json had three dead entries, and they were dead for
+  two different reasons — worth separating because the symptom is identical:
+  - `anthropic/claude-sonnet-4-5` → stale id, replaced with `anthropic/claude-opus-5` (correct
+    Opus 5 id; takes no date suffix).
+  - `openai/gpt-5.4` → **wrong provider name**. pi's provider is `openai-codex`, not `openai`;
+    `pi auth check --provider openai-codex` was `ready` the whole time while the entry warned on
+    every startup. Now `openai-codex/gpt-5.5`.
+  - `google/gemini-2.5-pro` → removed. Provider id `google` is real (it's in the package), but
+    Google has no credentials here and pi's model catalog is auth-filtered, so the entry could
+    only ever warn. Commit 753be88; both pushed.
+- pi's model catalog is auth-filtered: before credentials, `pi --list-models anthropic` returned
+  nothing, so an unauthenticated provider is indistinguishable from a nonexistent one. Also
+  `pi auth check` returns `not_ready` for *any* string including nonsense, so it can't confirm a
+  provider name — grep the installed package under `$(pnpm root -g)` for provider ids instead.
+- Ollama pull failed 4× with an opaque `Error: EOF`. Not network, not the server: attempt 1
+  stalled mid-transfer and left 2 of 16 per-chunk resume journals
+  (`blobs/sha256-<layer>-partial-0` and `-partial-4`) truncated to 0 bytes. Every retry then read
+  a journal claiming a byte range was complete when it wasn't and died instantly at manifest.
+  Deleting the 17 `*-partial*` files fixed it first try. A 46MB probe model pulling fine while the
+  4.7GB one failed is what isolated it to the cached blobs.
+- Gotcha for scripting pi: it reads stdin when stdin isn't a TTY, so from a non-interactive shell
+  it blocks waiting for EOF — pass `< /dev/null`. Warnings go to stderr, the answer to stdout, so
+  `pi -p ... 2>/dev/null` stays parseable.
+- Revisit: no Google credentials on this machine — if Gemini is ever set up, re-add a *verified*
+  id rather than the old 2.5-pro string. `pnpm approve-builds -g` is still pending for
+  @google/genai and protobufjs.
