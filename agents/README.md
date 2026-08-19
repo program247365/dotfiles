@@ -136,11 +136,11 @@ Installer behavior:
 - `~/.pi/agent/settings.json` -> `~/.dotfiles/agents/pi/home/settings.json`
 - `~/.pi/agent/AGENTS.md` -> `~/.dotfiles/agents/pi/home/AGENTS.md`
 - `~/.pi/agent/models.json` -> copied from `~/.dotfiles/agents/pi/home/models.json.default` only if missing
-- `~/.kevin/bin/pi` -> symlinked to the global `pnpm` install of `@mariozechner/pi-coding-agent`
+- `~/.kevin/bin/pi` -> symlinked to the global `pnpm` install of `@earendil-works/pi-coding-agent`
 
 Installer behavior:
 
-- Uses `pnpm add -g @mariozechner/pi-coding-agent`.
+- Uses `pnpm add -g @earendil-works/pi-coding-agent`.
 - Optionally installs Ollama with `sh ~/.dotfiles/agents/pi/install.sh --install-ollama`.
 - When `--install-ollama` is used, it also ensures the Ollama API is running before the installer exits.
 - Creates missing `~/.pi/agent`.
