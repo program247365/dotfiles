@@ -196,3 +196,38 @@
 - Revisit: no Google credentials on this machine — if Gemini is ever set up, re-add a *verified*
   id rather than the old 2.5-pro string. `pnpm approve-builds -g` is still pending for
   @google/genai and protobufjs.
+
+## 2026-08-24: Researched + verified codebase-memory-mcp (DeusData); Bear note written
+- Cloned, built from source, and tested the C-based code-graph MCP server: 15 tools / 158 grammars / 43 client surfaces all check out; indexed ~/.dotfiles (2,730 nodes) correctly; MCP calls 13–47ms warm; zero network sockets at runtime.
+- Full security sweep (subagent): clean — no telemetry, download code compiled out of release builds, credential-path indexing denylist, fail-open hooks, reversible config writes. Nits: install appends PATH to shell rc without uninstall cleanup; curl|bash configures all detected agents unless --skip-config.
+- Marketing vs paper gap: README says 120x fewer tokens/ms indexing; their own arXiv (2603.27277) says 10x tokens with 83% vs 92% answer quality vs plain file exploration. Dejan's "Claude ignores MCP tools" claim: Claude half supported (repo issue #69, shipped Grep/Glob hooks), ChatGPT half unverified.
+- Bear note "codebase-memory-mcp — verified research note" (29DDF584); test artifacts in /tmp/codebase-memory-mcp + /tmp/cbm-test-cache (disposable).
+- Revisit: if adopting, install with --skip-config and hand-add only the Claude Code entry; watch issue #1654 (large-repo OOM) before pointing it at supermono.
+
+## 2026-08-25: Tweet-enrichment skill — closed the untagged bare-link hole, enriched 94 notes
+- Verified the reported hole: 47 untagged notes held tweet URLs invisible to the classifier, which only recognized title-starts-with-URL or existing inbox tag. Four miss shapes: annotation-first saves ("Make agents.md! <url>"), share-sheet markdown-link saves ("[Name (@handle) 107 likes](url)"), enriched bodies whose literal #inbox/saved-tweets line Bear never promoted to a real tag (external-pipeline writes), and twitter.com-domain URLs.
+- Rewrote the pre-check recognition in agents/claude/commands/notes-organize-tweets.md as four signals (title prefix, inbox tag, enriched-body footprint, bare-link residual ≤300 chars); genuine project notes that merely reference a tweet go to a printed manual-review list instead of being rewritten. Residual text becomes the **My note** annotation so user words survive body rewrites.
+- Also fixed: URL regex swallowing `)` and `<!--` after query strings; /statuses/ legacy paths; reference_existing_attachments now percent-encodes filenames (Bear rejects writes whose attachment refs contain raw spaces — 7 notes failed on `Screenshot ... PM.png` before the fix); Step C now falls back to reading tweet text from the enriched body, since extra_tags-only notes are never in the current run's syndication batch.
+- Ran the full pipeline: 46 bodies built (39 single + 4 tombstone + 3 link-only), 37 thread upgrades via Tier 2 cookies, 35 head images + 22 Playwright card screenshots + 19 thread photos, 73 inbox tags, 37 topical tags. Zero iCloud conflicts.
+- Left for Kevin: 2 manual-review notes ("Agents in Stoa" 7DB6A7F7, Dwarkesh podcast note C3C6928A) and 6 tweets skipped in tagging for lack of a taxonomy fit (tferriss patience letter, Dostoevsky letter, Logitech alternative, SahilBloom video, thekitze paperclip, maxedapps thanks).
+- Skill edits are uncommitted in ~/.dotfiles (agents/claude/commands/notes-organize-tweets.md).
+
+## 2026-08-26: Tweet-enrichment re-run — idempotence confirmed, stale-marker cleanup
+- Re-ran the full workflow: zero new enrichment work needed — yesterday's pass fully converged (no new tweet saves, no iCloud conflicts).
+- Found and fixed a marker-hygiene bug: Step B's settle path stripped only *trailing* thread markers, but an attachment ref appended after `<!-- thread:unchecked -->` pushes it mid-body, where it survived. 63 notes carried a stale unchecked marker alongside their settled one — all cleaned; both settle regexes in the skill now strip markers anywhere in the body.
+- Settled 3 of the 6 tag-skipped notes: tferriss/Coach Sommer + Dostoevsky letters → writing/quips; maxedapps (links dmmulroy/anti-slop) → learn/ai.
+- Permanently skipped (no taxonomy fit, will keep listing under extra_tags): sahilbloom motivational video EA4A9989, almonk openlogi.org rec 4FFE26C4, thekitze paperclip 134E3490. Tag manually or add a taxonomy branch if they grate.
+- Manual-review pair unchanged: "Agents in Stoa" 7DB6A7F7, Dwarkesh podcast note C3C6928A.
+- Skill edits still uncommitted in ~/.dotfiles.
+
+## 2026-08-26: Tweet notes enrichment run — clean corpus, settled the 3 tag-skipped notes
+- Ran /notes-organize-tweets. Audit found zero notes needing body/image/thread work — Steps A/A2/A3/B all no-ops. No duplicate pairs, post-run conflict query clean.
+- Tagged the 3 notes the 2026-08-25 session had left as "no taxonomy fit": sahilbloom EA4A9989 → personal/motivational; almonk 4FFE26C4 → personal/technology; thekitze 134E3490 → projects/developer-productivity. Judged these existing tags close enough — remove/retag if they grate. They no longer surface under extra_tags.
+- Manual-review pair unchanged: "Agents in Stoa" 7DB6A7F7, Dwarkesh podcast note C3C6928A.
+
+## 2026-08-26: Updated impeccable skill v3.5.0 → v4.1.2
+- Ran `npx impeccable update --yes --no-hooks`; it writes through the ~/.claude/skills symlink straight into the vendored copy at agents/claude/home/skills/impeccable. First pass landed 4.1.1 because impeccable.style's bundle lagged the skill-v4.1.2 GitHub release (tagged this morning); re-ran with IMPECCABLE_BUNDLE_PATH pointed at the release's universal.zip to get 4.1.2 exactly.
+- The v3.6.0 npm CLI's update path silently skipped installing the four shipped subagents (asset-producer, documenter, finish-reviewer, manual-edit-applier) into ~/.claude/agents — a bug the v4.1.2 notes confirm ("Claude subagents install correctly again"). Copied them from the release bundle by hand; they now live in agents/claude/agents/.
+- Deliberately skipped the design hook install (--no-hooks) — the skill works without it; revisit if post-edit detector reminders sound useful (`/impeccable hooks on`).
+- Push required a rebase over 4 remote commits (pi scope rename etc.); autostash conflicted in WORKLOG.md, resolved by keeping both sides chronologically. Commit 4a68c68, pushed.
+- Added durable-skip convention to the Step C tagging pass in notes-organize-tweets.md: when no taxonomy tag fits, apply catch-all `learn/misc` instead of leaving the note untagged — any topical tag settles it so it stops resurfacing under extra_tags every run. Uncommitted alongside the existing skill edits.
