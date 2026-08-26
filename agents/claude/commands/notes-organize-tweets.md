@@ -37,9 +37,16 @@ If duplicates appear anyway, the **bear-notes skill → iCloud Sync Conflicts** 
 
 **Pre-check — Audit all tweet notes and classify what needs work**
 
-Two `bearcli search` calls cover the audit surface: a text search for `x.com` (catches notes with structured bodies and `#inbox/saved-tweets` tags) plus `@untagged` (catches bare-URL notes that Bear's FTS doesn't tokenize reliably). Results are merged by ID.
+Three `bearcli search` calls cover the audit surface: text searches for `x.com` and `twitter.com` (catch notes with structured bodies and `#inbox/saved-tweets` tags) plus `@untagged` (catches bare-URL notes that Bear's FTS doesn't tokenize reliably). Results are merged by ID.
 
-Tweet-save notes are recognized by **title prefix** — Bear auto-derives the title from the first content line, so a title starting with `https://x.com/.../status/...` is a high-confidence signal regardless of body shape. This catches: bare URLs, URL + user annotation (`* note: …`), markdown-link-wrapped `[url](url)`, and notes where the user typed `#inbox/saved-tweets` inline but Bear failed to promote it to a structured tag. Any text following the URL is captured as `annotation` and rendered into a `**My note**` block by Step B.
+Tweet-save notes are recognized by any of four signals (verified against the real corpus 2026-08-25 — title-prefix alone missed ~30 untagged notes):
+
+1. **Title prefix** — a title starting with `https://x.com/.../status/...` (or twitter.com). Catches bare URLs and markdown-link-wrapped `[url](url)`.
+2. **Existing `#inbox/saved-tweets` tag.**
+3. **Enriched-looking body** — the `**@handle** · [View on X]` footer, a `<!-- thread:` marker, or a literal `#inbox/saved-tweets` line. Catches notes written by external pipelines (e.g. iOS Shortcuts) whose inline tag text Bear never promoted to a real tag, leaving them fully untagged.
+4. **Bare-link shape** — after stripping tweet URLs, markdown link/image syntax, HTML comments, inline tags, and share-sheet boilerplate (`4.7K likes · 8 replies`, `Name (@handle) on X`), at most ~300 chars of user text remain and the note has no substantial user-authored structure. Catches annotation-first saves (`Make agents.md! https://x.com/…`) and `[Name (@handle) 107 likes](url)` share-sheet saves, whose titles never match signal 1.
+
+Notes containing a tweet URL that fail all four signals but are fully untagged are printed as a **manual-review list** — they look like project notes that merely reference a tweet, and rewriting them would destroy user content. Everything stripped-but-surviving in signal 4 is captured as `annotation` and rendered into a `**My note**` block by Step B, so user words are never lost.
 
 ```python
 import json, os, re, subprocess
@@ -62,6 +69,8 @@ def _search(query):
 by_id = {}
 for n in _search('x.com'):
     by_id[n['id']] = n
+for n in _search('twitter.com'):  # legacy-domain saves
+    by_id.setdefault(n['id'], n)
 for n in _search('@untagged'):  # Bear FTS misses bare-URL notes — pick them up here
     by_id.setdefault(n['id'], n)
 notes = list(by_id.values())
@@ -70,10 +79,34 @@ today = date.today()
 auth_needed_ttl = timedelta(days=7)
 
 # Title-prefix matches both `https://x.com/...` and `[https://x.com/...](...)` shapes.
-TWEET_URL_RE = re.compile(r'https?://(?:www\.)?x\.com/[^\s\])]+/status/\d+(?:\?\S*)?', re.IGNORECASE)
-TITLE_TWEET_RE = re.compile(r'^\[?https?://(?:www\.)?x\.com/\S+/status/\d+', re.IGNORECASE)
+TWEET_URL_RE = re.compile(r'https?://(?:www\.|mobile\.)?(?:x\.com|twitter\.com)/[^\s\])]+/status(?:es)?/\d+(?:\?[^\s\])]*)?', re.IGNORECASE)
+TITLE_TWEET_RE = re.compile(r'^\[?https?://(?:www\.|mobile\.)?(?:x\.com|twitter\.com)/\S+/status(?:es)?/\d+', re.IGNORECASE)
+
+# Share-sheet boilerplate: '4.7K likes and 8 replies', 'Name (@handle) on X',
+# 'Name (@handle) 107 likes · 5 replies'. Not user words — never an annotation,
+# and a heading made of this doesn't count as user-authored structure.
+BOILER_LINE_RE = re.compile(
+    r'^\s*(?:[\d.,]+[KMB]?\s+likes(?:\s+(?:and|·)\s+[\d.,]+[KMB]?\s+replies)?'
+    r'|.*\\?\(@[A-Za-z0-9_]{1,15}\\?\)(?:\s+on\s+X)?(?:\s+[\d.,]+[KMB]?\s+likes.*)?)\s*$',
+    re.IGNORECASE)
+
+def residual_text(text):
+    """The note minus everything that IS the link: tweet URLs, markdown link/image
+    syntax, HTML comments, inline tags, share-sheet boilerplate. What survives is
+    the user's own words — the basis for bare-link recognition and the annotation."""
+    t = re.sub(r'<!--.*?-->', ' ', text, flags=re.DOTALL)
+    t = re.sub(r'!\[[^\]]*\]\([^)]*\)', ' ', t)        # image embeds
+    t = re.sub(r'\[([^\]]*)\]\([^)]*\)', r'\1', t)     # unwrap md links, keep link text
+    t = TWEET_URL_RE.sub(' ', t)
+    t = re.sub(r'(?<!\S)#[\w][\w/-]*', ' ', t)         # inline tags (not '# ' headings)
+    t = re.sub(r'(?m)^#{1,6}\s+', '', t)               # heading markers, keep heading text
+    t = re.sub(r'(?m)^\s*[*>-]\s*', '', t)             # bullet/quote markers
+    lines = [ln.strip() for ln in t.split('\n')]
+    lines = [ln for ln in lines if ln and not BOILER_LINE_RE.match(ln)]
+    return '\n'.join(lines).strip()
 
 todo = []
+manual_review = []  # untagged notes with a tweet URL that look like real project notes
 seen_tweets = {}  # status_id -> [(note_id, has_thread_complete)] for conflict-pair detection
 for n in notes:
     text = (n.get('content') or '').strip()
@@ -83,24 +116,10 @@ for n in notes:
     has_inbox_tag = 'inbox/saved-tweets' in raw_tags
     topical_tags = [t for t in raw_tags if not t.startswith('inbox')]
 
-    # Recognize as tweet-save via title prefix OR existing inbox tag.
-    title_is_tweet = bool(TITLE_TWEET_RE.match(title))
-    if not title_is_tweet and not has_inbox_tag:
-        continue  # not a tweet note (e.g. project note that mentions a tweet)
-
     url_match = TWEET_URL_RE.search(text)
     if not url_match:
         continue
     url = url_match.group(0).rstrip('.,)>]"\'')
-
-    # Capture any user annotation after the URL (excluding inline #inbox/saved-tweets
-    # text and markdown link closers). Only meaningful when the body is still unstructured.
-    annotation = None
-    after_url = text[url_match.end():].strip()
-    after_url = re.sub(r'^\]\([^)]*\)\s*', '', after_url)  # strip markdown link closer
-    after_url = after_url.strip()
-    if after_url and not after_url.startswith('#') and not after_url.startswith('<!--'):
-        annotation = after_url[:500]
 
     has_image = bool(n.get('attachments'))
     is_tombstone = '_Original tweet was deleted or restricted._' in text
@@ -109,6 +128,35 @@ for n in notes:
         bool(re.search(r'^#\s+\S', text, re.MULTILINE))
         and ('> ' in text or is_tombstone or is_link_only)
     )
+    # Signal 3: enriched by a pipeline whose inline tag Bear never promoted.
+    looks_enriched = (
+        bool(re.search(r'\*\*@\w+\*\*\s*·\s*\[View (?:thread )?on X\]', text))
+        or '<!-- thread:' in text
+        or bool(re.search(r'(?m)^#inbox/saved-tweets\s*$', text))
+    )
+
+    # Recognize as tweet-save via signals 1-4 (see prose above).
+    title_is_tweet = bool(TITLE_TWEET_RE.match(title))
+    resid = residual_text(text)
+    if not (title_is_tweet or has_inbox_tag or looks_enriched):
+        # Signal 4: bare-link shape — little user text besides the link itself.
+        user_headings = [h for h in re.findall(r'(?m)^#{1,6}\s+(.+)$', text)
+                         if not BOILER_LINE_RE.match(h.strip())]
+        resid_lines = [ln for ln in resid.split('\n') if ln.strip()]
+        body_lines = resid_lines[1:] if user_headings else resid_lines
+        if len(resid) > 300 or (user_headings and len(body_lines) >= 2):
+            # Substantial user content → a project note that references a tweet.
+            # Never rewrite these; surface fully-untagged ones for a human decision.
+            if not raw_tags:
+                manual_review.append({'id': n['id'], 'title': title[:70], 'url': url})
+            continue
+
+    # User annotation: for still-unstructured bodies, the residual IS the annotation
+    # (annotation-first saves, URL-then-note saves, user-titled saves alike). Rendered
+    # into a `**My note**` block by Step B so nothing the user typed is lost.
+    annotation = None
+    if not has_body and resid:
+        annotation = resid[:500]
 
     # Parse thread markers — they're the idempotency anchor.
     #   <!-- thread:complete count=N fetched=YYYY-MM-DD -->   settled: Tier 2 has run, trust it
@@ -138,7 +186,7 @@ for n in notes:
         thread_auth_needed_date = None
         # Body still has the marker; Step A2 will overwrite it.
 
-    status_id = re.search(r'/status/(\d+)', url).group(1)
+    status_id = re.search(r'/status(?:es)?/(\d+)', url).group(1)
     seen_tweets.setdefault(status_id, []).append((n['id'], thread_complete_count is not None))
 
     needs = []
@@ -190,6 +238,12 @@ for k, v in sorted(counts.items()): print(f'  {k}: {v}')
 print()
 for n in todo:
     print(f'  id={n["id"]} needs={n["needs"]} {n["url"][:65]}')
+
+if manual_review:
+    print(f'\n{len(manual_review)} untagged notes reference a tweet but look like real project notes')
+    print('— left untouched; review by hand (open in Bear, tag or enrich manually):')
+    for m in manual_review:
+        print(f'  id={m["id"]} "{m["title"]}" {m["url"][:60]}')
 ```
 
 Review the output before proceeding. Then:
@@ -209,7 +263,7 @@ batch = [n for n in todo if {'image','body','thread_check'} & set(n['needs'])]
 
 results = []
 for n in batch:
-    m = re.search(r'/status/(\d+)', n['url'])
+    m = re.search(r'/status(?:es)?/(\d+)', n['url'])
     if not m:
         results.append({'id': n['id'], 'status': 'no_id', 'url': n['url']})
         continue
@@ -396,7 +450,7 @@ if shot_candidates:
 **Step B — Apply mutations via bearcli**
 
 ```python
-import json, os, re, subprocess, sys
+import json, os, re, subprocess, sys, urllib.parse
 from collections import Counter
 from datetime import date
 
@@ -458,9 +512,13 @@ def reference_existing_attachments(note_id, body):
     except Exception:
         return body
     for fname in [f for f in attached if f]:
-        if f']({fname})' in body:
+        # Bear writes attachment link targets percent-encoded (`image%202.png`) —
+        # a raw space in the target breaks markdown parsing and bearcli's
+        # attachment-reference guard rejects the write (hit 2026-08-25).
+        quoted = urllib.parse.quote(fname)
+        if f']({fname})' in body or f']({quoted})' in body:
             continue
-        ref = f'![{fname}]({fname})\n\n'
+        ref = f'![{fname}]({quoted})\n\n'
         m = re.search(r'^## Tweet 2 of \d+$', body, re.MULTILINE)
         if fname == ATTACH_NAME and m:
             body = body[:m.start()] + ref + body[m.start():]
@@ -652,8 +710,9 @@ for note_id, note in todo.items():
             # Stamp auth-needed marker without rewriting the body.
             cur = get_content(note_id)
             stamp = auth_needed_marker(auth_needed_date)
-            # Remove any existing thread:* marker first, then append
-            cleaned = re.sub(r'\n*<!--\s*thread:[^>]+-->\s*\n*$', '\n', cur)
+            # Remove any existing thread:* markers first (not just trailing — an image
+            # attached after the marker pushes it mid-body), then append
+            cleaned = re.sub(r'\n*<!--\s*thread:[^>]+-->\s*\n*', '\n', cur)
             new_body = cleaned.rstrip('\n') + '\n\n' + stamp + '\n'
             r = overwrite(note_id, new_body)
             if r.returncode == 0:
@@ -667,8 +726,10 @@ for note_id, note in todo.items():
             write_kind = 'body_thread_enrich'
         elif status == 'ok':
             # Single tweet OR thread fetch returned 1 tweet. Stamp count=1 on existing body.
+            # Strip ALL prior thread markers — a stale mid-body `thread:unchecked` survives
+            # a trailing-only regex when an attachment ref was appended after it.
             cur = get_content(note_id)
-            cleaned = re.sub(r'\n*<!--\s*thread:[^>]+-->\s*\n*$', '\n', cur)
+            cleaned = re.sub(r'\n*<!--\s*thread:[^>]+-->\s*\n*', '\n', cur)
             new_body = cleaned.rstrip('\n') + '\n\n' + thread_marker(1) + '\n'
             r = overwrite(note_id, new_body)
             if r.returncode == 0:
@@ -750,26 +811,43 @@ print('\nSummary:', json.dumps(dict(counts), indent=2))
 
 Pull the existing tag taxonomy and the live tags for each candidate, classify, then apply with `bearcli tags add` — body untouched, modification date untouched.
 
+Notes needing only `extra_tags` are never fetched by Step A (its batch is image/body/thread_check), so this run's syndication file won't cover them — on a re-run that's *every* candidate. The fallback reads the tweet text straight out of the already-enriched note body (title + blockquote), which is equivalent for classification.
+
 ```python
 import json, re, subprocess
 
 todo = json.load(open('/tmp/tweet_todo.json'))
 syn = {r['id']: r for r in json.load(open('/tmp/tweet_syndication.json'))}
 
+def text_from_note(note_id):
+    """Fallback when Step A didn't fetch this note this run: pull author + tweet text
+    from the enriched body (`# Author: …` heading, `> ` blockquote, `**@handle**` footer)."""
+    body = subprocess.run(['bearcli', 'cat', note_id], capture_output=True, text=True).stdout
+    author = ''
+    m = re.search(r'(?m)^#\s+([^:\n]+):', body)
+    if m: author = m.group(1).strip()
+    handle = ''
+    m = re.search(r'\*\*@(\w+)\*\*', body)
+    if m: handle = m.group(1)
+    quote = '\n'.join(ln[2:] for ln in body.split('\n') if ln.startswith('> '))
+    return author, handle, quote.strip()
+
 candidates = []
 for n in todo:
-    pr = syn.get(n['id'], {})
-    if pr.get('status') != 'ok':
+    if 'extra_tags' not in n['needs']:
         continue
     tags_raw = subprocess.check_output(['bearcli', 'tags', 'list', n['id'], '--format', 'json'])
     tags = [t.lstrip('#') for t in [e.get('tag', '') for e in json.loads(tags_raw)] if t]
     if any(not t.startswith('inbox') for t in tags):
         continue
-    candidates.append({
-        'id': n['id'], 'tags': tags,
-        'author': pr.get('author'), 'handle': pr.get('handle'),
-        'text': pr.get('tweetText') or '',
-    })
+    pr = syn.get(n['id'], {})
+    if pr.get('status') == 'ok':
+        author, handle, text = pr.get('author'), pr.get('handle'), pr.get('tweetText') or ''
+    else:
+        author, handle, text = text_from_note(n['id'])
+    if not text:
+        continue  # tombstone/link-only — nothing to classify
+    candidates.append({'id': n['id'], 'tags': tags, 'author': author, 'handle': handle, 'text': text})
 
 tags_raw = subprocess.check_output(['bearcli', 'tags', 'list', '--format', 'json'])
 all_tags = sorted({(e.get('tag') or '').lstrip('#')
@@ -788,7 +866,7 @@ for c in candidates:
     print(f"  text: {one_line[:240]}")
 ```
 
-Read the candidate content above. For each note, pick 1–3 tags from the existing taxonomy. Prefer `learn/*` tags. Skip link-only tweets. Then apply:
+Read the candidate content above. For each note, pick 1–3 tags from the existing taxonomy. Prefer `learn/*` tags. Skip link-only tweets. If nothing in the taxonomy genuinely fits, tag the note `learn/misc` — the designated catch-all. Any non-inbox tag settles the note durably (the audit's `extra_tags` check only fires when a note has *no* topical tag), so a `learn/misc` note stops resurfacing on every run. Never leave a candidate untagged as a "skip": that decision doesn't persist anywhere the audit can see, and the note will be re-flagged forever. Then apply:
 
 ```python
 import subprocess
