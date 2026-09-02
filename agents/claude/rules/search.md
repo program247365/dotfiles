@@ -34,6 +34,15 @@
   X with Claude/Codex/pi"; the claude one excludes the running session. A
   machine without a given agent installed silently contributes nothing for
   that source.
+- The `raycast` source is **jump-only, not a search**: Raycast Notes are
+  stored encrypted with no read API, so search can't rank them. It always
+  returns exactly one dateless hit at score 0, appended as the last row of
+  every page (it is excluded from the "N results" count), whose ref
+  deep-links into Raycast's own Search Notes (the query is *not* carried
+  over — Raycast's Search Notes accepts no starting term, so Kevin retypes
+  it there). Agents should read it as "Kevin may want to check Raycast
+  Notes by hand", never as a match — and never cite it as a source for
+  anything. `--source raycast` is only useful for producing that link.
 - Sources are enabled by presence in the config's `sources` block (unlisted
   = off; no config = shipped defaults, which is everything on except kpr,
   stoa, and index-recent). spark needs Spark Desktop running with CLI access
