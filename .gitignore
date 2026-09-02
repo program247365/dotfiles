@@ -13,3 +13,7 @@ agents/claude/project/scheduled_tasks.lock
 # herdr-ticket-campaign: repo reference files hold company-internal conventions
 # (repo slugs, Linear teams, tracker ids, staging-environment details) — machine-local only
 agents/claude/home/skills/herdr-ticket-campaign/references/*-repo.md
+
+# raycast: Raycast's own scheduled backup destination (Settings > Advanced >
+# Export) — large encrypted .rayconfig snapshots, not meant for git history
+raycast/
