@@ -9,6 +9,15 @@ DOTFILES_CLAUDE="$DOTFILES_ROOT/agents/claude"
 DOTFILES_PHILOSOPHY="$DOTFILES_ROOT/agents/philosophy/SOFTWARE_ENGINEERING.md"
 CLAUDE_DIR="$HOME/.claude"
 
+# Claude Code CLI — native installer. Self-updating after this, so only install
+# when it's missing. ~/.local/bin is put on PATH by system/env.zsh.
+if [ -x "$HOME/.local/bin/claude" ]; then
+  echo "  [ok] Claude Code CLI ($("$HOME/.local/bin/claude" --version 2>/dev/null | head -1))"
+else
+  echo "  [install] Claude Code CLI (native installer)"
+  curl -fsSL https://claude.ai/install.sh | bash
+fi
+
 # adopt_and_link: move existing config into dotfiles, then symlink back.
 #
 # For files:
