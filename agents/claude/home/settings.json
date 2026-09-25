@@ -30,7 +30,6 @@
       "/Users/kevin/.kevin/code/claude-code"
     ]
   },
-  "model": "claude-fable-5[1m]",
   "hooks": {
     "PostToolUse": [
       {
@@ -50,7 +49,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "sh '/Users/kevin/skills/tldraw-offline/inject-server-context.sh' SubagentStart"
+            "command": "node '/Users/kevin/skills/tldraw-offline/inject-server-context.mjs' SubagentStart"
           }
         ]
       }
@@ -97,7 +96,9 @@
     "skill-creator@claude-plugins-official": true,
     "posthog@claude-plugins-official": true,
     "frontend-design@claude-plugins-official": true,
-    "warp@claude-code-warp": true
+    "warp@claude-code-warp": true,
+    "datadog@claude-plugins-official": true,
+    "cloudflare@cloudflare": true
   },
   "extraKnownMarketplaces": {
     "compound-engineering-plugin": {
@@ -117,12 +118,19 @@
         "source": "github",
         "repo": "warpdotdev/claude-code-warp"
       }
+    },
+    "cloudflare": {
+      "source": {
+        "source": "github",
+        "repo": "cloudflare/skills"
+      }
     }
   },
   "skipDangerousModePermissionPrompt": true,
   "skipWorkflowUsageWarning": true,
   "theme": "dark",
   "editorMode": "vim",
+  "autoCompactEnabled": false,
   "skipAutoPermissionPrompt": true,
   "mcpServers": {
     "msgvault": {
