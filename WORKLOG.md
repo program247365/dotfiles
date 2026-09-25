@@ -265,3 +265,4 @@
 - Split the pile into three commits: native-installer switch, notes-organize-tweets script extraction, settings + tldraw-offline node helpers.
 - Revisit: a leftover npm global (2.1.260) lives in mise node 22.23.2, created 26 min after the native install (likely an old session's npm auto-updater). Still second on PATH. Removal was blocked for the agent; run `npm uninstall -g --prefix ~/.local/share/mise/installs/node/22.23.2 @anthropic-ai/claude-code`. The migration's early "already migrated" exit skips its leftover check, so it won't catch this.
 - Revisit: ~/.claude.json still says `autoUpdates: false`; native installs appear to ignore it (binary has `autoUpdatesProtectedForNative`), but confirm with `claude doctor`. Also confirm `autoCompactEnabled: false` in settings.json is intended.
+- Follow-up: Kevin ran the npm uninstall for the leftover 2.1.260 copy; `whence -ap claude` now returns only ~/.local/bin/claude and no mise node install holds a claude binary.
