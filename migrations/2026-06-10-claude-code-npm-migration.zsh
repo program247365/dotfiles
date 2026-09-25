@@ -6,6 +6,13 @@
 
 set -e
 
+# SUPERSEDED 2026-09-04 by 2026-09-04-claude-code-native-installer.zsh.
+# Claude Code now ships the same native binary through every channel and
+# self-updates, so the mise npm backend is gone. Kept for history; exits early
+# so its verification step stops aborting `dot`.
+echo "⊘ Superseded by 2026-09-04-claude-code-native-installer.zsh"
+exit 0
+
 echo "Migrating Claude Code: brew cask -> mise npm backend..."
 
 # 1. Remove the Homebrew cask if present (cask may be named "claude-code" or "claude-code@latest")

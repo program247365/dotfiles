@@ -3,55 +3,9 @@
 
 alias c="claude"
 
-# Claude Code Upgrade - upgrades claude-code via mise's npm backend and shows version
-# Usage: ccu [-n|--notes] to open release notes after upgrade
-ccu() {
-  local show_notes=false
-
-  # Parse arguments
-  while [[ $# -gt 0 ]]; do
-    case "$1" in
-      -n|--notes)
-        show_notes=true
-        shift
-        ;;
-      -h|--help)
-        echo "Usage: ccu [-n|--notes] [-h|--help]"
-        echo ""
-        echo "Upgrade Claude Code via mise"
-        echo ""
-        echo "Options:"
-        echo "  -n, --notes  Open release notes in browser after upgrade"
-        echo "  -h, --help   Show this help message"
-        return 0
-        ;;
-      *)
-        echo "Unknown option: $1"
-        echo "Use 'ccu --help' for usage"
-        return 1
-        ;;
-    esac
-  done
-
-  echo "Upgrading Claude Code via mise..."
-  echo ""
-
-  mise upgrade 'npm:@anthropic-ai/claude-code'
-  rehash
-
-  echo ""
-  local version=$(mise exec 'npm:@anthropic-ai/claude-code' -- claude --version 2>/dev/null | head -1)
-  echo "Installed version: $version"
-
-  if $show_notes; then
-    echo ""
-    echo "Opening release notes..."
-    open "https://github.com/anthropics/claude-code/releases"
-  else
-    echo ""
-    echo "Tip: Run 'ccu -n' to open release notes in browser"
-  fi
-}
+# Force an immediate update. Claude Code self-updates in the background anyway;
+# see what changed with /release-notes inside a session.
+alias ccu="claude update"
 
 # Claude with zero context: no MCPs, no skills/hooks, optional system prompt
 # Usage: c0 [system prompt...]
