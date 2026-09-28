@@ -4,6 +4,7 @@
   "enabledModels": [
     "openai-codex/gpt-5.5",
     "anthropic/claude-opus-5-5",
+    "anthropic/claude-sonnet-5-5",
     "ollama/qwen2.5-coder:7b",
     "ollama/gemma4:e2b",
     "apfel/apple-foundation-model"
@@ -19,5 +20,6 @@
   "quietStartup": false,
   "lastChangelogVersion": "0.87.1",
   "defaultThinkingLevel": "medium",
+  "showCacheMissNotices": true,
   "theme": "dark"
 }
