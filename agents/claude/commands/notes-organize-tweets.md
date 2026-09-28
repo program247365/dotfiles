@@ -56,7 +56,7 @@ Tweet-save notes are recognized by any of four signals (verified against the rea
 
 Notes containing a tweet URL that fail all four signals but are fully untagged are printed as a **manual-review list** — they look like project notes that merely reference a tweet, and rewriting them would destroy user content. Everything stripped-but-surviving in signal 4 is captured as `annotation` and rendered into a `**My note**` block by Step B, so user words are never lost.
 
-The pre-check also excludes **duplicate pairs** (two notes for the same tweet) from the run and prints them. A pair is either an iCloud sync conflict (created seconds apart; check the conflict stamp) or a double-save (same tweet saved twice, days apart — compare created dates). Discriminate with the post-run sqlite query below: a stamp means conflict, no stamp means double-save. Either way: merge tags into the richer/intact copy, trash the other, and — for conflict pairs only — recreate the survivor under a fresh ID if it carries the fork icon (see bear-notes skill → iCloud Sync Conflicts).
+The pre-check also excludes **duplicate pairs** (two notes for the same tweet) from the run and prints them. A pair is either an iCloud sync conflict (one copy created seconds after the other, typically at run time) or a double-save (same tweet saved twice, days apart). Discriminate by created dates — the post-run check below prints them. Either way: merge tags into the richer/intact copy, trash the other, and — for conflict pairs only — recreate the survivor under a fresh ID if it carries the fork icon (see bear-notes skill → iCloud Sync Conflicts).
 
 Review the output before proceeding. Then:
 
@@ -124,13 +124,13 @@ python3 ~/.dotfiles/agents/claude/tools/notes-organize-tweets/step_c_apply.py
 
 **Post-run conflict check**
 
-A remote version can sync down mid-run and collide with this run's writes (it happened 2026-08-11: thread bodies enriched on another machine arrived 47s after local writes, duplicating 4 notes). One read-only query catches it:
+A remote version can sync down mid-run and collide with this run's writes (it happened 2026-08-11: thread bodies enriched on another machine arrived 47s after local writes, duplicating 4 notes). A conflict leaves two live notes for the same tweet, so the check re-runs the pre-check's duplicate detection and prints each pair's created/modified times via `bearcli` (exit 1 when pairs exist). It deliberately avoids the SQLite conflict stamp — `bearcli` doesn't expose it, and reading Bear's DB directly needs Full Disk Access:
 
 ```bash
 ~/.dotfiles/agents/claude/tools/notes-organize-tweets/postrun_conflict_check.sh
 ```
 
-If rows come back, report them and resolve per **bear-notes skill → iCloud Sync Conflicts** (keep the richer copy, trash the stale one, recreate the survivor if it carries the fork icon — `bearcli` alone cannot clear the stamp).
+If pairs come back, report them and resolve per **bear-notes skill → iCloud Sync Conflicts** (keep the richer copy, trash the stale one, recreate the survivor if it carries the fork icon — `bearcli` alone cannot clear the stamp).
 
 ---
 
@@ -140,4 +140,4 @@ If rows come back, report them and resolve per **bear-notes skill → iCloud Syn
 
 Re-run the workflow after refreshing cookies to backfill the threads.
 
-If the pre-check excluded conflict pairs or the post-run check found stamped notes, list them in the report with the resolution pointer (bear-notes skill → iCloud Sync Conflicts).
+If the pre-check excluded conflict pairs or the post-run check found duplicate pairs, list them in the report with the resolution pointer (bear-notes skill → iCloud Sync Conflicts).
