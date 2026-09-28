@@ -30,6 +30,38 @@
       "/Users/kevin/.kevin/code/claude-code"
     ]
   },
+  "skillOverrides": {
+    "architecture-designer": "off",
+    "brainstorming": "off",
+    "design-an-interface": "off",
+    "dev-browser": "off",
+    "edit-article": "off",
+    "electron": "off",
+    "feature-video": "off",
+    "git-recon": "off",
+    "grill-with-docs": "off",
+    "handoff": "off",
+    "herdr-ticket-campaign": "off",
+    "improve-codebase-architecture": "off",
+    "plan-exit-review": "off",
+    "prototype": "off",
+    "qa": "off",
+    "request-refactor-plan": "off",
+    "review": "off",
+    "review-todos": "off",
+    "tdd": "off",
+    "tldraw": "off",
+    "tldraw-offline": "off",
+    "to-issues": "off",
+    "to-prd": "off",
+    "triage": "off",
+    "visual-explainer": "off",
+    "workday": "off",
+    "writing-beats": "off",
+    "writing-fragments": "off",
+    "writing-shape": "off",
+    "zoom-out": "off"
+  },
   "hooks": {
     "PostToolUse": [
       {
@@ -37,19 +69,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'TUI_REVIEW_BROADCAST=1 python3 /Users/kevin/code/tools/fast-code-reviewer/hooks/posttooluse.py'",
+            "command": "bash -c 'TUI_REVIEW_BROADCAST=1 python3 /Users/kevin/.kevin/code/fast-code-reviewer/hooks/posttooluse.py'",
             "timeout": 5000
-          }
-        ]
-      }
-    ],
-    "SubagentStart": [
-      {
-        "matcher": "tldraw-offline",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node '/Users/kevin/skills/tldraw-offline/inject-server-context.mjs' SubagentStart"
           }
         ]
       }
@@ -72,45 +93,39 @@
     "command": "~/.claude/statusline.sh"
   },
   "enabledPlugins": {
-    "rust-analyzer-lsp@claude-plugins-official": true,
-    "typescript-lsp@claude-plugins-official": true,
-    "code-review@claude-plugins-official": true,
+    "rust-analyzer-lsp@claude-plugins-official": false,
+    "typescript-lsp@claude-plugins-official": false,
+    "code-review@claude-plugins-official": false,
     "superpowers@claude-plugins-official": true,
-    "pr-review-toolkit@claude-plugins-official": true,
-    "commit-commands@claude-plugins-official": true,
-    "slack@claude-plugins-official": true,
-    "agent-sdk-dev@claude-code-plugins": true,
-    "code-review@claude-code-plugins": true,
-    "commit-commands@claude-code-plugins": true,
+    "pr-review-toolkit@claude-plugins-official": false,
+    "commit-commands@claude-plugins-official": false,
+    "slack@claude-plugins-official": false,
+    "agent-sdk-dev@claude-code-plugins": false,
+    "code-review@claude-code-plugins": false,
+    "commit-commands@claude-code-plugins": false,
     "explanatory-output-style@claude-code-plugins": true,
-    "feature-dev@claude-code-plugins": true,
-    "frontend-design@claude-code-plugins": true,
+    "feature-dev@claude-code-plugins": false,
+    "frontend-design@claude-code-plugins": false,
     "hookify@claude-code-plugins": false,
-    "learning-output-style@claude-code-plugins": true,
-    "plugin-dev@claude-code-plugins": true,
-    "pr-review-toolkit@claude-code-plugins": true,
-    "ralph-wiggum@claude-code-plugins": true,
+    "learning-output-style@claude-code-plugins": false,
+    "plugin-dev@claude-code-plugins": false,
+    "pr-review-toolkit@claude-code-plugins": false,
+    "ralph-wiggum@claude-code-plugins": false,
     "security-guidance@claude-code-plugins": true,
-    "compound-engineering@compound-engineering-plugin": true,
-    "swift-lsp@claude-plugins-official": true,
-    "skill-creator@claude-plugins-official": true,
-    "posthog@claude-plugins-official": true,
-    "frontend-design@claude-plugins-official": true,
+    "compound-engineering@compound-engineering-plugin": false,
+    "swift-lsp@claude-plugins-official": false,
+    "skill-creator@claude-plugins-official": false,
+    "posthog@claude-plugins-official": false,
+    "frontend-design@claude-plugins-official": false,
     "warp@claude-code-warp": true,
-    "datadog@claude-plugins-official": true,
-    "cloudflare@cloudflare": true
+    "datadog@claude-plugins-official": false,
+    "cloudflare@cloudflare": false
   },
   "extraKnownMarketplaces": {
     "compound-engineering-plugin": {
       "source": {
         "source": "github",
         "repo": "EveryInc/compound-engineering-plugin"
-      }
-    },
-    "vercel-vercel-plugin": {
-      "source": {
-        "source": "directory",
-        "path": "/Users/kevin/.cache/plugins/github.com-vercel-vercel-plugin"
       }
     },
     "claude-code-warp": {
@@ -139,5 +154,37 @@
         "mcp"
       ]
     }
+  },
+  "autoMode": {
+    "environment": [
+      "### Org-wide",
+      "**Organization**: None configured",
+      "**Cloud provider(s)**: None configured",
+      "**Repository visibility**: PUBLIC — github.com/program247365/dotfiles (this repo's origin remote); any push here is publishing",
+      "**Internal sharing / snippet hosting**: None configured — treat public paste/gist services as outside the trust boundary",
+      "**Secrets management**: None configured",
+      "**Default / protected branches**: main (default); no rulesets listed, no protected branches listed via gh — treat as unprotected",
+      "**CI/CD deploy targets**: None configured",
+      "**Network posture**: None configured",
+      "**Host containment**: None configured — assume Claude Code runs on an ordinary developer machine with open internet",
+      "**Source control**: origin github.com/program247365/dotfiles.git (public, push allowed — this is the user's own fork/repo); upstream github.com/holman/dotfiles.git (fetch/pull reference only — treat as read-only upstream, not a push target)",
+      "**Trusted internal domains**: None configured",
+      "**Trusted cloud buckets**: None configured",
+      "**Key internal services**: None configured",
+      "**Internal package registry**: None configured",
+      "**Sensitive data locations & audiences**: any file or store holding personal data, confidential business data, credentials, regulated data, or similarly sensitive material; preserve exact handles when known and share only with audiences cleared at the [named+specifics] bar",
+      "**Data retention / declassification**: None configured",
+      "**Sensitive remote targets**: any namespace, host, or container whose name carries `prod` or `production` as a whole word or name segment",
+      "**Protected deployment namespaces / environments**: None configured — fall back to the Sensitive remote targets heuristic",
+      "**Protected IaC scopes**: IAM, RBAC, networking, quota, and node-pool resources; anything whose name or tag carries `prod` or `production` as a whole word or name segment",
+      "### User-specific",
+      "**Primary use of Claude Code**: software development (personal dotfiles/config management)",
+      "**Trusted repo**: ~/.dotfiles (github.com/program247365/dotfiles, public) — origin is the user's own repo and push target; upstream (github.com/holman/dotfiles) is a reference-only remote, not a push destination; since the repo is public, only this repo's own work belongs in it — content ported from other checkouts or outside this session is not its own work",
+      "**Org-specific CLIs**: None configured — note bearcli, search, spark, qmd, mise, uv appear as routine non-standard CLIs in this project's own usage"
+    ],
+    "allow": [
+      "$defaults",
+      "Bash(qmd:*) in ~/.dotfiles — routine non-standard CLI used frequently in this project's own transcripts"
+    ]
   }
 }

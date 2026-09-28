@@ -267,3 +267,15 @@
 - Revisit: ~/.claude.json still says `autoUpdates: false`; native installs appear to ignore it (binary has `autoUpdatesProtectedForNative`), but confirm with `claude doctor`. Also confirm `autoCompactEnabled: false` in settings.json is intended.
 - Follow-up: Kevin ran the npm uninstall for the leftover 2.1.260 copy; `whence -ap claude` now returns only ~/.local/bin/claude and no mise node install holds a claude binary.
 - Correction to 2026-08-27: the squash to a clean single commit was never force-pushed. origin/main still carries the original commit plus a follow-up that genericized the naming example, so the real ticket id remains in public history. Pushed today by rebasing onto origin/main and dropping the local squash (identical tree). Scrubbing it would need a force-push of main, which Kevin must do himself if he wants it.
+
+## 2026-09-27: /doctor health check and cleanup
+- Disabled 22 unused plugins (posthog, compound-engineering, cloudflare, slack, datadog, duplicate review/commit/frontend plugins, 3 LSPs, etc.) and 30 unused user skills via `enabledPlugins`/`skillOverrides` in agents/claude/home/settings.json — the skill listing was over budget and truncating entries to names only.
+- Fixed broken hooks: fast-code-reviewer PostToolUse path moved to ~/.kevin/code/fast-code-reviewer; removed tldraw-offline SubagentStart hook (script no longer exists). Removed dangling skills/herdr symlink.
+- Removed leftover Claude copies (Homebrew-node npm global 2.1.220, mise npm tool 2.1.283); `claude install` set installMethod=native.
+- Revisit: something outside dotfiles re-added `npm:@anthropic-ai/claude-code` to ~/.config/mise/config.toml today at 12:15 — find the culprit if it reappears. monarchmoney/msgvault MCP servers fail to connect and are unused; run `/mcp disable` or fix them.
+
+## 2026-09-27: Audit Claude symlinks against install.sh
+- All install.sh symlinks resolve correctly (~/.claude/{CLAUDE.md,settings.json,commands,statusline.sh,rules,agents,skills,SOFTWARE_ENGINEERING.md}, ~/.dotfiles/.claude, ~/.dotfiles/SOFTWARE_ENGINEERING.md); no broken links inside linked dirs.
+- Removed stale vercel-vercel-plugin marketplace (pointed at missing ~/.cache path) and uninstalled the plugin; dropped duplicate statusLine from project settings.local.json; gitignored .playwright-mcp/; deleted Feb/Jul ~/.claude backups.
+- Note: /auto-mode-setup wrote an `autoMode.environment` block into agents/claude/home/settings.json — this repo is public, so review it before committing.
+- ~/.claude/hooks/herdr-agent-state.sh is intentionally outside dotfiles (created by herdr/install.sh).
