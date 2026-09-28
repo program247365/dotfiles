@@ -279,3 +279,13 @@
 - Removed stale vercel-vercel-plugin marketplace (pointed at missing ~/.cache path) and uninstalled the plugin; dropped duplicate statusLine from project settings.local.json; gitignored .playwright-mcp/; deleted Feb/Jul ~/.claude backups.
 - Note: /auto-mode-setup wrote an `autoMode.environment` block into agents/claude/home/settings.json — this repo is public, so review it before committing.
 - ~/.claude/hooks/herdr-agent-state.sh is intentionally outside dotfiles (created by herdr/install.sh).
+
+## 2026-09-28: notes-organize-tweets runs (09-25 and 09-28)
+- 09-25: enriched 23 tweet notes (15 new bodies, 10 thread upgrades, 15 images, 23 tagged). Step A3 crashed because Playwright updated and needed a new Chromium; installed it with `uv run --with playwright playwright install chromium`.
+- Gap found: precheck.py:144 flags `image` only when a note has no body, so a failed A3 is never retried once Step B writes the body. Backfilled the 12 affected notes by hand-adding `image` to /tmp/tweet_todo.json. Script not changed yet.
+- 09-28: trashed the bare copy from each of two duplicate pairs (double-saves, not sync conflicts), then enriched the surviving copy (2-tweet thread, screenshot, tags).
+- Revisit: postrun_conflict_check.sh fails with "authorization denied" on Bear's Group Container DB (macOS TCC, not the sandbox). Grant Full Disk Access or switch the check to bearcli. Fix the image-retry gap in precheck.py.
+
+## 2026-09-28: Fix fast-code-reviewer hook path regression
+- The 09-27 /doctor "fix" pointed the PostToolUse hook at ~/.kevin/code/fast-code-reviewer, which doesn't exist; every Edit/Write raised a blocking hook error. Restored the original path ~/code/tools/fast-code-reviewer (verified the script runs, exit 0).
+- Lesson: check that a "moved" path exists before repointing config to it.
