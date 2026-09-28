@@ -153,6 +153,7 @@ echo "  Linked ~/.kevin/bin/pi"
 
 link_with_backup "${DOTFILES_PI}/home/settings.json" "${PI_AGENT_DIR}/settings.json" "~/.pi/agent/settings.json"
 link_with_backup "${DOTFILES_PI}/home/AGENTS.md" "${PI_AGENT_DIR}/AGENTS.md" "~/.pi/agent/AGENTS.md"
+link_with_backup "${DOTFILES_PI}/home/presets.json" "${PI_AGENT_DIR}/presets.json" "~/.pi/agent/presets.json"
 copy_if_missing "${DOTFILES_PI}/home/models.json.default" "${PI_AGENT_DIR}/models.json" "~/.pi/agent/models.json"
 
 if ! grep -qF "${SHELL_ZSH_SOURCE}" "${HOME}/.zshrc.local" 2>/dev/null; then

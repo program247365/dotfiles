@@ -1,15 +1,23 @@
 {
-  "defaultProvider": "ollama",
-  "defaultModel": "qwen2.5-coder:7b",
+  "defaultProvider": "openai-codex",
+  "defaultModel": "gpt-5.5",
   "enabledModels": [
-    "anthropic/claude-opus-5",
     "openai-codex/gpt-5.5",
+    "anthropic/claude-opus-5-5",
     "ollama/qwen2.5-coder:7b",
     "ollama/gemma4:e2b",
     "apfel/apple-foundation-model"
   ],
+  "modelThinkingLevels": {
+    "anthropic/claude-opus-5-5": "high",
+    "ollama/qwen2.5-coder:7b": "off",
+    "ollama/gemma4:e2b": "off",
+    "apfel/apple-foundation-model": "off"
+  },
+  "extensions": ["~/.dotfiles/agents/pi/home/extensions"],
+  "prompts": ["~/.claude/commands"],
   "quietStartup": false,
-  "lastChangelogVersion": "0.84.2",
+  "lastChangelogVersion": "0.87.1",
   "defaultThinkingLevel": "medium",
   "theme": "dark"
 }
