@@ -209,13 +209,14 @@ Mechanics, learned the hard way:
   sqlite3 -readonly ~/Library/Group\ Containers/9K33E3U3T4.net.shinyfrog.bear/Application\ Data/database.sqlite \
     "SELECT ZUNIQUEIDENTIFIER FROM ZSFNOTE WHERE ZCONFLICTUNIQUEIDENTIFIER IS NOT NULL AND ZTRASHED=0"
   ```
+  This needs Full Disk Access for the calling terminal — without it macOS returns `authorization denied`. `bearcli` has no field for the stamp, so the bearcli-only fallback is finding the duplicate pair itself (same content, compare `created` dates).
 
 **Resolving a conflict pair via bearcli:**
 
 1. Compare the pair (`cat`, `tags list`, `attachments list`); keep the richer version, trash the stale one.
 2. If the survivor shows the fork icon, clear it by recreating the note under a fresh ID: `bearcli create` a placeholder → copy each attachment (`attachments save` old → `attachments add` new, binary-safe) → `bearcli overwrite` the new note with the original content (stdin) → re-add any tags missing from the body → verify title/content/tags/attachments match → trash the flagged original. Wiki links survive (they resolve by title); the note's created date resets to today.
 
-Not every duplicate is a sync conflict: two near-identical notes created days apart (no conflict stamp in the DB) are a double-save — the user captured the same thing twice. The stamp query above is the discriminator. Double-saves resolve the same way minus the recreate step: merge tags into the better copy, trash the other.
+Not every duplicate is a sync conflict: two near-identical notes created days apart (no conflict stamp in the DB) are a double-save — the user captured the same thing twice. The stamp query above is the discriminator; when it can't run, created dates are a heuristic only — a double-tap share can also create two copies seconds apart. Double-saves resolve the same way minus the recreate step: merge tags into the better copy, trash the other.
 
 **Prevention:** before a batch of bearcli writes, make sure Bear is running and give sync a settle window — `open -g -a Bear`, then wait ~60s if it was cold-launched (~15s if already running). A local audit cannot distinguish "never edited" from "edited elsewhere, sync pending."
 
