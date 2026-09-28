@@ -297,3 +297,11 @@
 - 09-27 and 09-28 "fixes" fought each other: the reviewer lives at ~/.kevin/code/fast-code-reviewer on one machine and ~/code/tools/fast-code-reviewer on the other, so any hardcoded path breaks one of them. The PostToolUse hook now tries both and exits 0 silently if neither exists (verified: resolves on this machine; HOME=/nonexistent exits 0).
 - Added `"tui": "fullscreen"` (set via /config).
 - Revisit: settings.json `mcpServers.msgvault` is likely dead config — the live msgvault server is defined in ~/.claude.json. Confirm against the settings schema before deleting.
+
+## 2026-09-28: Make pi a daily driver that shares Claude Code's rules and skills
+- Default model is now openai-codex/gpt-5.5 (flat subscription) instead of local qwen2.5-coder:7b, which couldn't follow a simple instruction in testing. Opus 5.5 added to enabledModels; per-model thinking levels set.
+- New extensions in agents/pi/home/extensions (loaded via settings `extensions`): shared-rules.ts injects claude/home/CLAUDE.md, the philosophy, and claude/rules/*.md (minus tool-use.md) as a system prompt section; claude-skills.ts adds only the ~/.claude/skills pi doesn't already discover (the 23 overlaps with ~/.agents/skills are identical copies; synced/ is skipped as Claude-only); confirm-irreversible.ts gates push/reset --hard/branch -D/clean -f/rm/sudo and blocks them without a UI.
+- Roles via vendored preset.ts + presets.json (explore/plan/work/critic/promote). Changed preset.ts to use a prompt section instead of replacing the whole system prompt, which had silently dropped the shared rules.
+- ~/.claude/commands added as pi prompts, so /notes-organize-tweets works in pi.
+- Anthropic in pi is always billed per token (subscription auth draws extra usage), so Opus-heavy work belongs in Claude Code; in pi, hand off between roles via /new + the plans/ file so Opus doesn't re-read the worker's transcript.
+- Revisit: promote preset -> claude-sonnet-5-5 and showCacheMissNotices; gemma4:e2b is in enabledModels but not pulled; `rm -f /tmp/...` in notes-organize-tweets triggers the gate each run.

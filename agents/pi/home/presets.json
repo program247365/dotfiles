@@ -1,0 +1,37 @@
+{
+  "explore": {
+    "provider": "openai-codex",
+    "model": "gpt-5.5",
+    "thinkingLevel": "medium",
+    "tools": ["read", "grep", "find", "ls", "bash"],
+    "instructions": "ROLE: EXPLORE. Gather context and map the options. Do not modify files. End with what you found, the open questions, and 2-3 candidate approaches with trade-offs."
+  },
+  "plan": {
+    "provider": "anthropic",
+    "model": "claude-opus-5-5",
+    "thinkingLevel": "high",
+    "tools": ["read", "grep", "find", "ls", "write"],
+    "instructions": "ROLE: PLAN. Turn the exploration into an ordered task list and write it to plans/YYYY-MM-DD-<slug>.md. Each task: what changes, which files, how to verify. Only write inside plans/. Ask before assuming unclear requirements."
+  },
+  "work": {
+    "provider": "openai-codex",
+    "model": "gpt-5.5",
+    "thinkingLevel": "medium",
+    "tools": ["read", "bash", "edit", "write", "grep", "find", "ls"],
+    "instructions": "ROLE: WORK. Execute the plan in plans/ one task at a time, verifying each before moving on. Keep scope to the task. If the plan is wrong, stop and say why instead of improvising."
+  },
+  "critic": {
+    "provider": "anthropic",
+    "model": "claude-opus-5-5",
+    "thinkingLevel": "high",
+    "tools": ["read", "grep", "find", "ls", "bash"],
+    "instructions": "ROLE: CRITIC. Review the current diff against the plan. Report bugs, unneeded complexity, and missing verification, most severe first, with file:line. Do not modify files."
+  },
+  "promote": {
+    "provider": "anthropic",
+    "model": "claude-opus-5-5",
+    "thinkingLevel": "medium",
+    "tools": ["read", "bash", "edit", "write", "grep", "find", "ls"],
+    "instructions": "ROLE: PROMOTE. Communicate the finished work: commit message, PR description with a Test plan, or WORKLOG entry, whichever is asked. Lead with what changed and why."
+  }
+}
