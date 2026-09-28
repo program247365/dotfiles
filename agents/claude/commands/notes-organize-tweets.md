@@ -80,7 +80,9 @@ python3 ~/.dotfiles/agents/claude/tools/notes-organize-tweets/step_a2_threads.py
 
 **Step A3 — Tweet-card screenshot fallback (Playwright)**
 
-For notes that need an image but got no embedded photo from Tier 1, renders X's embed widget and screenshots the tweet card to `/tmp/tweet_<note_id>.png` — the same path Step A would have used, so Step B picks it up transparently. If Chromium isn't cached yet, first run: `uv run --with playwright playwright install chromium`.
+For notes that need an image but got no embedded photo from Tier 1, renders X's embed widget and screenshots the tweet card to `/tmp/tweet_<note_id>.png` — the same path Step A would have used, so Step B picks it up transparently. If Chromium isn't cached yet — or the run fails with `Executable doesn't exist` because `uv` pulled a newer Playwright than the cached browser — run: `uv run --with playwright playwright install chromium`.
+
+A3 soft-fails (Step B counts `no_photo_available`). That's safe to leave: the pre-check flags `image` for any non-tombstone note without an attachment, body or not, so the next run retries the screenshot. One consequence: a note whose tweet was deleted after its body was written (syndication `no_article`, but never tombstoned) is re-flagged for `image` every run — expected noise, not a bug.
 
 ```bash
 python3 ~/.dotfiles/agents/claude/tools/notes-organize-tweets/step_a3_screenshots.py

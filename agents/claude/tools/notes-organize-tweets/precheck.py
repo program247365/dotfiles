@@ -141,7 +141,9 @@ for n in notes:
     needs = []
     if not has_inbox_tag: needs.append('inbox_tag')
     if not has_body:      needs.append('body')
-    if not has_image and not has_body: needs.append('image')
+    # Independent of has_body: a failed Tier 3 screenshot must be retried on a later
+    # run even though Step B already wrote the body. Tombstones have nothing to shoot.
+    if not has_image and not is_tombstone: needs.append('image')
     if has_inbox_tag and not topical_tags and not is_tombstone and not is_link_only:
         needs.append('extra_tags')
 
