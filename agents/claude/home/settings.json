@@ -69,7 +69,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'TUI_REVIEW_BROADCAST=1 python3 /Users/kevin/code/tools/fast-code-reviewer/hooks/posttooluse.py'",
+            "command": "bash -c 'for f in \"$HOME/.kevin/code/fast-code-reviewer/hooks/posttooluse.py\" \"$HOME/code/tools/fast-code-reviewer/hooks/posttooluse.py\"; do [ -f \"$f\" ] && TUI_REVIEW_BROADCAST=1 exec python3 \"$f\"; done; exit 0'",
             "timeout": 5000
           }
         ]
@@ -186,5 +186,6 @@
         "mcp"
       ]
     }
-  }
+  },
+  "tui": "fullscreen"
 }
