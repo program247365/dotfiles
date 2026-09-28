@@ -289,3 +289,4 @@
 ## 2026-09-28: Fix fast-code-reviewer hook path regression
 - The 09-27 /doctor "fix" pointed the PostToolUse hook at ~/.kevin/code/fast-code-reviewer, which doesn't exist; every Edit/Write raised a blocking hook error. Restored the original path ~/code/tools/fast-code-reviewer (verified the script runs, exit 0).
 - Lesson: check that a "moved" path exists before repointing config to it.
+- Scrub abandoned: origin/main had the unscrubbed history again (another clone pushed yesterday's prune commit on top of it). Kevin chose to rebase onto origin/main rather than force-push, so the 08-27 ticket id stays in public history. Dropped the local scrub note and the duplicate prune commit during the rebase.
