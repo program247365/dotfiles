@@ -69,7 +69,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'TUI_REVIEW_BROADCAST=1 python3 /Users/kevin/.kevin/code/fast-code-reviewer/hooks/posttooluse.py'",
+            "command": "bash -c 'TUI_REVIEW_BROADCAST=1 python3 /Users/kevin/code/tools/fast-code-reviewer/hooks/posttooluse.py'",
             "timeout": 5000
           }
         ]
@@ -147,15 +147,11 @@
   "editorMode": "vim",
   "autoCompactEnabled": false,
   "skipAutoPermissionPrompt": true,
-  "mcpServers": {
-    "msgvault": {
-      "command": "msgvault",
-      "args": [
-        "mcp"
-      ]
-    }
-  },
   "autoMode": {
+    "allow": [
+      "$defaults",
+      "Bash(qmd:*) in ~/.dotfiles — routine non-standard CLI used frequently in this project's own transcripts"
+    ],
     "environment": [
       "### Org-wide",
       "**Organization**: None configured",
@@ -181,10 +177,14 @@
       "**Primary use of Claude Code**: software development (personal dotfiles/config management)",
       "**Trusted repo**: ~/.dotfiles (github.com/program247365/dotfiles, public) — origin is the user's own repo and push target; upstream (github.com/holman/dotfiles) is a reference-only remote, not a push destination; since the repo is public, only this repo's own work belongs in it — content ported from other checkouts or outside this session is not its own work",
       "**Org-specific CLIs**: None configured — note bearcli, search, spark, qmd, mise, uv appear as routine non-standard CLIs in this project's own usage"
-    ],
-    "allow": [
-      "$defaults",
-      "Bash(qmd:*) in ~/.dotfiles — routine non-standard CLI used frequently in this project's own transcripts"
     ]
+  },
+  "mcpServers": {
+    "msgvault": {
+      "command": "msgvault",
+      "args": [
+        "mcp"
+      ]
+    }
   }
 }
