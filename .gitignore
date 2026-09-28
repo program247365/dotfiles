@@ -18,3 +18,5 @@ agents/claude/home/skills/herdr-ticket-campaign/references/*-repo.md
 # raycast: Raycast's own scheduled backup destination (Settings > Advanced >
 # Export) — large encrypted .rayconfig snapshots, not meant for git history
 raycast/
+.playwright-mcp/
+agents/claude/home/skills/synced/
