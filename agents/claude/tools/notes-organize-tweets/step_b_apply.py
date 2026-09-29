@@ -44,7 +44,10 @@ def get_topical_tags(note_id):
     if r.returncode != 0: return []
     try: tags = [t.lstrip('#') for t in [e.get('tag','') for e in json.loads(r.stdout)] if t]
     except Exception: return []
-    return [t for t in tags if not t.startswith('inbox')]
+    tags = [t for t in tags if not t.startswith('inbox')]
+    # Bear lists implied parents (`learn`, `learn/ai`) alongside `learn/ai/llm`; re-adding
+    # them would write redundant parent tags into the body. Keep only the leaves.
+    return [t for t in tags if not any(o.startswith(t + '/') for o in tags)]
 
 def reference_existing_attachments(note_id, body):
     """bearcli overwrite rejects any write that drops the last reference to an existing
@@ -78,8 +81,48 @@ def reference_existing_attachments(note_id, body):
             body = body.rstrip('\n') + '\n\n' + ref
     return body
 
-def clean_text(t):
-    return re.sub(r'\s*https://t\.co/\S+\s*$', '', t).strip()
+_tco_cache = {}
+
+def resolve_tco(short):
+    if short not in _tco_cache:
+        r = run('curl', '-sS', '-o', '/dev/null', '--max-time', '10', '-w', '%{redirect_url}', short)
+        _tco_cache[short] = r.stdout.strip() if r.returncode == 0 else ''
+    return _tco_cache[short]
+
+def clean_text(t, quoted_id=None):
+    """Expand t.co links to their real targets. Links that only point back at the tweet's
+    own media or its quoted tweet are dropped — the attachment / quote block covers them.
+    An unresolvable link stays as t.co: a working redirect beats silently losing it."""
+    def expand(m):
+        target = resolve_tco(m.group(0))
+        if not target:
+            return m.group(0)
+        if re.search(r'(?:x|twitter)\.com/\w+/status/\d+/(?:photo|video)/', target):
+            return ''
+        if quoted_id and re.search(rf'/status/{quoted_id}\b', target):
+            return ''
+        return target
+    return re.sub(r'https://t\.co/\w+', expand, t).strip()
+
+def is_link_only(text):
+    return not re.sub(r'https?://\S+', '', text).strip()
+
+def quote_block(q):
+    """Render a quoted tweet under the quoting tweet's text."""
+    if not q:
+        return []
+    text = clean_text(q.get('text') or '')
+    link = q.get('permanentUrl') or ''
+    return [f'**Quoting @{q.get("username", "")}** · [View on X]({link})', '', blockquote(text), '']
+
+def existing_annotation(note_id):
+    """The pre-check only extracts annotations from unstructured notes. Rebuilding an
+    already-enriched body must carry its `**My note**` block forward or the user's words
+    are lost."""
+    m = re.search(r'^\*\*My note\*\*:\n\n((?:>.*\n?)+)', get_content(note_id), re.MULTILINE)
+    if not m:
+        return None
+    return '\n'.join(ln[2:] if ln.startswith('> ') else '' for ln in m.group(1).rstrip('\n').split('\n'))
 
 def blockquote(text):
     return '\n'.join((f'> {line}' if line.strip() else '>') for line in text.split('\n'))
@@ -104,25 +147,29 @@ def unchecked_marker():
     # has not yet checked for a self-thread. A later run re-flags this note thread_check.
     return f'<!-- thread:unchecked fetched={today_iso} -->'
 
-def build_single_body(syn_entry, url, count_marker=None, annotation=None):
+def build_single_body(syn_entry, url, count_marker=None, annotation=None, full=None):
     # count_marker is the trailing marker for a real-text single tweet. First-pass callers
     # pass unchecked_marker() so a later run will thread-check it. Link-only bodies ignore it
     # and stamp count=1, since a link card never has a self-thread to fetch.
+    # `full` is Tier 2's hydrated record for this tweet, when A2 ran — it carries the
+    # untruncated long-form text and the quoted tweet, which syndication lacks.
     if count_marker is None:
         count_marker = unchecked_marker()
-    tweet_text = clean_text(syn_entry.get('tweetText') or '')
+    quoted = (full or {}).get('quoted')
+    raw_text = (full or {}).get('text') or syn_entry.get('tweetText') or ''
+    tweet_text = clean_text(raw_text, (quoted or {}).get('id') or syn_entry.get('quoted_id'))
     author = (syn_entry.get('author') or '').strip()
     handle = (syn_entry.get('handle') or '').strip()
     expanded_url = ''
     try:
-        full = json.load(open(f'/tmp/syndication_{syn_entry["id"]}.json'))
-        for u in (full.get('entities') or {}).get('urls') or []:
+        syn_json = json.load(open(f'/tmp/syndication_{syn_entry["id"]}.json'))
+        for u in (syn_json.get('entities') or {}).get('urls') or []:
             if u.get('expanded_url'):
                 expanded_url = u['expanded_url']; break
     except Exception:
         pass
 
-    if not tweet_text:
+    if not quoted and is_link_only(tweet_text):
         target = expanded_url[:60] if expanded_url else 'external resource'
         lines = [
             f'# {author}: link to {target}',
@@ -134,12 +181,11 @@ def build_single_body(syn_entry, url, count_marker=None, annotation=None):
             lines += [f'**Linked URL**: <{expanded_url}>', '']
         kind = 'body_link_only'
     else:
-        lines = [
-            heading_short(author, tweet_text),
-            '',
-            blockquote(tweet_text),
-            '',
-        ]
+        heading_text = tweet_text or f'quoting @{quoted.get("username", "")}'
+        lines = [heading_short(author, heading_text), '']
+        if tweet_text:
+            lines += [blockquote(tweet_text), '']
+        lines += quote_block(quoted)
         kind = 'body'
 
     if annotation:
@@ -163,16 +209,17 @@ def build_thread_body(syn_entry, url, thread, annotation=None):
     head = tweets[0]
     author = (syn_entry.get('author') or head.get('name') or '').strip()
     handle = (syn_entry.get('handle') or head.get('username') or '').strip()
-    head_text = clean_text(head.get('text') or '')
+    head_text = clean_text(head.get('text') or '', (head.get('quoted') or {}).get('id'))
     single_line = re.sub(r'\s+', ' ', head_text).strip()
     short = single_line[:60] + ('…' if len(single_line) > 60 else '')
     lines = [f'# {author}: {short} (thread: {n} tweets)', '']
     for seq, t in enumerate(tweets, start=1):
-        body = clean_text(t.get('text') or '')
+        body = clean_text(t.get('text') or '', (t.get('quoted') or {}).get('id'))
         lines.append(f'## Tweet {seq} of {n}')
         lines.append('')
         lines.append(blockquote(body) if body else '> _(no text)_')
         lines.append('')
+        lines += quote_block(t.get('quoted'))
         if t.get('photos'):
             lines.append(f'![tweet_{seq}.png](tweet_{seq}.png)')
             lines.append('')
@@ -233,6 +280,13 @@ for note_id, note in todo.items():
 
     write_body = None
     write_kind = None
+    # Tier 2's full record of the head tweet, when A2 fetched it (single-tweet case).
+    hydrated_head = thread_data['tweets'][0] if thread_data and thread_size == 1 else None
+    # Syndication truncated this tweet's text or dropped its quote — an existing body built
+    # from it is lossy and worth rebuilding once Tier 2 has the full text.
+    lossy_syndication = bool(pr.get('is_note_tweet') or pr.get('quoted_id'))
+    if annotation is None and 'body' not in needs:
+        annotation = existing_annotation(note_id)
 
     if 'body' in needs:
         if status == 'ok':
@@ -242,7 +296,8 @@ for note_id, note in todo.items():
             else:
                 # First-pass single body: stamp thread:unchecked so a re-run thread-checks it
                 # (build_single_body downgrades link-only bodies to count=1 internally).
-                write_body, write_kind = build_single_body(pr, url, unchecked_marker(), annotation=annotation)
+                write_body, write_kind = build_single_body(pr, url, unchecked_marker(), annotation=annotation,
+                                                           full=hydrated_head)
         elif status == 'no_article':
             write_body = build_tombstone_body(url)
             write_kind = 'body_tombstone'
@@ -272,6 +327,12 @@ for note_id, note in todo.items():
             # Body already exists — Tier 2 found a thread. Rebuild as thread.
             write_body = build_thread_body(pr, url, thread_data, annotation=annotation)
             write_kind = 'body_thread_enrich'
+        elif hydrated_head and lossy_syndication and status == 'ok':
+            # Settled single tweet whose body came from truncated syndication text (long-form
+            # note tweet, or a quote tweet with the quote missing). Rebuild at full fidelity.
+            write_body, _ = build_single_body(pr, url, thread_marker(1), annotation=annotation,
+                                              full=hydrated_head)
+            write_kind = 'body_full_text'
         elif status == 'ok':
             # Single tweet OR thread fetch returned 1 tweet. Stamp count=1 on existing body.
             # Strip ALL prior thread markers — a stale mid-body `thread:unchecked` survives
@@ -326,11 +387,17 @@ for note_id, note in todo.items():
 
     # 3b. Thread photos — for thread-enriched notes, attach each tweet_<seq>.png.
     if write_kind in ('body_thread', 'body_thread_enrich') and thread_data:
+        # A re-enrich (FORCE, or a thread that grew) finds earlier photos already attached;
+        # re-adding would make Bear store a renamed copy (`tweet_3 2.png`).
+        la = run('bearcli', 'attachments', 'list', note_id, '--format', 'json')
+        already = {e.get('filename') for e in json.loads(la.stdout)} if la.returncode == 0 else set()
         for seq, t in enumerate(thread_data['tweets'], start=1):
             shot = f'/tmp/tweet_{note_id}_{seq}.png'
             if not (os.path.exists(shot) and os.path.getsize(shot) > 1000):
                 continue
             fname = f'tweet_{seq}.png'
+            if fname in already:
+                continue
             with open(shot, 'rb') as f:
                 r = run('bearcli', 'attachments', 'add', note_id,
                         '--filename', fname, input=f.read())

@@ -5,7 +5,7 @@ The workflow is fully idempotent — run it any time to catch up on anything tha
 > **Three-tier fetching strategy:**
 >
 > 1. **Tier 1 (always):** `cdn.syndication.twimg.com/tweet-result?id=<id>` — X's own embed API. Returns full JSON for any single tweet (text, author, photos, video, conversation_count). No login, no bot detection. The `token` parameter isn't validated.
-> 2. **Tier 2 (thread enrichment, opt-in):** `@the-convocation/twitter-scraper` Node lib calling X's authenticated GraphQL via the user's exported cookies. Used only to fetch self-thread continuations when a tweet has `conversation_count > 0`. Skipped silently if cookies are missing or stale. A first-pass single body is stamped `thread:unchecked`; a later run re-flags it for Tier 2 and upgrades it to a thread (or settles it at `thread:complete count=1`). Set `FORCE_THREAD_RECHECK=1` to re-open already-settled notes for backfill.
+> 2. **Tier 2 (thread enrichment, opt-in):** `@the-convocation/twitter-scraper` Node lib calling X's authenticated GraphQL via the user's exported cookies. Used to fetch self-thread continuations when a tweet has `conversation_count > 0`, and for **full text**: Tier 1 truncates long-form "note tweets" to ~280 chars and truncates quoted tweets, so any note tweet or quote tweet is routed here too, replies or not. Every tweet in the chain is re-fetched via `getTweet` (TweetDetail), the only endpoint carrying `note_tweet` text and the quoted tweet. Skipped silently if cookies are missing or stale. A first-pass single body is stamped `thread:unchecked`; a later run re-flags it for Tier 2 and upgrades it to a thread (or settles it at `thread:complete count=1`). Set `FORCE_THREAD_RECHECK=1` to re-open already-settled notes for backfill.
 > 3. **Tier 3 (screenshot fallback):** Playwright loads `platform.twitter.com/embed/Tweet.html?id=<id>` and screenshots the rendered tweet card. Runs only when Tier 1 returned no embedded photo, so text-only and link-card tweets still get a visual attachment. No auth required.
 >
 > Cookies live at `~/.config/notes-organize-tweets/x-cookies.json` (gitignored). Run `~/.dotfiles/agents/claude/tools/refresh-x-cookies.sh` for setup instructions.
@@ -72,7 +72,7 @@ python3 ~/.dotfiles/agents/claude/tools/notes-organize-tweets/step_a_syndication
 
 **Step A2 — Thread fetch via twitter-scraper (auth required)**
 
-Notes flagged `thread_check` whose head tweet has `conversation_count > 0` are candidates. Skips cleanly if cookies are missing/stale — affected notes get an `auth-needed` marker via Step B. Transient fetch errors (503s) land in `/tmp/tweet_thread_errors.json` so Step B leaves those notes unsettled for a retry.
+Candidates: notes flagged `thread_check` whose head tweet has `conversation_count > 0`, plus any note getting a body or thread check whose tweet is a long-form note tweet or a quote tweet (Step A records `is_note_tweet` / `quoted_id`). Each chain tweet is re-fetched at full fidelity; a rate limit or failed re-fetch counts as transient, so the note stays unsettled instead of settling on truncated text. Skips cleanly if cookies are missing/stale — affected notes get an `auth-needed` marker via Step B. Transient fetch errors (503s) land in `/tmp/tweet_thread_errors.json` so Step B leaves those notes unsettled for a retry.
 
 ```bash
 python3 ~/.dotfiles/agents/claude/tools/notes-organize-tweets/step_a2_threads.py
@@ -90,7 +90,7 @@ python3 ~/.dotfiles/agents/claude/tools/notes-organize-tweets/step_a3_screenshot
 
 **Step B — Apply mutations via bearcli**
 
-Writes bodies (single/thread/tombstone/link-only), inbox tags, attachments, and thread markers. Preserves topical tags across body rewrites, keeps every existing attachment referenced (bearcli's overwrite guard), and dedups Bear's auto-injected image links. Body precedence and marker rules are documented in the script's comments.
+Writes bodies (single/thread/tombstone/link-only), inbox tags, attachments, and thread markers. Preserves topical tags across body rewrites, keeps every existing attachment referenced (bearcli's overwrite guard), and dedups Bear's auto-injected image links. Renders quoted tweets as a `**Quoting @handle**` block, expands `t.co` links to their targets (dropping only those pointing at the tweet's own media or its quote), carries an existing `**My note**` block through any rebuild, and skips re-attaching thread photos already on the note. The pre-check keys each note on its `**@handle** · [View on X](…)` footer, since quote and expanded links put other tweets' URLs higher in the body. Body precedence and marker rules are documented in the script's comments.
 
 ```bash
 python3 ~/.dotfiles/agents/claude/tools/notes-organize-tweets/step_b_apply.py
@@ -134,7 +134,7 @@ If pairs come back, report them and resolve per **bear-notes skill → iCloud Sy
 
 ---
 
-**Final report**: counts per category — `body`, `body_thread`, `body_thread_enrich`, `body_link_only`, `body_tombstone`, `thread_marker_only`, `thread_auth_needed`, `thread_retry_pending` (Tier 2 hit a transient error — left unchecked for a later run), `image` (covers both embedded photos and Tier 3 screenshots — same attachment slot), `thread_image`, `inbox_tag`, `extra_tags`. Plus `no_article`, `no_photo_available`, `skipped_no_data`, `failed`. If `thread_auth_needed > 0`, surface the cookie-refresh hint:
+**Final report**: counts per category — `body`, `body_thread`, `body_thread_enrich`, `body_full_text` (settled single tweet rebuilt from Tier 2's untruncated text/quote), `body_link_only`, `body_tombstone`, `thread_marker_only`, `thread_auth_needed`, `thread_retry_pending` (Tier 2 hit a transient error — left unchecked for a later run), `image` (covers both embedded photos and Tier 3 screenshots — same attachment slot), `thread_image`, `inbox_tag`, `extra_tags`. Plus `no_article`, `no_photo_available`, `skipped_no_data`, `failed`. If `thread_auth_needed > 0`, surface the cookie-refresh hint:
 
 > `~/.dotfiles/agents/claude/tools/refresh-x-cookies.sh`
 

@@ -41,6 +41,11 @@ for n in batch:
         'photo_urls': photos,
         'url': n['url'],
         'conversation_count': data.get('conversation_count') or 0,
+        # Long-form "note tweets" arrive truncated to ~280 chars here (only a note_tweet id,
+        # no text), and quoted tweets likewise. Step A2 routes both through Tier 2's
+        # TweetDetail fetch, which carries the full text.
+        'is_note_tweet': 'note_tweet' in data,
+        'quoted_id': (data.get('quoted_tweet') or {}).get('id_str'),
     })
 
 # Download first photo per tweet (?name=large for higher-res)

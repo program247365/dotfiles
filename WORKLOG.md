@@ -305,3 +305,15 @@
 - ~/.claude/commands added as pi prompts, so /notes-organize-tweets works in pi.
 - Anthropic in pi is always billed per token (subscription auth draws extra usage), so Opus-heavy work belongs in Claude Code; in pi, hand off between roles via /new + the plans/ file so Opus doesn't re-read the worker's transcript.
 - Revisit: promote preset -> claude-sonnet-5-5 and showCacheMissNotices; gemma4:e2b is in enabledModels but not pulled; `rm -f /tmp/...` in notes-organize-tweets triggers the gate each run.
+
+## 2026-09-29: Routine notes-organize-tweets run
+- Enriched 1 new save (karpathy on the Sutton pod): body, tweet-card screenshot, inbox tag; convergence pass upgraded it to a 3-tweet thread; tagged learn/ai/research + learn/ai/llm.
+- No conflict pairs pre- or post-run; no script changes.
+- Revisit: 2 untagged notes reference tweets but look like project notes (manual-review list) — they resurface every run until tagged by hand.
+
+## 2026-09-29: notes-organize-tweets captures long-form tweets, quotes, and links at full fidelity
+- A long-form "note tweet" was saved truncated at ~280 chars: syndication returns only a note_tweet id, and Tier 2's searchTweets also returns legacy full_text. Only getTweet (TweetDetail) carries the full text and the quoted tweet.
+- Step A records is_note_tweet/quoted_id; A2 routes those through Tier 2 even with no replies; the fetcher re-fetches every chain tweet via getTweet (failure = transient, note stays unsettled). Switched to ErrorRateLimitStrategy: the default silently sleeps up to 15 min on a rate limit (caused a hung probe).
+- Step B renders a **Quoting @handle** block, expands t.co links (drops media/quote self-links), adds body_full_text for settled single tweets, carries **My note** through rebuilds (the enrich path previously dropped it), skips re-attaching existing thread photos (made `tweet_3 2.png`), and re-adds only leaf tags.
+- Pre-check now keys on the `**@handle** · [View on X]` footer: the quote link higher in the body made a re-run rebuild the note as the quoted author's thread (caught in verification, note restored).
+- Revisit: the Tier 3 embed screenshot still stops at "Show more" for long-form tweets (the body text is now complete, so the screenshot is just the visual card). Fixing that would mean screenshotting x.com with cookies. Only 1 note on this machine has a thread marker, so there's no local backfill; run FORCE_THREAD_RECHECK=1 on the other machine if its corpus differs.

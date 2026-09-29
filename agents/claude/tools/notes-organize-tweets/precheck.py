@@ -68,7 +68,11 @@ for n in notes:
     url_match = TWEET_URL_RE.search(text)
     if not url_match:
         continue
-    url = url_match.group(0).rstrip('.,)>]"\'')
+    # An enriched body can hold other tweets' URLs above its own (a quoted tweet's link,
+    # expanded t.co links in the text), so the Step B footer link is authoritative.
+    footer = re.search(r'^\*\*@\w+\*\* · \[View (?:thread )?on X\]\((' + TWEET_URL_RE.pattern + r')\)',
+                       text, re.MULTILINE | re.IGNORECASE)
+    url = footer.group(1) if footer else url_match.group(0).rstrip('.,)>]"\'')
 
     has_image = bool(n.get('attachments'))
     is_tombstone = '_Original tweet was deleted or restricted._' in text
