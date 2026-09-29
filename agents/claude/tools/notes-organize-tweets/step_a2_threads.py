@@ -13,13 +13,15 @@ except FileNotFoundError:
 
 candidates = []
 for note_id, n in todo.items():
-    if 'thread_check' not in n['needs']:
-        continue
     pr = syn.get(note_id) or {}
     if pr.get('status') != 'ok':
         continue
-    if (pr.get('conversation_count') or 0) == 0:
-        # No replies at all → definitely single tweet. Skip Tier 2 entirely; Step B will write count=1.
+    # Syndication truncates long-form note tweets and quoted tweets — only Tier 2 has the
+    # full text, so fetch those whenever a body is being (re)built, replies or not.
+    needs_full_text = pr.get('is_note_tweet') or pr.get('quoted_id')
+    wants_thread = 'thread_check' in n['needs'] and (pr.get('conversation_count') or 0) > 0
+    # No replies at all → definitely single tweet; Step B will write count=1.
+    if not (wants_thread or (needs_full_text and {'body', 'thread_check'} & set(n['needs']))):
         continue
     candidates.append({
         'note_id': note_id,
@@ -27,7 +29,7 @@ for note_id, n in todo.items():
         'author': pr.get('handle'),
     })
 
-print(f'{len(candidates)} thread candidates (conversation_count > 0)')
+print(f'{len(candidates)} Tier 2 candidates (replies, long-form, or quote tweets)')
 
 if not candidates:
     print('no thread candidates — skipping Step A2')

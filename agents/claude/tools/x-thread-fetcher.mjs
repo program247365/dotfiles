@@ -14,7 +14,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
-import { Scraper, SearchMode } from "@the-convocation/twitter-scraper";
+import { Scraper, SearchMode, ErrorRateLimitStrategy } from "@the-convocation/twitter-scraper";
 
 const COOKIE_PATH = path.join(os.homedir(), ".config/notes-organize-tweets/x-cookies.json");
 
@@ -45,7 +45,10 @@ async function makeScraper() {
     );
     process.exit(2);
   }
-  const scraper = new Scraper();
+  // The default WaitingRateLimitStrategy sleeps silently until the window resets (up to
+  // 15 min). Throwing instead routes a rate limit into the transient-error path below, so
+  // the note stays thread:unchecked and a later run retries.
+  const scraper = new Scraper({ rateLimitStrategy: new ErrorRateLimitStrategy() });
   await scraper.setCookies(cookies);
   const ok = await scraper.isLoggedIn();
   if (!ok) {
@@ -62,6 +65,23 @@ async function probe() {
   const scraper = await makeScraper();
   // No direct "who am I" — fetch a small thing to validate further. isLoggedIn already true.
   console.log("ok cookies valid, authenticated session ready");
+}
+
+function toRecord(t) {
+  const q = t.quotedStatus;
+  return {
+    id: t.id,
+    inReplyToStatusId: t.inReplyToStatusId,
+    conversationId: t.conversationId,
+    text: t.text,
+    username: t.username,
+    name: t.name,
+    timestamp: t.timestamp,
+    permanentUrl: t.permanentUrl,
+    photos: (t.photos || []).map((p) => ({ url: p.url, alt_text: p.alt_text })),
+    videos: (t.videos || []).map((v) => ({ url: v.url, preview: v.preview })),
+    quoted: q ? { id: q.id, username: q.username, name: q.name, text: q.text, permanentUrl: q.permanentUrl } : null,
+  };
 }
 
 async function readStdin() {
@@ -100,36 +120,14 @@ async function fetchThreads() {
       for await (const t of iter) {
         // Filter strictly to the same conversation
         if (String(t.conversationId || t.conversation_id_str || t.conversationIdStr) !== String(head_id)) continue;
-        tweets.push({
-          id: t.id,
-          inReplyToStatusId: t.inReplyToStatusId,
-          conversationId: t.conversationId,
-          text: t.text,
-          username: t.username,
-          name: t.name,
-          timestamp: t.timestamp,
-          permanentUrl: t.permanentUrl,
-          photos: (t.photos || []).map((p) => ({ url: p.url, alt_text: p.alt_text })),
-          videos: (t.videos || []).map((v) => ({ url: v.url, preview: v.preview })),
-        });
+        tweets.push(toRecord(t));
       }
       // Always include the head if missing (search occasionally omits the seed tweet)
       if (!tweets.some((t) => String(t.id) === String(head_id))) {
         try {
           const head = await scraper.getTweet(head_id);
           if (head) {
-            tweets.push({
-              id: head.id,
-              inReplyToStatusId: head.inReplyToStatusId,
-              conversationId: head.conversationId,
-              text: head.text,
-              username: head.username,
-              name: head.name,
-              timestamp: head.timestamp,
-              permanentUrl: head.permanentUrl,
-              photos: (head.photos || []).map((p) => ({ url: p.url, alt_text: p.alt_text })),
-              videos: (head.videos || []).map((v) => ({ url: v.url, preview: v.preview })),
-            });
+            tweets.push(toRecord(head));
           }
         } catch (e) {
           console.error(`getTweet(${head_id}) fallback failed: ${e.message}`);
@@ -170,6 +168,16 @@ async function fetchThreads() {
       }
       const chain = tweets.filter((t) => chainIds.has(String(t.id)));
       // Already sorted, so chain is in chronological order.
+
+      // Search timelines return long-form note tweets truncated to ~280 chars and omit
+      // quoted tweets; only TweetDetail (getTweet) carries note_tweet text and the quote.
+      // Re-fetch every chain tweet. A failure throws to the catch below — writing the
+      // truncated text would settle the note at the wrong fidelity.
+      for (let i = 0; i < chain.length; i++) {
+        const full = await scraper.getTweet(chain[i].id);
+        if (!full) throw new Error(`getTweet(${chain[i].id}) returned nothing`);
+        chain[i] = toRecord(full);
+      }
 
       const out = `/tmp/syndication_thread_${note_id}.json`;
       await fs.writeFile(out, JSON.stringify({
