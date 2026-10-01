@@ -20,7 +20,7 @@
   "extensions": ["~/.dotfiles/agents/pi/home/extensions"],
   "prompts": ["~/.claude/commands"],
   "quietStartup": false,
-  "lastChangelogVersion": "0.99.0",
+  "lastChangelogVersion": "0.99.2",
   "defaultThinkingLevel": "medium",
   "showCacheMissNotices": true,
   "theme": "dark"
