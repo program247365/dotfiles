@@ -141,6 +141,7 @@
       }
     }
   },
+  "tui": "fullscreen",
   "skipDangerousModePermissionPrompt": true,
   "skipWorkflowUsageWarning": true,
   "theme": "dark",
@@ -187,5 +188,5 @@
       ]
     }
   },
-  "tui": "fullscreen"
+  "agentPushNotifEnabled": true
 }

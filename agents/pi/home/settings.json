@@ -7,7 +7,9 @@
     "anthropic/claude-sonnet-5-5",
     "ollama/qwen2.5-coder:7b",
     "ollama/gemma4:e2b",
-    "apfel/apple-foundation-model"
+    "apfel/apple-foundation-model",
+    "openai-codex/gpt-6-sol",
+    "openai-codex/gpt-6-astra"
   ],
   "modelThinkingLevels": {
     "anthropic/claude-opus-5-5": "high",
@@ -18,7 +20,7 @@
   "extensions": ["~/.dotfiles/agents/pi/home/extensions"],
   "prompts": ["~/.claude/commands"],
   "quietStartup": false,
-  "lastChangelogVersion": "0.87.1",
+  "lastChangelogVersion": "0.99.0",
   "defaultThinkingLevel": "medium",
   "showCacheMissNotices": true,
   "theme": "dark"
