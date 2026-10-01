@@ -317,3 +317,12 @@
 - Step B renders a **Quoting @handle** block, expands t.co links (drops media/quote self-links), adds body_full_text for settled single tweets, carries **My note** through rebuilds (the enrich path previously dropped it), skips re-attaching existing thread photos (made `tweet_3 2.png`), and re-adds only leaf tags.
 - Pre-check now keys on the `**@handle** · [View on X]` footer: the quote link higher in the body made a re-run rebuild the note as the quoted author's thread (caught in verification, note restored).
 - Revisit: the Tier 3 embed screenshot still stops at "Show more" for long-form tweets (the body text is now complete, so the screenshot is just the visual card). Fixing that would mean screenshotting x.com with cookies. Only 1 note on this machine has a thread marker, so there's no local backfill; run FORCE_THREAD_RECHECK=1 on the other machine if its corpus differs.
+
+## 2026-10-01: dotfiles main conflict check and pi version bump
+- What changed
+  - Fetched origin/main and verified main had no outstanding merge conflicts; local main is ahead only.
+  - Committed the pending Pi `lastChangelogVersion` bump to 0.99.2.
+- What we decided and why
+  - Kept the Pi settings diff minimal by preserving existing JSON formatting and adding only the version change.
+- What to revisit next time
+  - Push the two local commits to origin/main after confirmation.
