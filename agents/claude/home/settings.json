@@ -119,7 +119,8 @@
     "frontend-design@claude-plugins-official": false,
     "warp@claude-code-warp": true,
     "datadog@claude-plugins-official": false,
-    "cloudflare@cloudflare": false
+    "cloudflare@cloudflare": false,
+    "vercel@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
     "compound-engineering-plugin": {
@@ -146,7 +147,7 @@
   "skipWorkflowUsageWarning": true,
   "theme": "dark",
   "editorMode": "vim",
-  "autoCompactEnabled": false,
+  "autoCompactEnabled": true,
   "skipAutoPermissionPrompt": true,
   "autoMode": {
     "allow": [
