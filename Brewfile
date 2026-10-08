@@ -44,6 +44,7 @@ brew 'mas'
 brew 'navi'
 brew 'noahgorstein/tap/jqp' #JQ playground: https://github.com/noahgorstein/jqp
 brew 'neovim'
+brew 'tree-sitter-cli' # nvim-treesitter (main) compiles parsers with it
 brew 'nvm' # https://github.com/mhinz/neovim-remote
 brew 'onefetch'
 brew 'ripgrep'
