@@ -326,3 +326,15 @@
   - Kept the Pi settings diff minimal by preserving existing JSON formatting and adding only the version change.
 - What to revisit next time
   - Push the two local commits to origin/main after confirmation.
+
+## 2026-10-12: ast-grep-codemods skill, built and tested with baseline/green runs
+- What changed
+  - New skill `agents/claude/home/skills/ast-grep-codemods/SKILL.md`: when to reach for ast-grep (many-file mechanical rewrites, repo-wide structural CI rules), global-only install, a verified migration codemod and CI lint rule for 0.50, gotchas, and the rationalizations agents used to avoid it.
+  - Installed ast-grep 0.50 globally via brew (`sg` alias is deprecated; use `ast-grep`).
+- What we decided and why
+  - Without the skill, fresh agents on a hard fixture (multi-line calls, nested args, same-named foreign method, comment/string decoys) got correct results but by hand-rolling a 148-line tokenizer or adding acorn plus a 60-77 line walker; none installed ast-grep even when they named it as missing. With the skill, an unprompted agent discovered it, installed globally, and finished with a 3-rule YAML file matching the reference exactly.
+  - ast-grep is never added to a repo's package.json or lockfile; CI installs it in its own pinned step. Rule files may live in the repo. The skill asks before a global install rather than running it.
+  - The first fixture was too uniform (line-anchored regex was actually correct), so the baseline was redone on a harder one before writing the skill.
+- What to revisit next time
+  - Watch whether agents rewrite semantically-unsafe shapes (variable log level) instead of leaving them; the skill now requires listing those sites either way.
+  - Skill is 1k words; trim if it starts loading too often.
