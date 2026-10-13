@@ -43,6 +43,7 @@ alias fh='fzf-make history'
 # My Apps
 alias r='rem-tui'
 alias q='qmd'
+alias l='looper'
 # TODO(kit): self-alias hacks so kit indexes tools installed outside its sources
 # (kpr: keeper-cli/install.sh → ~/.bun/bin; spark: installed by Spark Desktop.app;
 # livediff: tools/livediff/install.sh → ~/.cargo/bin;
