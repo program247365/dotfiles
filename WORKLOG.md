@@ -1,6 +1,7 @@
 # WORKLOG
 
 ## 2026-07-29: qmd/search review — fixed staleness + recency, added daily sync, 10x'd --deep
+
 - What changed
   - search repo: stale-index auto-update now stats the bear-sync manifest
     (the old index-sqlite mtime signal could never fire); doctor 1.50s → 0.03s.
@@ -32,6 +33,7 @@
   - Plan checklist lives in Bear: "QMD for Bear Notes" note (all items done).
 
 ## 2026-07-29: search install.sh stoa failure — bun compile naming bug
+
 - What changed
   - stoa-mono 932ba9f: build.ts used `compile: true, naming: "stoa"`, but
     Bun.build ignores `naming` for compiled executables (bun 1.3.x names
@@ -52,12 +54,14 @@
     `search doctor` there (first real test of parsePi).
 
 ## 2026-08-02: Email triage via spark CLI — inbox/trash analysis and deletion report
+
 - Dumped unified inbox (4,175) and recent trash (1,000) with `spark emails`; aggregated senders in scratchpad
-- Found k@kbr.sh mirrors kridgway@gmail.com — 3,477 of 4,175 inbox msgs are the mirror backlog; 1,800 msgs are from 197 senders Kevin already routinely deletes
+- Found <k@kbr.sh> mirrors <kridgway@gmail.com> — 3,477 of 4,175 inbox msgs are the mirror backlog; 1,800 msgs are from 197 senders Kevin already routinely deletes
 - Wrote triage report (scratchpad/email-triage-report.md) with Spark search strings per delete bucket; all accounts read-only so no actions taken
-- Revisit: grant Spark triage access for agent-driven cleanup; fix kridgway→k@kbr.sh duplication at the source
+- Revisit: grant Spark triage access for agent-driven cleanup; fix kridgway→<k@kbr.sh> duplication at the source
 
 ## 2026-08-04: search rule updated for reminders source, doctor upgrades, web UI
+
 - What changed
   - agents/claude/rules/search.md now covers: reminders source (open todos
     only, `--completed` opts in; same Full Disk Access grant as imessage),
@@ -82,7 +86,9 @@
     every new source and goes stale.
 - What to revisit next time
   - Push search repo 4f9feea (and Kevin's sources/Makefile work) when ready.
+
 ## 2026-08-10: OOO meeting catch-up — Supernormal summaries into a Bear note
+
 - Confirmed OOO window Jul 30–Aug 9 (last recording + last commit Jul 29; back Aug 10).
 - Found NO Supernormal recordings exist for that window (own capture off, no teammate
   captures visible; Supernormal's own Aug 6 brief confirms the transcription gap).
@@ -94,6 +100,7 @@
   (underlying URLs unrecoverable without following redirects).
 
 ## 2026-08-11: Tweet notes enrichment run (/notes-organize-tweets)
+
 - Enriched 22 Bear tweet notes: 18 fresh saves got structured bodies (12 tweet-text,
   6 link-only), 18 images (7 embedded photos + 11 Playwright tweet-card screenshots),
   18 inbox tags; 12 notes got topical tags from the existing taxonomy.
@@ -105,6 +112,7 @@
   (~/Library/Caches/ms-playwright). Consider baking uv invocation into the workflow.
 
 ## 2026-08-11: iCloud conflict cleanup + sync guard for /notes-organize-tweets
+
 - Today's run collided with iCloud sync: the 4 thread-check notes had already been
   thread-enriched on the other machine, but that version hadn't synced down. Local
   auth-needed stamps + late-arriving cloud versions made CloudKit duplicate all 4
@@ -116,6 +124,7 @@
 - Uncommitted: notes-organize-tweets.md edit + earlier WORKLOG entries.
 
 ## 2026-08-11: Cleared persistent Bear conflict icons by recreating notes
+
 - Bear's fork icon is driven by ZSFNOTE.ZCONFLICTUNIQUEIDENTIFIER, stamped on the
   conflict-created copy; bearcli trash/overwrite never clears it (verified in DB).
   Bear's FAQ says deleting one version or editing the note resolves it — that logic
@@ -127,6 +136,7 @@
   title-based so they survive.
 
 ## 2026-08-11: Baked sync/conflict knowledge into bear-notes skill + tweet workflow
+
 - bear-notes SKILL.md: new "iCloud Sync Conflicts" section — conflict-stamp mechanics
   (ZCONFLICTUNIQUEIDENTIFIER), why bearcli can't clear it, read-only detection query,
   recreate-under-fresh-ID recipe, double-save vs conflict discriminator, prevention.
@@ -142,6 +152,7 @@
   dedupe.
 
 ## 2026-08-11: Deduped 6 double-save tweet note pairs
+
 - Kept the richer/intact copy per pair (shadcn 48187426, Dan Koe 1950EEB2, Machina
   13FF51C0, Dwarkesh DB48F2F2, Thariq 9B937759, Jerry Liu 76CB9816), merged missing
   topical tags into keepers, trashed the 6 others. Guarded against losing My-note
@@ -151,7 +162,8 @@
   /notes-organize-tweets run (thread backfill still blocked on X cookies).
 
 ## 2026-08-18: Herdr setup — integrations, skill, and dotfiles adoption
-- Read https://herdr.dev/agent-guide.md; Herdr 0.8.0 was already installed (Homebrew, Brewfile) and this session runs inside a Herdr pane (HERDR_ENV=1), so setup was verification + gap-filling.
+
+- Read <https://herdr.dev/agent-guide.md>; Herdr 0.8.0 was already installed (Homebrew, Brewfile) and this session runs inside a Herdr pane (HERDR_ENV=1), so setup was verification + gap-filling.
 - Installed integrations for claude/codex/pi (`herdr integration install <agent>`) — adds native session restore; state detection stays screen-based. The claude installer wrote a SessionStart hook through the settings.json symlink, so agents/claude/home/settings.json is modified in the repo.
 - Installed the herdr skill via `npx skills add herdrdev/herdr --skill herdr -g`. The CLI's relative symlink broke through the ~/.claude/skills dotfiles symlink; repointed it absolute to ~/.agents/skills/herdr. Saved as a memory (skills-cli-relative-symlink).
 - Added herdr/ (config.toml + install.sh): symlinks only config.toml into ~/.config/herdr (runtime state stays machine-local), then runs the integration installs idempotently and reloads the server config. Uses install.sh so script/install auto-discovers it; the install.zsh files (starship, mise, warp) are the older manually-run generation. Needed because the committed SessionStart hook references ~/.claude/hooks/herdr-agent-state.sh, which only the integration install creates on a fresh machine.
@@ -159,11 +171,13 @@
 - Revisit: commit Brewfile, settings.json, skills/herdr symlink, and herdr/ together; decide whether other machines want the same integrations.
 
 ## 2026-08-18: Adopted QuickMD as the live markdown viewer for agent-written files
+
 - Added `b451c/quickmd` tap + cask to Brewfile, installed it (needed new `brew trust`), and verified live reload against appends, wipes, and atomic temp-file renames.
 - Wrote `agents/claude/home/skills/quickmd/SKILL.md` via the writing-skills TDD loop: baseline agent misread "watch the markdown file" as a polling watcher; with the skill it opens QuickMD instead. Committed as 221c6eb.
 - Revisit: brew flagged 10 pre-existing untrusted taps (heroku, stripe, anthropics/tap, illegalstudio, noahgorstein…) it now ignores — trust the ones in use or `brew bundle` will skip them.
 
 ## 2026-08-19: pi moved to @earendil-works scope; enabledModels provider ids corrected
+
 - npm deprecated `@mariozechner/pi-coding-agent` in favor of `@earendil-works/pi-coding-agent`.
   A scope rename is a *new* package to pnpm, so `pnpm add -g` the new one would have left both
   installed, each declaring a `pi` bin and racing for the same symlink. agents/pi/install.sh now
@@ -198,6 +212,7 @@
   @google/genai and protobufjs.
 
 ## 2026-08-24: Researched + verified codebase-memory-mcp (DeusData); Bear note written
+
 - Cloned, built from source, and tested the C-based code-graph MCP server: 15 tools / 158 grammars / 43 client surfaces all check out; indexed ~/.dotfiles (2,730 nodes) correctly; MCP calls 13–47ms warm; zero network sockets at runtime.
 - Full security sweep (subagent): clean — no telemetry, download code compiled out of release builds, credential-path indexing denylist, fail-open hooks, reversible config writes. Nits: install appends PATH to shell rc without uninstall cleanup; curl|bash configures all detected agents unless --skip-config.
 - Marketing vs paper gap: README says 120x fewer tokens/ms indexing; their own arXiv (2603.27277) says 10x tokens with 83% vs 92% answer quality vs plain file exploration. Dejan's "Claude ignores MCP tools" claim: Claude half supported (repo issue #69, shipped Grep/Glob hooks), ChatGPT half unverified.
@@ -205,6 +220,7 @@
 - Revisit: if adopting, install with --skip-config and hand-add only the Claude Code entry; watch issue #1654 (large-repo OOM) before pointing it at supermono.
 
 ## 2026-08-25: Tweet-enrichment skill — closed the untagged bare-link hole, enriched 94 notes
+
 - Verified the reported hole: 47 untagged notes held tweet URLs invisible to the classifier, which only recognized title-starts-with-URL or existing inbox tag. Four miss shapes: annotation-first saves ("Make agents.md! <url>"), share-sheet markdown-link saves ("[Name (@handle) 107 likes](url)"), enriched bodies whose literal #inbox/saved-tweets line Bear never promoted to a real tag (external-pipeline writes), and twitter.com-domain URLs.
 - Rewrote the pre-check recognition in agents/claude/commands/notes-organize-tweets.md as four signals (title prefix, inbox tag, enriched-body footprint, bare-link residual ≤300 chars); genuine project notes that merely reference a tweet go to a printed manual-review list instead of being rewritten. Residual text becomes the **My note** annotation so user words survive body rewrites.
 - Also fixed: URL regex swallowing `)` and `<!--` after query strings; /statuses/ legacy paths; reference_existing_attachments now percent-encodes filenames (Bear rejects writes whose attachment refs contain raw spaces — 7 notes failed on `Screenshot ... PM.png` before the fix); Step C now falls back to reading tweet text from the enriched body, since extra_tags-only notes are never in the current run's syndication batch.
@@ -213,6 +229,7 @@
 - Skill edits are uncommitted in ~/.dotfiles (agents/claude/commands/notes-organize-tweets.md).
 
 ## 2026-08-26: Tweet-enrichment re-run — idempotence confirmed, stale-marker cleanup
+
 - Re-ran the full workflow: zero new enrichment work needed — yesterday's pass fully converged (no new tweet saves, no iCloud conflicts).
 - Found and fixed a marker-hygiene bug: Step B's settle path stripped only *trailing* thread markers, but an attachment ref appended after `<!-- thread:unchecked -->` pushes it mid-body, where it survived. 63 notes carried a stale unchecked marker alongside their settled one — all cleaned; both settle regexes in the skill now strip markers anywhere in the body.
 - Settled 3 of the 6 tag-skipped notes: tferriss/Coach Sommer + Dostoevsky letters → writing/quips; maxedapps (links dmmulroy/anti-slop) → learn/ai.
@@ -221,11 +238,13 @@
 - Skill edits still uncommitted in ~/.dotfiles.
 
 ## 2026-08-26: Tweet notes enrichment run — clean corpus, settled the 3 tag-skipped notes
+
 - Ran /notes-organize-tweets. Audit found zero notes needing body/image/thread work — Steps A/A2/A3/B all no-ops. No duplicate pairs, post-run conflict query clean.
 - Tagged the 3 notes the 2026-08-25 session had left as "no taxonomy fit": sahilbloom EA4A9989 → personal/motivational; almonk 4FFE26C4 → personal/technology; thekitze 134E3490 → projects/developer-productivity. Judged these existing tags close enough — remove/retag if they grate. They no longer surface under extra_tags.
 - Manual-review pair unchanged: "Agents in Stoa" 7DB6A7F7, Dwarkesh podcast note C3C6928A.
 
 ## 2026-08-26: Updated impeccable skill v3.5.0 → v4.1.2
+
 - Ran `npx impeccable update --yes --no-hooks`; it writes through the ~/.claude/skills symlink straight into the vendored copy at agents/claude/home/skills/impeccable. First pass landed 4.1.1 because impeccable.style's bundle lagged the skill-v4.1.2 GitHub release (tagged this morning); re-ran with IMPECCABLE_BUNDLE_PATH pointed at the release's universal.zip to get 4.1.2 exactly.
 - The v3.6.0 npm CLI's update path silently skipped installing the four shipped subagents (asset-producer, documenter, finish-reviewer, manual-edit-applier) into ~/.claude/agents — a bug the v4.1.2 notes confirm ("Claude subagents install correctly again"). Copied them from the release bundle by hand; they now live in agents/claude/agents/.
 - Deliberately skipped the design hook install (--no-hooks) — the skill works without it; revisit if post-edit detector reminders sound useful (`/impeccable hooks on`).
@@ -233,6 +252,7 @@
 - Added durable-skip convention to the Step C tagging pass in notes-organize-tweets.md: when no taxonomy tag fits, apply catch-all `learn/misc` instead of leaving the note untagged — any topical tag settles it so it stops resurfacing under extra_tags every run. Uncommitted alongside the existing skill edits.
 
 ## 2026-08-27: herdr-ticket-campaign skill reviewed, hardened, committed
+
 - Code-reviewed the untracked skill (10 findings, 2 confirmed by executing the monitor loop): false agent-"gone" events, comm fed numeric sort, phantom slot-free on failed owner.json reads, silent gh blindness, invisible no-PR completions, <slug> naming contradiction, unquoted recap interpolation, unchained spawn block, /tmp brief purge risk, missing phase hooks for repo standing orders. All fixed; the rewritten monitor was re-verified against mocked failure scenarios before committing.
 - Work privacy: dotfiles is PUBLIC — the work repo's reference file (repo slug, issue-tracker conventions, tracker page id, shared-environment behavior, resource-lock protocol) is now gitignored via references/*-repo.md and stays machine-local. SKILL.md/brief-template genericized to `<repo>-repo.md`. Standing rule going forward: no work repo names, ticket numbers, or real ticket subjects in WORKLOG or any committed file, even as examples.
 - Briefs relocated /tmp/port-briefs → ~/.herdr/briefs; all 25 existing briefs copied over (originals left in /tmp for any in-flight agent).
@@ -240,12 +260,14 @@
 - Revisit: other machines running campaigns need their *-repo.md reference file copied by hand; consider a private sync channel for those files if that gets old.
 
 ## 2026-08-27: Tweet enrichment run + extracted workflow scripts from command md
+
 - Ran /notes-organize-tweets: 12 fresh saves enriched (11 bodies + 1 link-only, 12 images — 3 embedded photos, 9 Playwright screenshots, 12 inbox tags). Second convergence pass settled threads: 2 upgraded to real thread bodies (@mattshumer_, @patrick_oshag), 9 settled count=1, 11 topically tagged. Corpus fully settled (pre-check now reports 0).
 - Resolved a double-save (no conflict stamp): trashed the bare Aug-26 re-save of the Matt Ronge tweet; the enriched April copy survives.
 - Token-efficiency refactor (Kevin's ask): the command md embedded ~36KB of Python that got loaded into context AND re-typed to /tmp every run. Extracted all 9 scripts verbatim into agents/claude/tools/notes-organize-tweets/ and slimmed the command md 44KB → 11KB, keeping all prose knowledge (four-signal recognition, marker semantics, conflict playbook). step_c_apply.py now reads /tmp/tweet_tag_assignments.json instead of an inline dict. Added an explicit "convergence pass" section so one session fully settles fresh saves.
 - Next time: manual-review notes 7DB6A7F7 ("Agents in Stoa") and C3C6928A (Dwarkesh episode) still untagged — tag by hand or decide they're fine. Changes uncommitted — review and commit when ready.
 
 ## 2026-09-04: Retired the claude() shell-function updater; moving to the native installer
+
 - Root-caused the intermittent `zsh: permission denied:` on launch. The wrapper called `mise which 'npm:@anthropic-ai/claude-code'`, but `mise which` takes a *bin name*, not a tool spec, so it always errored. The first call had a `whence -p claude` fallback; the post-upgrade re-assignment did not, leaving `claude_bin=""`. zsh execing an empty string returns exactly `permission denied:` (exit 126) — so every time mise found an update, the launch died instead of starting Claude.
 - Claude Code self-updates now (native *and* npm-global installs check on startup and periodically; only brew/winget/apt/dnf/apk don't). The whole update block was redundant, and worse: `npm config get prefix` pointed at mise's *node* install, so Claude's own updater wrote there while our `mise upgrade` wrote to the npm-backend dir. Two updaters, two 200MB copies, and the PATH winner wasn't the one mise managed. Plus a stale 2.1.252 npm global under /opt/homebrew.
 - Decided (with Kevin): standardize on the native installer — the npm package now ships the same native binary and no longer runs on Node, which was the entire reason for the 2026-06-10 mise-npm migration. Wrapper keeps only the Warp tab rename; no update logic, accepting a one-launch lag.
@@ -259,6 +281,7 @@
 - Revisit: the install.zsh vs install.sh split is a trap — three files that look like installers never run. Worth collapsing to one convention.
 
 ## 2026-09-25: Re-assessed the uncommitted native-installer work; slimmed ccu; committed
+
 - Verified the 2026-09-04 migration took: `claude` -> ~/.local/bin/claude (2.1.281, installMethod native), and it self-updated from 2.1.260 on 09-23 without help.
 - Fixed a wrapper bug: claude() emitted OSC title escapes even when stdout was a pipe, corrupting `claude -p ... | jq` output. Both printfs are now gated on `[[ -t 1 ]]`.
 - Replaced the 50-line ccu() with `alias ccu="claude update"` — it had become a wrapper around a built-in. Release notes: `/release-notes` in-session.
@@ -269,24 +292,28 @@
 - Correction to 2026-08-27: the squash to a clean single commit was never force-pushed. origin/main still carries the original commit plus a follow-up that genericized the naming example, so the real ticket id remains in public history. Pushed today by rebasing onto origin/main and dropping the local squash (identical tree). Scrubbing it would need a force-push of main, which Kevin must do himself if he wants it.
 
 ## 2026-09-27: /doctor health check and cleanup
+
 - Disabled 22 unused plugins (posthog, compound-engineering, cloudflare, slack, datadog, duplicate review/commit/frontend plugins, 3 LSPs, etc.) and 30 unused user skills via `enabledPlugins`/`skillOverrides` in agents/claude/home/settings.json — the skill listing was over budget and truncating entries to names only.
 - Fixed broken hooks: fast-code-reviewer PostToolUse path moved to ~/.kevin/code/fast-code-reviewer; removed tldraw-offline SubagentStart hook (script no longer exists). Removed dangling skills/herdr symlink.
 - Removed leftover Claude copies (Homebrew-node npm global 2.1.220, mise npm tool 2.1.283); `claude install` set installMethod=native.
 - Revisit: something outside dotfiles re-added `npm:@anthropic-ai/claude-code` to ~/.config/mise/config.toml today at 12:15 — find the culprit if it reappears. monarchmoney/msgvault MCP servers fail to connect and are unused; run `/mcp disable` or fix them.
 
 ## 2026-09-27: Audit Claude symlinks against install.sh
+
 - All install.sh symlinks resolve correctly (~/.claude/{CLAUDE.md,settings.json,commands,statusline.sh,rules,agents,skills,SOFTWARE_ENGINEERING.md}, ~/.dotfiles/.claude, ~/.dotfiles/SOFTWARE_ENGINEERING.md); no broken links inside linked dirs.
 - Removed stale vercel-vercel-plugin marketplace (pointed at missing ~/.cache path) and uninstalled the plugin; dropped duplicate statusLine from project settings.local.json; gitignored .playwright-mcp/; deleted Feb/Jul ~/.claude backups.
 - Note: /auto-mode-setup wrote an `autoMode.environment` block into agents/claude/home/settings.json — this repo is public, so review it before committing.
 - ~/.claude/hooks/herdr-agent-state.sh is intentionally outside dotfiles (created by herdr/install.sh).
 
 ## 2026-09-28: notes-organize-tweets runs (09-25 and 09-28)
+
 - 09-25: enriched 23 tweet notes (15 new bodies, 10 thread upgrades, 15 images, 23 tagged). Step A3 crashed because Playwright updated and needed a new Chromium; installed it with `uv run --with playwright playwright install chromium`.
 - Gap found: precheck.py:144 flags `image` only when a note has no body, so a failed A3 is never retried once Step B writes the body. Backfilled the 12 affected notes by hand-adding `image` to /tmp/tweet_todo.json. Script not changed yet.
 - 09-28: trashed the bare copy from each of two duplicate pairs (double-saves, not sync conflicts), then enriched the surviving copy (2-tweet thread, screenshot, tags).
 - Revisit: postrun_conflict_check.sh fails with "authorization denied" on Bear's Group Container DB (macOS TCC, not the sandbox). Grant Full Disk Access or switch the check to bearcli. Fix the image-retry gap in precheck.py.
 
 ## 2026-09-28: Fix fast-code-reviewer hook path regression
+
 - The 09-27 /doctor "fix" pointed the PostToolUse hook at ~/.kevin/code/fast-code-reviewer, which doesn't exist; every Edit/Write raised a blocking hook error. Restored the original path ~/code/tools/fast-code-reviewer (verified the script runs, exit 0).
 - Lesson: check that a "moved" path exists before repointing config to it.
 - Scrub abandoned: origin/main had the unscrubbed history again (another clone pushed yesterday's prune commit on top of it). Kevin chose to rebase onto origin/main rather than force-push, so the 08-27 ticket id stays in public history. Dropped the local scrub note and the duplicate prune commit during the rebase.
@@ -294,11 +321,13 @@
 - Revisit: the other clone must fetch and hard-reset to origin/main before it pushes, or the old history comes back. stash@{0} is still built on the pre-scrub history (local only). GitHub may still serve the old commit hashes until it garbage-collects them; contact GitHub Support if that matters.
 
 ## 2026-09-28: Make fast-code-reviewer hook path machine-independent
+
 - 09-27 and 09-28 "fixes" fought each other: the reviewer lives at ~/.kevin/code/fast-code-reviewer on one machine and ~/code/tools/fast-code-reviewer on the other, so any hardcoded path breaks one of them. The PostToolUse hook now tries both and exits 0 silently if neither exists (verified: resolves on this machine; HOME=/nonexistent exits 0).
 - Added `"tui": "fullscreen"` (set via /config).
 - Revisit: settings.json `mcpServers.msgvault` is likely dead config — the live msgvault server is defined in ~/.claude.json. Confirm against the settings schema before deleting.
 
 ## 2026-09-28: Make pi a daily driver that shares Claude Code's rules and skills
+
 - Default model is now openai-codex/gpt-5.5 (flat subscription) instead of local qwen2.5-coder:7b, which couldn't follow a simple instruction in testing. Opus 5.5 added to enabledModels; per-model thinking levels set.
 - New extensions in agents/pi/home/extensions (loaded via settings `extensions`): shared-rules.ts injects claude/home/CLAUDE.md, the philosophy, and claude/rules/*.md (minus tool-use.md) as a system prompt section; claude-skills.ts adds only the ~/.claude/skills pi doesn't already discover (the 23 overlaps with ~/.agents/skills are identical copies; synced/ is skipped as Claude-only); confirm-irreversible.ts gates push/reset --hard/branch -D/clean -f/rm/sudo and blocks them without a UI.
 - Roles via vendored preset.ts + presets.json (explore/plan/work/critic/promote). Changed preset.ts to use a prompt section instead of replacing the whole system prompt, which had silently dropped the shared rules.
@@ -307,11 +336,13 @@
 - Revisit: promote preset -> claude-sonnet-5-5 and showCacheMissNotices; gemma4:e2b is in enabledModels but not pulled; `rm -f /tmp/...` in notes-organize-tweets triggers the gate each run.
 
 ## 2026-09-29: Routine notes-organize-tweets run
+
 - Enriched 1 new save (karpathy on the Sutton pod): body, tweet-card screenshot, inbox tag; convergence pass upgraded it to a 3-tweet thread; tagged learn/ai/research + learn/ai/llm.
 - No conflict pairs pre- or post-run; no script changes.
 - Revisit: 2 untagged notes reference tweets but look like project notes (manual-review list) — they resurface every run until tagged by hand.
 
 ## 2026-09-29: notes-organize-tweets captures long-form tweets, quotes, and links at full fidelity
+
 - A long-form "note tweet" was saved truncated at ~280 chars: syndication returns only a note_tweet id, and Tier 2's searchTweets also returns legacy full_text. Only getTweet (TweetDetail) carries the full text and the quoted tweet.
 - Step A records is_note_tweet/quoted_id; A2 routes those through Tier 2 even with no replies; the fetcher re-fetches every chain tweet via getTweet (failure = transient, note stays unsettled). Switched to ErrorRateLimitStrategy: the default silently sleeps up to 15 min on a rate limit (caused a hung probe).
 - Step B renders a **Quoting @handle** block, expands t.co links (drops media/quote self-links), adds body_full_text for settled single tweets, carries **My note** through rebuilds (the enrich path previously dropped it), skips re-attaching existing thread photos (made `tweet_3 2.png`), and re-adds only leaf tags.
@@ -319,6 +350,7 @@
 - Revisit: the Tier 3 embed screenshot still stops at "Show more" for long-form tweets (the body text is now complete, so the screenshot is just the visual card). Fixing that would mean screenshotting x.com with cookies. Only 1 note on this machine has a thread marker, so there's no local backfill; run FORCE_THREAD_RECHECK=1 on the other machine if its corpus differs.
 
 ## 2026-10-01: dotfiles main conflict check and pi version bump
+
 - What changed
   - Fetched origin/main and verified main had no outstanding merge conflicts; local main is ahead only.
   - Committed the pending Pi `lastChangelogVersion` bump to 0.99.2.
@@ -328,6 +360,7 @@
   - Push the two local commits to origin/main after confirmation.
 
 ## 2026-10-12: ast-grep-codemods skill, built and tested with baseline/green runs
+
 - What changed
   - New skill `agents/claude/home/skills/ast-grep-codemods/SKILL.md`: when to reach for ast-grep (many-file mechanical rewrites, repo-wide structural CI rules), global-only install, a verified migration codemod and CI lint rule for 0.50, gotchas, and the rationalizations agents used to avoid it.
   - Installed ast-grep 0.50 globally via brew (`sg` alias is deprecated; use `ast-grep`).
@@ -338,3 +371,16 @@
 - What to revisit next time
   - Watch whether agents rewrite semantically-unsafe shapes (variable log level) instead of leaving them; the skill now requires listing those sites either way.
   - Skill is 1k words; trim if it starts loading too often.
+
+## 2026-10-08: Fix neovim treesitter errors after a plugin update; move maestro PATH to zshrc.local
+
+- What changed
+  - Moved the installer-appended `~/.maestro/bin` PATH line from zsh/zshrc.symlink to ~/.zshrc.local (machine-specific).
+  - Committed Claude `"model": "opus"` and pi changelog bumps (1.0.4, 1.1.0) as minimal diffs; pi keeps reformatting its arrays and dropping the trailing newline on every update.
+  - neovim 0.11.3 -> 0.12.5 (brew). nvim-treesitter main needs 0.12; on 0.11 plugins failed to load and lazy rewrote lazy-lock.json without ~15 plugins. Restored the committed lock + `Lazy! restore`.
+  - Installed tree-sitter-cli (now in Brewfile) and rebuilt stale Oct-2025 parsers — the noice `Invalid node type "tab"` error was the old vim.so against new queries.
+- What we decided and why
+  - Never commit a lazy-lock.json that drops plugins while lazyvim.json extras are unchanged — it means the machine failed to load them.
+- What to revisit next time
+  - `jsonc` parser no longer exists upstream; LazyVim json extra still requests it (harmless warning).
+  - Other machine: confirm neovim >= 0.12 and tree-sitter-cli installed (`brew bundle`).
