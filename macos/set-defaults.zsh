@@ -82,8 +82,11 @@ defaults write NSGlobalDomain KeyRepeat -int 1
 # Safari & WebKit                                                             #
 ###############################################################################
 
+# Safari is sandboxed: writing its domain needs Full Disk Access for the
+# terminal. Use the first write as the probe and skip the rest if it fails.
+if defaults write com.apple.Safari UniversalSearchEnabled -bool false 2>/dev/null; then
+
 # Privacy: don’t send search queries to Apple
-defaults write com.apple.Safari UniversalSearchEnabled -bool false
 defaults write com.apple.Safari SuppressSearchSuggestions -bool true
 
 # Show the full URL in the address bar (note: this still hides the scheme)
@@ -105,6 +108,10 @@ defaults write com.apple.Safari SendDoNotTrackHTTPHeader -bool true
 
 # Update extensions automatically
 defaults write com.apple.Safari InstallExtensionUpdatesAutomatically -bool true
+
+else
+  echo "skipped Safari defaults: give your terminal Full Disk Access (System Settings > Privacy & Security > Full Disk Access), then re-run dot"
+fi
 
 ###############################################################################
 # Dock, Dashboard, and hot corners                                            #
