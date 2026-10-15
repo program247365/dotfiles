@@ -37,8 +37,8 @@ fi
 # so point the UI at the terminal explicitly.
 selected="$(printf '%s\n' "$all" | sk --multi --layout reverse \
   --pre-select-file "$preselect" \
-  --bind 'ctrl-a:select-all' \
-  --header 'Selected entries install on this machine. tab: toggle  ctrl-a: select all  enter: save  esc: cancel' \
+  --bind 'ctrl-a:select-all,ctrl-d:deselect-all' \
+  --header 'Selected entries install on this machine (all selected to start). tab: toggle  ctrl-a: all  ctrl-d: none  enter: save  esc: cancel' \
   2>/dev/tty)" || {
   if [ -e "$SKIP_FILE" ]; then
     echo "  picker cancelled; skip list unchanged"
