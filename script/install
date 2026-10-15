@@ -6,8 +6,13 @@ set -e
 
 cd "$(dirname "$0")"/..
 
-# mise installs node/bun/python for the installers that follow it.
+# Toolchain first: mise provides node, pnpm, python and bun for the rest.
 export PATH="$HOME/.local/share/mise/shims:$PATH"
+for installer in ./mise/install.sh ./node/install.sh; do
+  sh -c "$installer"
+done
 
-# Sorted so the order is deterministic: mise/ and node/ run before tools/.
-find . -name install.sh -not -path '*/node_modules/*' | sort | while read -r installer ; do sh -c "${installer}" ; done
+# Everything else, sorted so the order is deterministic.
+find . -name install.sh -not -path '*/node_modules/*' \
+  -not -path './mise/*' -not -path './node/*' \
+  | sort | while read -r installer ; do sh -c "${installer}" ; done
