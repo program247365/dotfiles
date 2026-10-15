@@ -120,6 +120,14 @@ if ! command -v pnpm >/dev/null 2>&1; then
   exit 1
 fi
 
+# pnpm refuses global installs unless its global bin dir is on PATH. The
+# zshrc does this for interactive shells; bootstrap is not one.
+export PNPM_HOME="${PNPM_HOME:-$HOME/Library/pnpm}"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+
 if [ "$INSTALL_OLLAMA" -eq 1 ]; then
   if command -v ollama >/dev/null 2>&1; then
     echo "  Ollama already installed"
