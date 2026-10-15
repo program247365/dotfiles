@@ -25,8 +25,23 @@ echo '# Set PATH, MANPATH, etc., for Homebrew.' >> "$HOME/.profile"
 echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> "$HOME/.zprofile"
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
+DOTFILES_ROOT="$(cd "$(dirname "$0")/.." && pwd -P)"
+SKIP_FILE="${DOTFILES_BREW_SKIP:-$HOME/.config/dotfiles/brew-skip}"
+
+# First interactive run on a machine: choose which entries to install.
+if [ ! -e "$SKIP_FILE" ] && [ -t 0 ]
+then
+  "$DOTFILES_ROOT/homebrew/select-brews"
+fi
+
 echo " Installing brews for you!"
 brew update
-brew bundle
+if [ -s "$SKIP_FILE" ]
+then
+  echo "  skipping $(wc -l < "$SKIP_FILE" | tr -d ' ') entries listed in $SKIP_FILE"
+  grep -v -F -f "$SKIP_FILE" "$DOTFILES_ROOT/Brewfile" | brew bundle --file=-
+else
+  brew bundle --file="$DOTFILES_ROOT/Brewfile"
+fi
 
 exit 0

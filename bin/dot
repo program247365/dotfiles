@@ -17,6 +17,7 @@ displayUsageAndExit() {
 	echo ""
 	echo "Options:"
 	echo "  -e, --edit    Open dotfiles directory for editing"
+	echo "  -s, --select-brews  Choose which Brewfile entries install on this machine"
 	echo "  -h, --help    Show this help message and exit"
 	exit
 }
@@ -29,6 +30,9 @@ while test $# -gt 0; do
 		"-e"|"--edit")
 			exec "$EDITOR" "$dotfilesDirectory"
 			exit
+			;;
+		"-s"|"--select-brews")
+			exec "$HOME/.dotfiles/homebrew/select-brews"
 			;;
 		*)
 			echo "Invalid option: $1"
