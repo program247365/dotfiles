@@ -40,7 +40,13 @@ selected="$(printf '%s\n' "$all" | sk --multi --layout reverse \
   --bind 'ctrl-a:select-all' \
   --header 'Selected entries install on this machine. tab: toggle  ctrl-a: select all  enter: save  esc: cancel' \
   2>/dev/tty)" || {
-  echo "  picker cancelled; skip list unchanged"
+  if [ -e "$SKIP_FILE" ]; then
+    echo "  picker cancelled; skip list unchanged"
+  else
+    mkdir -p "$(dirname "$SKIP_FILE")"
+    : > "$SKIP_FILE"
+    echo "  picker cancelled; installing everything and not asking again ($SKIP_FILE)"
+  fi
   exit 0
 }
 
