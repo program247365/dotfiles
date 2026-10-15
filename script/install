@@ -6,5 +6,8 @@ set -e
 
 cd "$(dirname "$0")"/..
 
-# find the installers and run them iteratively
-find . -name install.sh | while read installer ; do sh -c "${installer}" ; done
+# mise installs node/bun/python for the installers that follow it.
+export PATH="$HOME/.local/share/mise/shims:$PATH"
+
+# Sorted so the order is deterministic: mise/ and node/ run before tools/.
+find . -name install.sh -not -path '*/node_modules/*' | sort | while read -r installer ; do sh -c "${installer}" ; done
