@@ -40,8 +40,13 @@ if command -v herdr >/dev/null 2>&1; then
   for agent in claude codex pi; do
     herdr integration install "$agent"
   done
+  # The Brewfile no longer uses start_service: Homebrew 6's bundle marked the
+  # whole herdr entry failed when the service start errored. Start it here.
   if herdr status server >/dev/null 2>&1; then
     herdr server reload-config
+  else
+    echo "  [start] herdr server via brew services"
+    brew services start herdr
   fi
 else
   echo "  [skip] herdr not installed yet (brew bundle installs it) — re-run for integrations"
