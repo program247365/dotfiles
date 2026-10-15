@@ -4,7 +4,6 @@ tap 'Arthur-Ficial/tap' # https://github.com/Arthur-Ficial/apfel
 tap 'program247365/tap' # https://github.com/program247365/homebrew-tap
 tap 'b451c/quickmd' # https://github.com/b451c/quickmd
 
-brew '1password-cli'
 brew 'apfel' # https://github.com/Arthur-Ficial/apfel - Apple Intelligence from the CLI (on-device LLM, no API key)
 brew 'bat'
 brew 'broot'
@@ -15,7 +14,6 @@ brew 'datasette' # https://github.com/simonw/datasette
 brew 'diskonaut' # https://github.com/imsnif/diskonaut
 brew 'dust' # https://github.com/bootandy/dust
 brew 'eza' # https://github.com/eza-community/eza
-brew 'fantastical' # https://flexibits.com/fantastical
 brew 'fastfetch' # https://github.com/fastfetch-cli/fastfetch
 brew 'fd'
 brew 'mise' # https://mise.jdx.dev
@@ -26,7 +24,7 @@ brew 'git'
 brew 'git-delta' # https://github.com/dandavison/delta
 brew 'grex' # https://github.com/pemistahl/grex
 brew 'gfold' # https://github.com/nickgerace/gfold
-brew 'herdr', start_service: true # https://herdr.dev - background server that keeps coding-agent terminal sessions alive
+brew 'herdr' # service started by herdr/install.sh. https://herdr.dev - background server that keeps coding-agent terminal sessions alive
 brew 'hyperfine' # https://github.com/sharkdp/hyperfine
 brew 'jless' # https://jless.io/
 brew 'jq'
@@ -60,10 +58,12 @@ brew 'yt-dlp'
 brew 'zoxide'
 
 cask '1password'
+cask '1password-cli'
 cask 'appcleaner'
 cask 'cap'
 cask 'discord'
 cask 'docker-desktop'
+cask 'fantastical' # https://flexibits.com/fantastical
 cask 'figma'
 cask 'firefox'
 cask 'font-fira-code-nerd-font'

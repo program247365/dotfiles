@@ -43,6 +43,13 @@ fi
 
 echo " Installing brews for you!"
 brew update
+
+# Homebrew 6 refuses formulae and casks from third-party taps until they are
+# trusted, so trust every tap the Brewfile declares or references.
+for tap in $(sed -nE "s/^tap '([^']+)'.*/\1/p; s/^(brew|cask) '([^'\/]+\/[^'\/]+)\/[^']+'.*/\2/p" "$DOTFILES_ROOT/Brewfile" | sort -u)
+do
+  brew trust --tap "$tap" >/dev/null 2>&1 || echo "  could not trust tap $tap"
+done
 if [ -s "$SKIP_FILE" ]
 then
   echo "  skipping $(wc -l < "$SKIP_FILE" | tr -d ' ') entries listed in $SKIP_FILE"
