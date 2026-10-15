@@ -13,16 +13,23 @@ then
   # Install the correct homebrew for each OS type
   if test "$(uname)" = "Darwin"
   then
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+    # The installer ends with "Next steps" telling you to edit .zprofile by
+    # hand; the lines below do that, so drop that block from its output.
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)" 2>&1 \
+      | sed '/^==> Next steps:/,$d'
   elif test "$(expr substr $(uname -s) 1 5)" = "Linux"
   then
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install)"
   fi
 fi
 
-## Update paths
-echo '# Set PATH, MANPATH, etc., for Homebrew.' >> "$HOME/.profile"
-echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> "$HOME/.zprofile"
+## Update paths (once per machine)
+if ! grep -qs 'brew shellenv' "$HOME/.zprofile"
+then
+  echo "  adding Homebrew to $HOME/.zprofile"
+  echo '# Set PATH, MANPATH, etc., for Homebrew.' >> "$HOME/.zprofile"
+  echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> "$HOME/.zprofile"
+fi
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
 DOTFILES_ROOT="$(cd "$(dirname "$0")/.." && pwd -P)"
