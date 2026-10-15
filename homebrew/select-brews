@@ -33,10 +33,13 @@ else
   printf '%s\n' "$all" > "$preselect"
 fi
 
+# skim >= 5 draws its UI on stderr, and bootstrap merges stderr into a pipe,
+# so point the UI at the terminal explicitly.
 selected="$(printf '%s\n' "$all" | sk --multi --layout reverse \
   --pre-select-file "$preselect" \
-  --bind 'ctrl-a:toggle-all' \
-  --header 'Selected entries install on this machine. tab: toggle  ctrl-a: toggle all  enter: save  esc: cancel')" || {
+  --bind 'ctrl-a:select-all' \
+  --header 'Selected entries install on this machine. tab: toggle  ctrl-a: select all  enter: save  esc: cancel' \
+  2>/dev/tty)" || {
   echo "  picker cancelled; skip list unchanged"
   exit 0
 }
