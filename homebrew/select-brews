@@ -1,0 +1,49 @@
+#!/bin/zsh
+#
+# Pick which Brewfile entries install on this machine.
+#
+# Every brew/cask/mas line is offered in a multi-select picker. Entries you
+# deselect are written to the skip file, and homebrew/install.zsh filters
+# them out of the Brewfile before running `brew bundle`. Taps and cask_args
+# always apply. Re-run any time with `dot --select-brews`.
+
+set -e
+
+DOTFILES_ROOT="$(cd "$(dirname "$0")/.." && pwd -P)"
+BREWFILE="$DOTFILES_ROOT/Brewfile"
+SKIP_FILE="${DOTFILES_BREW_SKIP:-$HOME/.config/dotfiles/brew-skip}"
+
+if ! command -v sk >/dev/null 2>&1; then
+  echo "  installing sk (the picker) before choosing brews"
+  brew install sk
+fi
+
+# Reduce a Brewfile line to its identity, e.g. `cask 'docker'`.
+entry_key() {
+  sed -E "s/^((brew|cask|mas) '[^']+').*/\1/"
+}
+
+all="$(grep -E "^(brew|cask|mas) '" "$BREWFILE")"
+
+preselect="$(mktemp)"
+trap 'rm -f "$preselect"' EXIT
+if [ -s "$SKIP_FILE" ]; then
+  printf '%s\n' "$all" | grep -v -F -f "$SKIP_FILE" > "$preselect" || true
+else
+  printf '%s\n' "$all" > "$preselect"
+fi
+
+selected="$(printf '%s\n' "$all" | sk --multi --layout reverse \
+  --pre-select-file "$preselect" \
+  --bind 'ctrl-a:toggle-all' \
+  --header 'Selected entries install on this machine. tab: toggle  ctrl-a: toggle all  enter: save  esc: cancel')" || {
+  echo "  picker cancelled; skip list unchanged"
+  exit 0
+}
+
+mkdir -p "$(dirname "$SKIP_FILE")"
+comm -23 <(printf '%s\n' "$all" | entry_key | sort) \
+         <(printf '%s\n' "$selected" | entry_key | sort) > "$SKIP_FILE"
+
+skipped="$(wc -l < "$SKIP_FILE" | tr -d ' ')"
+echo "  $skipped Brewfile entries will be skipped on this machine ($SKIP_FILE)"
