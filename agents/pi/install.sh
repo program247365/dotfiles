@@ -121,12 +121,12 @@ if ! command -v pnpm >/dev/null 2>&1; then
 fi
 
 # pnpm refuses global installs unless its global bin dir is on PATH. The
-# zshrc does this for interactive shells; bootstrap is not one.
+# zshrc does this for interactive shells; bootstrap is not one. With
+# PNPM_HOME set the dir is $PNPM_HOME; unset, pnpm defaults to
+# ~/Library/pnpm/bin, so put both on PATH.
 export PNPM_HOME="${PNPM_HOME:-$HOME/Library/pnpm}"
-case ":$PATH:" in
-  *":$PNPM_HOME:"*) ;;
-  *) export PATH="$PNPM_HOME:$PATH" ;;
-esac
+mkdir -p "$PNPM_HOME/bin"
+export PATH="$PNPM_HOME:$PNPM_HOME/bin:$PATH"
 
 if [ "$INSTALL_OLLAMA" -eq 1 ]; then
   if command -v ollama >/dev/null 2>&1; then
