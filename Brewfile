@@ -1,7 +1,5 @@
 cask_args appdir: '/Applications'
 
-tap 'homebrew/bundle'
-tap 'homebrew/cask-fonts'
 tap 'Arthur-Ficial/tap' # https://github.com/Arthur-Ficial/apfel
 tap 'program247365/tap' # https://github.com/program247365/homebrew-tap
 tap 'b451c/quickmd' # https://github.com/b451c/quickmd
@@ -65,12 +63,12 @@ cask '1password'
 cask 'appcleaner'
 cask 'cap'
 cask 'discord'
-cask 'docker'
+cask 'docker-desktop'
 cask 'figma'
 cask 'firefox'
 cask 'font-fira-code-nerd-font'
 cask 'font-source-code-pro'
-cask 'font-source-sans-pro'
+cask 'font-source-sans-3' # Source Sans Pro was renamed upstream
 cask 'google-chrome'
 cask 'quickmd' # https://github.com/b451c/quickmd - markdown viewer with live auto-reload
 cask 'raycast'
