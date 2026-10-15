@@ -16,7 +16,7 @@ cd ~/.dotfiles
 script/bootstrap
 ```
 
-On the first run, a picker asks which Brewfile entries to install on this machine. Deselected entries are remembered in `~/.config/dotfiles/brew-skip`; change your mind later with `dot --select-brews`.
+On the first run, a picker asks which Brewfile entries to install on this machine. Deselected entries are remembered in `~/.config/dotfiles/brew-skip`. Run `dot --select-brews` to pick again: it offers to uninstall anything you deselect that is installed, then installs what you selected.
 
 ## Update
 

@@ -35,8 +35,9 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 DOTFILES_ROOT="$(cd "$(dirname "$0")/.." && pwd -P)"
 SKIP_FILE="${DOTFILES_BREW_SKIP:-$HOME/.config/dotfiles/brew-skip}"
 
-# First interactive run on a machine: choose which entries to install.
-if [ ! -e "$SKIP_FILE" ] && [ -t 0 ]
+# Choose which entries to install: on the first interactive run on a machine,
+# or whenever `dot --select-brews` asks for it.
+if [ -t 0 ] && { [ -n "$DOTFILES_SELECT_BREWS" ] || [ ! -e "$SKIP_FILE" ]; }
 then
   "$DOTFILES_ROOT/homebrew/select-brews"
 fi

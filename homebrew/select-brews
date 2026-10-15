@@ -56,3 +56,39 @@ comm -23 <(printf '%s\n' "$all" | entry_key | sort) \
 
 skipped="$(wc -l < "$SKIP_FILE" | tr -d ' ')"
 echo "  $skipped Brewfile entries will be skipped on this machine ($SKIP_FILE)"
+
+# Offer to uninstall deselected entries that are already installed.
+installed_formulae="$(brew list --formula -1 2>/dev/null)"
+installed_casks="$(brew list --cask -1 2>/dev/null)"
+to_remove=()
+while IFS= read -r entry; do
+  [ -n "$entry" ] || continue
+  kind="${entry%% *}"
+  name="${entry#* }"; name="${name//\'/}"
+  short="${name##*/}"
+  case "$kind" in
+    brew) printf '%s\n' "$installed_formulae" | grep -qx "$short" && to_remove+=("$kind $name") ;;
+    cask) printf '%s\n' "$installed_casks" | grep -qx "$short" && to_remove+=("$kind $name") ;;
+  esac
+done < "$SKIP_FILE"
+
+if [ ${#to_remove[@]} -gt 0 ]; then
+  {
+    echo "  deselected but installed:"
+    printf '    %s\n' "${to_remove[@]}"
+    printf '  uninstall these %d now? [y/N] ' "${#to_remove[@]}"
+  } > /dev/tty
+  read -r answer < /dev/tty
+  case "$answer" in
+    [yY]*)
+      for entry in "${to_remove[@]}"; do
+        kind="${entry%% *}"; name="${entry#* }"
+        if [ "$kind" = cask ]; then
+          brew uninstall --cask "$name" || echo "  could not uninstall cask $name"
+        else
+          brew uninstall "$name" || echo "  could not uninstall $name"
+        fi
+      done ;;
+    *) echo "  kept them installed; they just won't be managed by brew bundle here" ;;
+  esac
+fi

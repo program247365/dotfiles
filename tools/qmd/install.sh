@@ -23,26 +23,25 @@ echo "Setting up QMD..."
 # Node >= 22 (README requirement)
 NODE_VERSION=$(node --version 2>/dev/null | sed 's/^v//')
 if [ -z "$NODE_VERSION" ]; then
-  echo "  Error: node not found. Run: mise install node@22 && mise use node@22"
-  exit 1
+  echo "  skipped QMD: node not found (mise/install.sh sets it up; re-run dot)"
+  exit 0
 fi
 NODE_MAJOR=$(echo "$NODE_VERSION" | cut -d. -f1)
 if [ "$NODE_MAJOR" -lt 22 ]; then
-  echo "  Error: node v$NODE_VERSION too old. QMD requires >= 22"
-  echo "  Run: mise install node@22 && mise use node@22"
-  exit 1
+  echo "  skipped QMD: node v$NODE_VERSION too old, needs >= 22 (mise use --global node@24)"
+  exit 0
 fi
 
 # bun runs bear-sync.ts
 if ! command -v bun >/dev/null 2>&1; then
-  echo "  Error: bun not found. Run: brew install oven-sh/bun/bun"
-  exit 1
+  echo "  skipped QMD: bun not found (brew install oven-sh/bun/bun, then re-run dot)"
+  exit 0
 fi
 
 # bearcli reads Bear notes (ships with Bear 2.8+)
 if ! command -v bearcli >/dev/null 2>&1; then
-  echo "  Error: bearcli not found. Run: ~/.dotfiles/tools/bearcli/install.sh"
-  exit 1
+  echo "  skipped QMD: bearcli not found (install Bear, then re-run dot)"
+  exit 0
 fi
 
 # brew sqlite (needed for FTS5 / sqlite-vec extensions)
