@@ -384,3 +384,12 @@
 - What to revisit next time
   - `jsonc` parser no longer exists upstream; LazyVim json extra still requests it (harmless warning).
   - Other machine: confirm neovim >= 0.12 and tree-sitter-cli installed (`brew bundle`).
+
+## 2026-10-15: Researched landing-page skills; drafted `landing` skill; dogfooded on Side Projects
+- Added `agents/claude/home/skills/landing/` (SKILL.md + references/conversion.md, references/deploy.md) on branch `feat/landing-page-skill` (worktree `~/.dotfiles-worktrees/landing-page-skill`, outside the repo because `.worktrees` isn't gitignored and `.claude` is a symlink that blocks native worktrees).
+- Decided to build a thin orchestrator instead of adopting one: no existing skill is monorepo-, impeccable-, and Vercel-CLI-aware. Borrowed rules from coreyhaines31/marketingskills, Paldom/landing-page-builder-skills, Pieter Levels' formula; design is delegated to impeccable.
+- Dogfood: 3 variants in sideprojects worktree (`~/.kevin/code/sideprojects-worktrees/landing`, branch `feat/landing-page`, `marketing/`), preview-deployed to Vercel project `sideprojects-marketing`. Nothing committed in either repo.
+- Revisit: pick a variant, wire WAITLIST_WEBHOOK_URL (logs-only storage now), enable Web Analytics, real OG image, then commit both branches.
+- Later same day: shipped. Kevin picked variant B + A's bullets; live at https://getsideprojects.app (Namecheap → Vercel nameservers, www 308 → apex). Waitlist → Resend segment "Side Projects waitlist" via a dedicated full-access key stored only as a Vercel prod secret. Web Analytics on (plain-HTML `/_vercel/insights/script.js`).
+- Found and fixed: re-creating a Resend contact resets `unsubscribed`, so the function now adds existing contacts to the segment and only creates new ones (verified live). Skill references updated with this, the deploy-then-attach-domain order, and analytics path.
+- Revisit: real OG image; Resend sending domain for getsideprojects.app (records via `vercel dns add`); whether custom events record on Hobby; delete or keep /a /b /c variants.
