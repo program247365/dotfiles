@@ -79,3 +79,11 @@ cask 'tailscale-app' # GUI app + CLI; the bare 'tailscale' cask was renamed to t
 cask 'tldraw' # tldraw offline — desktop whiteboard, offline.tldraw.com
 cask 'warp'
 cask 'xscope'
+
+# Mac App Store (mas): needs App Store sign-in, and only installs apps this
+# Apple ID already owns. Xcode is left out on purpose (10+ GB); install it by hand.
+mas 'Amphetamine', id: 937984704
+mas 'Bear', id: 1091189122 # bearcli ships inside it (tools/bearcli)
+mas 'Flow', id: 1423210932
+mas 'Plash', id: 1494023538
+mas 'Spark Mail', id: 6445813049 # Spark Desktop; provides the spark CLI
