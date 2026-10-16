@@ -446,3 +446,8 @@
 - Claude skills migration marked superseded (agents/claude/install.sh owns ~/.claude/skills; its glob over the removed .dotfiles/.claude/skills aborted dot).
 - bin/dot: a failing migration is reported and dot keeps going; exit status reflects it.
 - Revisit: migrations have no "already ran" record, so each one must guard itself. Consider a stamp file per migration if more get added.
+
+## 2026-10-15: livediff link failure was a half-updated Command Line Tools
+- `cargo install livediff` failed with `tapi error: malformed file ... unknown architecture arm64e.x1-macos`. The MacOSX27.0 SDK had been installed (xcrun picks the newest) while ld was still ld-1267 from CLT 26.6, so every native link failed, even a C hello-world.
+- Fixed on the machine, not in the dotfiles: `sudo softwareupdate -i "Command Line Tools for Xcode 27.0-27.0"` (ld is now ld-27037.1). Needs a real terminal; `!` in Claude Code has no TTY for sudo. Avoid `-i -a`, which also pulls the macOS update.
+- Revisit: if this recurs on another machine, check `ld -v` against `xcrun --show-sdk-version` before blaming dot.
