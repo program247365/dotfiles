@@ -67,7 +67,7 @@ echo "› Running migrations"
 for script in "$ZSH/migrations"/*.zsh; do
 	if [ -f "$script" ]; then
 		echo "  Running migration: $(basename "$script")"
-		"$script"
+		"$script" || { echo "  migration failed: $(basename "$script")"; install_status=1; }
 	fi
 done
 

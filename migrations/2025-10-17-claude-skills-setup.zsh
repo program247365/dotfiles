@@ -5,6 +5,12 @@
 
 set -e
 
+# SUPERSEDED: agents/claude/install.sh links agents/claude/home/skills to
+# ~/.claude/skills, and ~/.dotfiles/.claude/skills no longer exists (its glob
+# matched nothing and aborted dot). Kept for history.
+echo "⊘ Superseded by agents/claude/install.sh (global skills)"
+exit 0
+
 echo "Setting up Claude Code skills..."
 
 DOTFILES_DIR="${HOME}/.dotfiles"
