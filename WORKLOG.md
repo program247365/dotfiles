@@ -411,3 +411,7 @@
 - Later: Pi installer hit ERR_PNPM_GLOBAL_BIN_DIR_NOT_IN_PATH on the new Mac: pnpm refuses `add -g` unless ~/Library/pnpm is on PATH, which only the interactive zshrc does. The installer now exports PNPM_HOME and prepends it itself.
 - Later: Warp theme didn't come through on the new Mac. Warp Settings Sync only carries the theme *selection*; custom theme YAML lives locally in ~/.warp/themes and never syncs, and warp/install.zsh never ran (script/install only runs install.sh). Replaced it with an idempotent warp/install.sh that symlinks each warp/themes/*.yaml into ~/.warp/themes. Ran it twice here; both Synthgreen files linked.
 - Revisit: confirm Warp picks up Synthgreen after a restart; if the synced selection still shows the default, pick it once in Settings > Appearance.
+
+## 2026-10-15: Add Tailscale cask to Brewfile
+- Added `cask 'tailscale-app'` to the Brewfile. `brew info --cask tailscale` now resolves to `tailscale-app`, so the Brewfile uses the current name.
+- Revisit: not installed on this machine yet; `dot` or `brew bundle` will pick it up.
