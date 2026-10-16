@@ -87,12 +87,12 @@ calculate-xcode() {
   du -sh ~/Library/Developer/Xcode/*
 }
 
-# git-all worktree shortcut: gwt fix-thing → creates ~/code/{repo}-fix-thing worktrees
+# git-all worktree shortcut: gwt fix-thing → creates $PROJECTS/{repo}-fix-thing worktrees
 gwt() {
   local suffix="$1"
   if [[ -z "$suffix" ]]; then
     echo "Usage: gwt <branch-suffix>"
-    echo "  e.g. gwt fix-thing → ~/code/repo1-fix-thing, ~/code/repo2-fix-thing"
+    echo "  e.g. gwt fix-thing → $PROJECTS/repo1-fix-thing, $PROJECTS/repo2-fix-thing"
     return 1
   fi
 
@@ -108,12 +108,12 @@ gwt() {
     [[ ! -d "$dir/.git" ]] && continue
 
     local name=$(basename "$dir")
-    local wt_dir="$HOME/code/${name}-${suffix}"
+    local wt_dir="${PROJECTS:-$HOME/.kevin/code}/${name}-${suffix}"
 
     echo "\033[36m━━━ \033[1;35m$name\033[0;36m ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
     git -C "$dir" worktree add "$wt_dir" -b "$suffix"
     if [[ $? -eq 0 ]]; then
-      echo "\033[32m→ ~/code/${name}-${suffix}\033[0m"
+      echo "\033[32m→ $wt_dir\033[0m"
     else
       echo "\033[31m✗ failed\033[0m"
     fi
