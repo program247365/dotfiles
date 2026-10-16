@@ -8,11 +8,21 @@ cd "$(dirname "$0")"/..
 
 # Toolchain first: mise provides node, pnpm, python and bun for the rest.
 export PATH="$HOME/.local/share/mise/shims:$PATH"
-for installer in ./mise/install.sh ./node/install.sh; do
-  sh -c "$installer"
-done
+failed=()
+run() { sh -c "$1" || failed+=("$1"); }
 
-# Everything else, sorted so the order is deterministic.
-find . -name install.sh -not -path '*/node_modules/*' \
-  -not -path './mise/*' -not -path './node/*' \
-  | sort | while read -r installer ; do sh -c "${installer}" ; done
+run ./mise/install.sh
+run ./node/install.sh
+
+# Everything else, sorted so the order is deterministic. One failing
+# installer must not stop the rest, so failures are collected and reported.
+while read -r installer; do
+  run "$installer"
+done < <(find . -name install.sh -not -path '*/node_modules/*' \
+  -not -path './mise/*' -not -path './node/*' | sort)
+
+if [ ${#failed[@]} -gt 0 ]; then
+  echo "› installers failed (fix, then re-run dot):"
+  printf '    %s\n' "${failed[@]}"
+  exit 1
+fi

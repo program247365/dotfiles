@@ -35,8 +35,8 @@ BIN_DIR="$HOME/.kevin/bin"
 echo "Setting up search..."
 
 if ! command -v bun >/dev/null 2>&1; then
-  echo "  Error: bun not found. Run: brew install oven-sh/bun/bun"
-  exit 1
+  echo "  skipped search: bun not found (brew install bun, then re-run dot)"
+  exit 0
 fi
 
 if [ ! -d "$REPO_DIR" ]; then

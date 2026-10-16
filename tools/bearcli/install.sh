@@ -13,8 +13,8 @@ BIN_DIR="$HOME/.kevin/bin"
 LINK="$BIN_DIR/bearcli"
 
 if [ ! -x "$BUNDLED" ]; then
-  echo "bearcli not found at $BUNDLED — install Bear 2.8 or newer." >&2
-  exit 1
+  echo "  skipped bearcli: Bear not installed (install Bear 2.8+, then re-run dot)"
+  exit 0
 fi
 
 mkdir -p "$BIN_DIR"

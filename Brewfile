@@ -8,6 +8,7 @@ brew 'apfel' # https://github.com/Arthur-Ficial/apfel - Apple Intelligence from 
 brew 'bat'
 brew 'broot'
 brew 'bottom' # 'btm' is the cli binary
+brew 'bun' # tools/search, keeper-cli and qmd build with it
 brew 'cocogitto' # https://github.com/cocogitto/cocogitto
 brew 'csvkit'
 brew 'datasette' # https://github.com/simonw/datasette
@@ -44,6 +45,7 @@ brew 'tree-sitter-cli' # nvim-treesitter (main) compiles parsers with it
 brew 'nvm' # https://github.com/mhinz/neovim-remote
 brew 'onefetch'
 brew 'ripgrep'
+brew 'rust' # cargo for tools/livediff and bh (tools/search)
 brew 'sk'
 brew 'so'
 brew 'spotify_player' # https://github.com/aome510/spotify-player - Work demands music. On the CLI.

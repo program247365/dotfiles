@@ -42,11 +42,12 @@ if command -v herdr >/dev/null 2>&1; then
   done
   # The Brewfile no longer uses start_service: Homebrew 6's bundle marked the
   # whole herdr entry failed when the service start errored. Start it here.
-  if herdr status server >/dev/null 2>&1; then
+  # `status server` exits 0 even when stopped; only --json says which.
+  if herdr status server --json | grep -q '"running":true'; then
     herdr server reload-config
   else
     echo "  [start] herdr server via brew services"
-    brew services start herdr
+    brew services start herdr || echo "  [warn] could not start herdr server; run \`herdr\` to start it"
   fi
 else
   echo "  [skip] herdr not installed yet (brew bundle installs it) — re-run for integrations"

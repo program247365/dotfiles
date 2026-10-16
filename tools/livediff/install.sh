@@ -17,8 +17,8 @@ set -e
 echo "Setting up Livediff..."
 
 if ! command -v cargo >/dev/null 2>&1; then
-  echo "  Error: cargo not found. Run: brew install rustup && rustup-init"
-  exit 1
+  echo "  skipped Livediff: cargo not found (brew install rust, then re-run dot)"
+  exit 0
 fi
 
 cargo install livediff
