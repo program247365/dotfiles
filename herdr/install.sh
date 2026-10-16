@@ -46,8 +46,9 @@ if command -v herdr >/dev/null 2>&1; then
   if herdr status server --json | grep -q '"running":true'; then
     herdr server reload-config
   else
-    echo "  [start] herdr server via brew services"
-    brew services start herdr || echo "  [warn] could not start herdr server; run \`herdr\` to start it"
+    # The formula ships no service and herdr has no `server start`; the
+    # server comes up the first time `herdr` launches.
+    echo "  [note] herdr server not running; it starts the first time you run \`herdr\`"
   fi
 else
   echo "  [skip] herdr not installed yet (brew bundle installs it) — re-run for integrations"

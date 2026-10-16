@@ -16,9 +16,11 @@ run ./node/install.sh
 
 # Everything else, sorted so the order is deterministic. One failing
 # installer must not stop the rest, so failures are collected and reported.
-while read -r installer; do
+# The list is read on fd 3: installers that read stdin (ssh -T in
+# keeper-cli) would otherwise swallow the remaining entries.
+while read -r installer <&3; do
   run "$installer"
-done < <(find . -name install.sh -not -path '*/node_modules/*' \
+done 3< <(find . -name install.sh -not -path '*/node_modules/*' \
   -not -path './mise/*' -not -path './node/*' | sort)
 
 if [ ${#failed[@]} -gt 0 ]; then

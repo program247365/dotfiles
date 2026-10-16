@@ -438,3 +438,11 @@
 - Spark: the old ID 1176895641 is Spark Classic. Switched to Spark Mail (6445813049), the Spark Desktop app that provides the spark CLI search uses.
 - Left Xcode out on purpose (10+ GB). macos/install.zsh keeps only softwareupdate, xcode-select and brew upgrade, and still isn't run by dot.
 - Revisit: confirm the mas installs work on the next fresh machine; they need App Store sign-in first.
+
+## 2026-10-15: Second fresh-run pass on dot
+- script/install now reads the installer list on fd 3. keeper-cli's `ssh -T` read stdin and swallowed every installer after it (kit, starship, bearcli, livediff, qmd, search, warp silently never ran).
+- herdr: the formula ships no service and there is no `herdr server start`, so `brew services start` can never work. It now prints a note; the server starts on the first `herdr`.
+- LazyVim migration was not idempotent: `[ -d ~/.config/nvim ]` is true for its own symlink, so a re-run would move config and ~/.local/share/nvim plugins to .bak. It now exits early when the link is in place, and no longer clones the starter just to delete it.
+- Claude skills migration marked superseded (agents/claude/install.sh owns ~/.claude/skills; its glob over the removed .dotfiles/.claude/skills aborted dot).
+- bin/dot: a failing migration is reported and dot keeps going; exit status reflects it.
+- Revisit: migrations have no "already ran" record, so each one must guard itself. Consider a stamp file per migration if more get added.

@@ -3,6 +3,13 @@
 # LazyVim Migration Script - 2025-08-20
 # This script sets up LazyVim on a new machine and creates symlinks from this dotfiles repo
 
+# Already linked: nothing to do. Without this, `[ -d ~/.config/nvim ]` is true
+# for the symlink itself and every dot run would move config and plugins aside.
+if [ -L ~/.config/nvim ] && [ "$(readlink ~/.config/nvim)" = "$HOME/.dotfiles/config" ]; then
+    echo "✓ ~/.config/nvim already linked to ~/.dotfiles/config"
+    exit 0
+fi
+
 echo "🚀 Starting LazyVim migration setup..."
 
 # Make a backup of current Neovim files
@@ -32,17 +39,9 @@ if [ -d ~/.cache/nvim ]; then
     mv ~/.cache/nvim ~/.cache/nvim.bak
 fi
 
-# Clone the LazyVim starter
-echo "📥 Cloning LazyVim starter..."
-git clone https://github.com/LazyVim/starter ~/.config/nvim
-
-# Remove the .git folder
-echo "🗑️  Removing .git folder from starter..."
-rm -rf ~/.config/nvim/.git
-
-# Remove the starter directory and create symlink to our dotfiles config
+# ~/.dotfiles/config is already a LazyVim config (from the starter), so link it
 echo "🔗 Setting up symlink to dotfiles nvim config..."
-rm -rf ~/.config/nvim
+mkdir -p ~/.config
 ln -s ~/.dotfiles/config ~/.config/nvim
 
 # Verify the symlink
