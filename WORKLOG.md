@@ -415,3 +415,26 @@
 ## 2026-10-15: Add Tailscale cask to Brewfile
 - Added `cask 'tailscale-app'` to the Brewfile. `brew info --cask tailscale` now resolves to `tailscale-app`, so the Brewfile uses the current name.
 - Revisit: not installed on this machine yet; `dot` or `brew bundle` will pick it up.
+
+## 2026-10-15: Point gwt and fresh at $PROJECTS
+- `gwt` (functions/functions.zsh) and `bin/fresh` now use `$PROJECTS` instead of hardcoded `~/code`, which doesn't exist on this machine.
+- Fallback when `$PROJECTS` is unset is `~/.kevin/code`, matching zsh/zshrc.symlink, so non-interactive shells behave the same.
+- Revisit: installers and agents/claude/home/settings.json still hardcode `~/.kevin/code` / `~/.kevin/personal-code`; the work machine could set `PROJECTS` in ~/.localrc.
+
+## 2026-10-15: Create ~/.kevin dirs on dot
+- `script/custom_dirs.zsh` was never called by anything. `bin/dot` now runs it first, and it also creates `~/.kevin/code` so `$PROJECTS` exists on a fresh machine.
+- It runs before macos/set-defaults.zsh, which points screenshots at ~/.kevin/screenshots.
+
+## 2026-10-15: Make dot survive a fresh machine
+- herdr/install.sh: `herdr status server` exits 0 even when stopped, so `reload-config` failed and `set -e` killed every installer after herdr. It now checks `--json` for `"running":true`, and a failed `brew services start` only warns.
+- script/install runs every installer, collects the failures, and exits 1 at the end with a list. bin/dot still runs migrations and `kit index`, then exits with the install status.
+- bin/dot: removed the second `brew update` (homebrew/install.zsh already ran one) and added `brew shellenv` so a fresh machine has brew on PATH.
+- Brewfile: added bun (search, keeper-cli, qmd) and rust (livediff, bh). bearcli, livediff and search now skip with a note when a prerequisite is missing, the same way keeper-cli and qmd already did.
+- node/install.sh: `--allow-scripts=dev-browser` silences the npm install-scripts warning.
+- Revisit: Pi's pnpm "Ignored build scripts" (@google/genai, protobufjs) warning; git-all.config.local still has to be created by hand per machine; Safari defaults still need Full Disk Access.
+
+## 2026-10-15: App Store apps via Brewfile mas lines
+- Moved Amphetamine, Bear, Flow and Plash out of macos/install.zsh (which dot never runs) into the Brewfile as `mas` lines. `brew bundle` skips apps already installed, and select-brews already offers mas lines.
+- Spark: the old ID 1176895641 is Spark Classic. Switched to Spark Mail (6445813049), the Spark Desktop app that provides the spark CLI search uses.
+- Left Xcode out on purpose (10+ GB). macos/install.zsh keeps only softwareupdate, xcode-select and brew upgrade, and still isn't run by dot.
+- Revisit: confirm the mas installs work on the next fresh machine; they need App Store sign-in first.
