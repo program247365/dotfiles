@@ -34,7 +34,7 @@ fi
 
 # bun runs bear-sync.ts
 if ! command -v bun >/dev/null 2>&1; then
-  echo "  skipped QMD: bun not found (brew install oven-sh/bun/bun, then re-run dot)"
+  echo "  skipped QMD: bun not found (brew install bun, then re-run dot)"
   exit 0
 fi
 

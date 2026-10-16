@@ -6,3 +6,4 @@ mkdir -p $MY_DIR # it's a meeee
 mkdir -p "$MY_DIR/screenshots"
 mkdir -p "$MY_DIR/downloads"
 mkdir -p "$MY_DIR/bin"
+mkdir -p "$MY_DIR/code" # $PROJECTS in zsh/zshrc.symlink

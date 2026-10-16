@@ -8,7 +8,7 @@ mise use --global node@24
 echo "Installing global Node.js tools..."
 # Claude Code is NOT installed here — it ships a native binary now and is
 # installed by agents/claude/install.sh. See migrations/2026-09-04-*.
-npm install -g dev-browser
+npm install -g --allow-scripts=dev-browser dev-browser
 if [ ! -d "$HOME/.dev-browser/node_modules" ]; then
   dev-browser install
 fi

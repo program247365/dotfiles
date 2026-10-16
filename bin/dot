@@ -44,19 +44,23 @@ done
 
 export ZSH=$HOME/.dotfiles
 
+# Create ~/.kevin dirs (code, screenshots, ...) before anything points at them
+sh $ZSH/script/custom_dirs.zsh
+
 # Set macOS defaults
 $ZSH/macos/set-defaults.zsh
 
 # Install homebrew
 $ZSH/homebrew/install.zsh 2>&1
 
-# Upgrade homebrew
-echo "› brew update"
-brew update
+# homebrew/install.zsh updates brew but runs in its own process, so put brew
+# on this shell's PATH (a fresh machine has no ~/.zprofile entry loaded yet).
+eval "$(/opt/homebrew/bin/brew shellenv)"
 
-# Install software
+# Install software; keep going to migrations even if an installer failed
 echo "› $ZSH/script/install"
-$ZSH/script/install
+install_status=0
+$ZSH/script/install || install_status=$?
 
 # Run migrations
 echo "› Running migrations"
@@ -72,3 +76,5 @@ echo "› kit index"
 if command -v kit >/dev/null 2>&1; then
   kit index
 fi
+
+exit $install_status
