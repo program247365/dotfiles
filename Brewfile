@@ -73,6 +73,7 @@ cask 'google-chrome'
 cask 'quickmd' # https://github.com/b451c/quickmd - markdown viewer with live auto-reload
 cask 'raycast'
 cask 'slack'
+cask 'tailscale-app' # GUI app + CLI; the bare 'tailscale' cask was renamed to this
 cask 'tldraw' # tldraw offline — desktop whiteboard, offline.tldraw.com
 cask 'warp'
 cask 'xscope'
