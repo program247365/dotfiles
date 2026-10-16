@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# fresh — check health of all git repos under $PROJECTS (or ~/code)
+# fresh — check health of all git repos under $PROJECTS (or ~/.kevin/code)
 #
 # Reports repos with:
 #   - uncommitted changes (dirty working tree)
@@ -9,7 +9,7 @@
 
 set -euo pipefail
 
-ROOT="${1:-${PROJECTS:-$HOME/code}}"
+ROOT="${1:-${PROJECTS:-$HOME/.kevin/code}}"
 
 if [ ! -d "$ROOT" ]; then
   echo "Directory not found: $ROOT"
