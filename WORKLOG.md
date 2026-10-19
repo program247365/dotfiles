@@ -487,3 +487,7 @@
 - Verified: a one-job workflow passed with `npx -y run-local-ci@0.18.1` on OrbStack. The skill now covers `orb start`, the socket, and the first-run image pull.
 - Revisit: Docker Desktop.app is still installed and owns `/usr/local/bin/docker`. Uninstall it (`brew uninstall --cask docker-desktop`), then open OrbStack.app once so it links its own `docker` CLI.
 - Follow-up: uninstalled Docker Desktop. The uninstall also removed `/usr/local/bin/docker`, and OrbStack didn't link its CLI. New `docker/path.zsh` appends `/Applications/OrbStack.app/Contents/MacOS/xbin` (docker, docker-compose, buildx, kubectl) to PATH, which needs no sudo. Also symlinked `~/.docker/cli-plugins/{docker-compose,docker-buildx}` to the xbin copies; that's machine state outside the repo. Verified `docker run hello-world` and a Local CI run from a fresh shell.
+
+## 2026-10-19: Added mole to Brewfile
+- Brewfile: added `brew 'mole'` (tw93/Mole, Mac deep-clean/optimize CLI, in homebrew-core). Committed and pushed as ccdb2b9.
+- Installed mole 1.61.0; it provides both `mo` and `mole`.
