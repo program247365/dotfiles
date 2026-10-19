@@ -468,3 +468,10 @@
 - No repo change needed: `mise/install.sh` already runs `mise use --global node@24`, which installs it on a fresh machine.
 - Revisit: `mise activate zsh` runs twice (`mise/path.zsh` and `zsh/zshrc.symlink:93`). It's harmless today; drop one if shell startup time matters.
 - Follow-up: removed the duplicate `mise activate zsh` at `zsh/zshrc.symlink:93` (added 2026-03-26, before `mise/path.zsh` existed). Verified `node` resolution and mise's position in PATH are the same with only `mise/path.zsh` activating.
+
+## 2026-10-19: Added /make-check-repo skill
+- New skill `agents/claude/home/skills/make-check-repo/SKILL.md`: surveys a repo's CI config and tooling, builds a non-mutating `make check` that mirrors CI (format, lint, typecheck, tests, build, etc.), runs it until green, and writes a Verification section into the repo's AGENTS.md (plus `@AGENTS.md` in CLAUDE.md).
+- New rule `agents/claude/rules/make-check.md`: suggest the skill right after a repo is created, or in repos with CI but no `make check`; run `make check` before calling work done.
+- Inspired by Cory House's "strict check script" post (tsc, cspell, test, knip, e2e build, lint, format:check).
+- First run: triage (no hosted CI). `make check` went from tsc-only to typecheck (now incl. test/, scripts/), `bash -n`, `swiftc -typecheck`, `bun test`, and a demo-data server smoke test; green in ~2s, pushed as triage ace82a5. The run showed that Claude Code only auto-loads CLAUDE.md, so the skill now creates a `@AGENTS.md` CLAUDE.md when none exists.
+- Revisit: triage has no formatter/linter (proposed biome, not added). Codex/pi don't get the skill or rule yet. Overlaps with /local-ci: make-check-repo builds `make check`; local-ci runs the GitHub Actions workflows.
