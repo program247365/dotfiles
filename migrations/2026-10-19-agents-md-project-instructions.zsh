@@ -8,7 +8,8 @@
 # pointed at agents/codex/project/AGENTS.md, a file that was never committed.
 #
 # End state: ~/.dotfiles/AGENTS.md is the tracked file, no root CLAUDE.md
-# shadows it, and claude is new enough to read it.
+# shadows it, claude is new enough to read it, and ~/.codex/AGENTS.md is
+# generated (it was a dangling symlink too).
 # Idempotent: safe to re-run.
 
 set -e
@@ -37,7 +38,16 @@ for shadow in CLAUDE.md CLAUDE.local.md .claude/CLAUDE.md; do
   fi
 done
 
-# 3. Claude Code must be new enough to read AGENTS.md directly
+# 3. Codex: ~/.codex/AGENTS.md was a symlink to a file that was never
+#    committed. Replace it with the generated global instructions.
+if [[ -d "$HOME/.codex" ]] || command -v codex >/dev/null 2>&1; then
+  bash "$DOTFILES_ROOT/agents/codex/generate-agents-md.sh"
+  echo "✓ ~/.codex/AGENTS.md generated"
+else
+  echo "⊘ Codex not installed; agents/codex/install.sh generates ~/.codex/AGENTS.md"
+fi
+
+# 4. Claude Code must be new enough to read AGENTS.md directly
 if ! command -v claude >/dev/null 2>&1; then
   echo "⊘ claude not installed; agents/claude/install.sh installs the current version"
   exit 0
