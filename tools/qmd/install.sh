@@ -20,15 +20,21 @@ echo "Setting up QMD..."
 
 # --- Prerequisites ---
 
-# Node >= 22 (README requirement)
-NODE_VERSION=$(node --version 2>/dev/null | sed 's/^v//')
-if [ -z "$NODE_VERSION" ]; then
-  echo "  skipped QMD: node not found (mise/install.sh sets it up; re-run dot)"
-  exit 0
+# Node >= 22 (README requirement). Pinned to Homebrew's node, not mise's:
+# a global install under a mise node lives in a versioned dir that vanishes
+# when that version is pruned, and the bin's `env node` shebang resolves to
+# whatever node is first on PATH (mise shims under launchd) — wrong ABI for
+# qmd's native modules, or a dead shim.
+BREW_NODE="$(brew --prefix)/bin/node"
+BREW_NPM="$(brew --prefix)/bin/npm"
+if [ ! -x "$BREW_NODE" ]; then
+  echo "  Installing node via brew..."
+  brew install node
 fi
+NODE_VERSION=$("$BREW_NODE" --version | sed 's/^v//')
 NODE_MAJOR=$(echo "$NODE_VERSION" | cut -d. -f1)
 if [ "$NODE_MAJOR" -lt 22 ]; then
-  echo "  skipped QMD: node v$NODE_VERSION too old, needs >= 22 (mise use --global node@24)"
+  echo "  skipped QMD: brew node v$NODE_VERSION too old, needs >= 22 (brew upgrade node)"
   exit 0
 fi
 
@@ -53,16 +59,22 @@ fi
 # --- Install ---
 
 echo "  Installing from npm ($UPSTREAM_PKG)..."
-npm install -g "$UPSTREAM_PKG"
+"$BREW_NPM" install -g "$UPSTREAM_PKG"
 
 if [ -d "$OLD_FORK_DIR" ]; then
   echo "  Removing old fork clone (replaced by upstream npm package)..."
   rm -rf "$OLD_FORK_DIR"
 fi
 
+QMD_ENTRY="$("$BREW_NPM" prefix -g)/lib/node_modules/$UPSTREAM_PKG/bin/qmd"
 mkdir -p "$BIN_DIR"
-ln -sf "$(npm prefix -g)/bin/qmd" "$BIN_DIR/qmd"
-echo "  Linked $BIN_DIR/qmd -> $(npm prefix -g)/bin/qmd"
+rm -f "$BIN_DIR/qmd"
+cat > "$BIN_DIR/qmd" <<EOF
+#!/bin/sh
+exec "$BREW_NODE" "$QMD_ENTRY" "\$@"
+EOF
+chmod +x "$BIN_DIR/qmd"
+echo "  Wrote $BIN_DIR/qmd (runs $QMD_ENTRY under $BREW_NODE)"
 
 # --- Bear mirror + collection ---
 
