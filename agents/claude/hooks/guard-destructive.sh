@@ -30,8 +30,9 @@ for pattern in "rm -rf" "git push --force" "git push -f " "git reset --hard" \
 done
 
 if [ -n "$blocked" ]; then
-  echo "BLOCKED: Destructive pattern '$blocked' detected."
-  echo "Ask the user for explicit confirmation before running this command."
+  # Exit 2 shows Claude stderr only
+  echo "BLOCKED: Destructive pattern '$blocked' detected." >&2
+  echo "Ask the user for explicit confirmation before running this command." >&2
   exit 2
 fi
 

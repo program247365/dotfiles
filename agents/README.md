@@ -28,10 +28,6 @@ agents/
 │       └── skills/
 ├── codex/
 │   ├── install.sh
-│   ├── home/
-│   │   └── AGENTS.md
-│   ├── project/
-│   │   └── AGENTS.md
 │   └── skills/
 │       └── README.md
 ├── pi/
@@ -42,7 +38,6 @@ agents/
 │   ├── LOCAL_MODELS.md
 │   ├── lib/
 │   └── home/
-│       ├── AGENTS.md
 │       ├── settings.json
 │       ├── models.json.default
 │       └── auth.json.example
@@ -82,6 +77,13 @@ Canonical source:
 
 It also follows a future-friendly convention: any agent folder under `agents/<name>/` that has an `install.sh` gets a linked `~/.<name>/SOFTWARE_ENGINEERING.md`.
 
+## Project Instructions
+
+`~/.dotfiles/AGENTS.md` is a real, committed file: the project instructions for
+every agent working in this repo. Claude Code (v2.1.277+) reads `AGENTS.md`
+natively when the repo has no `CLAUDE.md`, so there is deliberately no root
+`CLAUDE.md`. Codex and pi read `AGENTS.md` on their own.
+
 ## Always-On Global Behavior
 
 These are the global files that should guide every new session:
@@ -89,12 +91,9 @@ These are the global files that should guide every new session:
 - Claude: `~/.claude/CLAUDE.md`
 - Codex: `~/.codex/AGENTS.md`
 
-Both of those files explicitly reference:
-
-- `~/.claude/SOFTWARE_ENGINEERING.md` (Claude)
-- `~/.codex/SOFTWARE_ENGINEERING.md` (Codex)
-
-Both philosophy files are symlinked to:
+Claude's imports `~/.claude/SOFTWARE_ENGINEERING.md`; Codex's is generated
+with the philosophy inlined. `~/.claude/SOFTWARE_ENGINEERING.md` and
+`~/.codex/SOFTWARE_ENGINEERING.md` are both symlinked to:
 
 - `~/.dotfiles/agents/philosophy/SOFTWARE_ENGINEERING.md`
 
@@ -118,8 +117,7 @@ This keeps all Claude configuration in version control. Global settings (permiss
 
 `agents/codex/install.sh` manages:
 
-- `~/.codex/AGENTS.md` -> `~/.dotfiles/agents/codex/home/AGENTS.md`
-- `~/.dotfiles/AGENTS.md` -> `~/.dotfiles/agents/codex/project/AGENTS.md`
+- `~/.codex/AGENTS.md`: generated (not linked) from `claude/home/CLAUDE.md`, the philosophy, and `claude/rules/*.md` minus `tool-use.md`. Codex can't follow `@` imports, so it gets one concatenated file. Re-run the installer (or `dot`) after editing those sources.
 - `~/.codex/SOFTWARE_ENGINEERING.md` -> `~/.dotfiles/agents/philosophy/SOFTWARE_ENGINEERING.md`
 - `~/.codex/skills/<skill-name>` -> `~/.dotfiles/agents/codex/skills/<skill-name>` (for each local skill directory)
 
@@ -134,7 +132,7 @@ Installer behavior:
 `agents/pi/install.sh` manages:
 
 - `~/.pi/agent/settings.json` -> `~/.dotfiles/agents/pi/home/settings.json`
-- `~/.pi/agent/AGENTS.md` -> `~/.dotfiles/agents/pi/home/AGENTS.md`
+- Global instructions: none on disk. The `shared-rules` extension injects the same sources as Codex's generated AGENTS.md into the system prompt.
 - `~/.pi/agent/models.json` -> copied from `~/.dotfiles/agents/pi/home/models.json.default` only if missing
 - `~/.kevin/bin/pi` -> symlinked to the global `pnpm` install of `@earendil-works/pi-coding-agent`
 
@@ -190,8 +188,7 @@ sh ~/.dotfiles/agents/codex/install.sh
 ls -l ~/.dotfiles/.claude
 ls -l ~/.claude/CLAUDE.md
 ls -l ~/.claude/statusline.sh
-ls -l ~/.dotfiles/AGENTS.md
-ls -l ~/.codex/AGENTS.md
+head -1 ~/.codex/AGENTS.md   # generated marker
 ls -l ~/.dotfiles/SOFTWARE_ENGINEERING.md
 ls -l ~/.claude/SOFTWARE_ENGINEERING.md
 ls -l ~/.codex/SOFTWARE_ENGINEERING.md

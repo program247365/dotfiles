@@ -4,7 +4,6 @@ zsh/zshrc.local.symlink
 .DS_Store
 __pycache__/
 .claude
-AGENTS.md
 /SOFTWARE_ENGINEERING.md
 .config/notes-organize-tweets/
 agents/claude/tools/node_modules/

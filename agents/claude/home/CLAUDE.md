@@ -6,11 +6,6 @@ Use @~/.claude/SOFTWARE_ENGINEERING.md as the baseline software engineering phil
 
 - Ask before taking any irreversible action: git push, file deletion, branch reset, external API calls.
 
-## Dotfiles
-
-- When working in `~/.dotfiles`, follow project config in `~/.dotfiles/.claude`.
-- Treat `agents/philosophy/SOFTWARE_ENGINEERING.md` as the canonical source.
-
 ## WORKLOG.md
 
 If a `WORKLOG.md` exists in the current project root, read it at session start to

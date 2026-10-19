@@ -5,7 +5,7 @@ Pi integration managed from this dotfiles repo.
 ## What The Installer Manages
 
 - `~/.pi/agent/settings.json` -> symlinked from dotfiles
-- `~/.pi/agent/AGENTS.md` -> symlinked from dotfiles
+- Global instructions: injected by the `shared-rules` extension from the Claude CLAUDE.md, philosophy and rules (no `~/.pi/agent/AGENTS.md`)
 - `~/.pi/agent/models.json` -> copied once from `models.json.default`, then left machine-local
 - `~/.kevin/bin/pi` -> symlink to the global `pnpm` install
 
@@ -139,7 +139,6 @@ Useful variants:
 Managed by dotfiles:
 
 - `~/.pi/agent/settings.json`
-- `~/.pi/agent/AGENTS.md`
 
 Seeded once, then machine-local:
 

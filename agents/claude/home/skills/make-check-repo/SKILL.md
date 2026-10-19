@@ -108,9 +108,9 @@ mirrors CI (`<CI file>`): <gates in order>. All gates must pass.
 - `make fix` auto-formats and applies lint fixes.
 ```
 
-Claude Code loads `CLAUDE.md`, not `AGENTS.md`. If `CLAUDE.md` is missing,
-create it containing just `@AGENTS.md`; if it exists without referencing
-`AGENTS.md`, add that line.
+Claude Code reads `AGENTS.md` directly, but only when no `CLAUDE.md` exists
+in the repo. Don't create a `CLAUDE.md`. If one already exists without
+referencing `AGENTS.md`, add an `@AGENTS.md` line to it.
 
 Drop the `make fix` bullet if the repo has no `fix` target. With no hosted CI,
 say so: "`make check` is the CI".

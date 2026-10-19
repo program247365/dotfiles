@@ -1,10 +1,10 @@
-# Initialize a project with CLAUDE.md and WORKLOG.md scaffolding
+# Initialize a project with AGENTS.md and WORKLOG.md scaffolding
 project-init() {
   local dir="${1:-.}"
   local created=0
 
-  if [ ! -f "$dir/CLAUDE.md" ]; then
-    cat > "$dir/CLAUDE.md" <<'SCAFFOLD'
+  if [ ! -f "$dir/AGENTS.md" ] && [ ! -f "$dir/CLAUDE.md" ]; then
+    cat > "$dir/AGENTS.md" <<'SCAFFOLD'
 # Project
 
 ## Purpose
@@ -17,7 +17,7 @@ project-init() {
 
 ## Known Gotchas
 SCAFFOLD
-    echo "Created CLAUDE.md"
+    echo "Created AGENTS.md"
     created=1
   fi
 

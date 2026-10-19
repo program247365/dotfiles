@@ -110,8 +110,9 @@ remote CI and say why.
 
 ## 5. Record it in AGENTS.md
 
-Add or replace one section. Create `AGENTS.md` if missing, and add `@AGENTS.md`
-to `CLAUDE.md` if it doesn't already reference it. Write `npx local-ci` in Node
+Add or replace one section. Create `AGENTS.md` if missing. If the repo has a
+`CLAUDE.md` that doesn't reference it, add `@AGENTS.md` there (Claude Code
+skips `AGENTS.md` when a `CLAUDE.md` exists). Write `npx local-ci` in Node
 repos and `npx -y run-local-ci@<version>` everywhere else.
 
 ```markdown
