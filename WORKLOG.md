@@ -451,3 +451,14 @@
 - `cargo install livediff` failed with `tapi error: malformed file ... unknown architecture arm64e.x1-macos`. The MacOSX27.0 SDK had been installed (xcrun picks the newest) while ld was still ld-1267 from CLT 26.6, so every native link failed, even a C hello-world.
 - Fixed on the machine, not in the dotfiles: `sudo softwareupdate -i "Command Line Tools for Xcode 27.0-27.0"` (ld is now ld-27037.1). Needs a real terminal; `!` in Claude Code has no TTY for sudo. Avoid `-i -a`, which also pulls the macOS update.
 - Revisit: if this recurs on another machine, check `ld -v` against `xcrun --show-sdk-version` before blaming dot.
+
+## 2026-10-15: Picked up the interrupted Side Projects launch session
+- Confirmed both repos' `main` branches are merged and pushed (`sideprojects` 3f90f28, dotfiles ce20da4); kept the unrelated `agents/pi/home/settings.json` change untouched. The OG card is live (200), old variants return 404, and analytics script returns 200 when routed to Vercel's current IP.
+- Resend DNS records are publicly visible; domain verification was pending at the end of the prior session. The local macOS DNS cache still resolves the apex to Namecheap's old 162.255.119.119, making ordinary curl time out, while public resolvers and Vercel authoritative DNS return current Vercel IPs. No launch email sent.
+- Revisit: check Resend domain status with permission, resolve local DNS cache, and clarify intended launch email audience/content before sending.
+
+## 2026-10-19: Fixed qmd missing from PATH (search fell back to stale index)
+- `~/.kevin/bin/qmd` was a dangling symlink into mise's node 24.14.1, pruned ~Oct 12; the qmd index in `~/.cache/qmd` was empty too. Reinstalled `@tobilu/qmd` 2.8.3 with Homebrew npm and rebuilt the index via `search update qmd`.
+- `tools/qmd/install.sh` now installs with Homebrew's npm and writes `~/.kevin/bin/qmd` as a wrapper that execs `/opt/homebrew/bin/node`. Reason: qmd's `#!/usr/bin/env node` resolves to mise shims first under launchd PATH (dead shim, or the wrong ABI for native modules).
+- The first rebuild failed on a full disk (ENOSPC); Kevin freed 15 GB.
+- Revisit: `~/.config/mise/config.toml` wants node 24 but 24.22.0 isn't installed (`mise install node@24`, or drop it). A brew node major upgrade may need `npm rebuild -g @tobilu/qmd`.
