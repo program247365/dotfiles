@@ -475,3 +475,14 @@
 - Inspired by Cory House's "strict check script" post (tsc, cspell, test, knip, e2e build, lint, format:check).
 - First run: triage (no hosted CI). `make check` went from tsc-only to typecheck (now incl. test/, scripts/), `bash -n`, `swiftc -typecheck`, `bun test`, and a demo-data server smoke test; green in ~2s, pushed as triage ace82a5. The run showed that Claude Code only auto-loads CLAUDE.md, so the skill now creates a `@AGENTS.md` CLAUDE.md when none exists.
 - Revisit: triage has no formatter/linter (proposed biome, not added). Codex/pi don't get the skill or rule yet. Overlaps with /local-ci: make-check-repo builds `make check`; local-ci runs the GitHub Actions workflows.
+
+## 2026-10-19: Added /local-ci skill
+- New skill `agents/claude/home/skills/local-ci/SKILL.md`: wires Local CI (redwoodjs/local-ci, formerly agent-ci; npm `run-local-ci`, pinned exact) into a repo, adds a `make ci-local` target next to `make check`, gitignores `.env.local-ci`, runs it until green, and writes a Local CI section into AGENTS.md.
+- Decided: name the check workflows with `--workflow` and don't use `--all`, because `--all` also selects deploy workflows, and secrets fall back to same-named shell env vars, so a local run could really deploy. Our skill replaces the upstream `npx skills add` skill.
+- Revisit: not yet run against a real repo, because Docker Desktop wasn't running. Codex/pi don't get it yet.
+
+## 2026-10-19: Swapped Docker Desktop for OrbStack
+- Brewfile: replaced `cask 'docker-desktop'` with `cask 'orbstack'`, and installed OrbStack 2.2.4. `docker` now uses the `orbstack` context (`docker info` reports OrbStack 29.8.2).
+- New `docker/env.zsh` exports `LOCAL_CI_DOCKER_HOST=unix://$HOME/.orbstack/run/docker.sock` when that socket exists. Local CI ignores docker contexts and defaults to `/var/run/docker.sock`, which OrbStack only creates in admin mode. Chose the env var over enabling admin mode, so no sudo is needed.
+- Verified: a one-job workflow passed with `npx -y run-local-ci@0.18.1` on OrbStack. The skill now covers `orb start`, the socket, and the first-run image pull.
+- Revisit: Docker Desktop.app is still installed and owns `/usr/local/bin/docker`. Uninstall it (`brew uninstall --cask docker-desktop`), then open OrbStack.app once so it links its own `docker` CLI.

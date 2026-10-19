@@ -64,7 +64,6 @@ cask '1password-cli'
 cask 'appcleaner'
 cask 'cap'
 cask 'discord'
-cask 'docker-desktop'
 cask 'fantastical' # https://flexibits.com/fantastical
 cask 'figma'
 cask 'firefox'
@@ -72,6 +71,7 @@ cask 'font-fira-code-nerd-font'
 cask 'font-source-code-pro'
 cask 'font-source-sans-3' # Source Sans Pro was renamed upstream
 cask 'google-chrome'
+cask 'orbstack' # https://orbstack.dev - Docker engine + Linux VMs; replaces Docker Desktop (provides docker CLI)
 cask 'quickmd' # https://github.com/b451c/quickmd - markdown viewer with live auto-reload
 cask 'raycast'
 cask 'slack'
