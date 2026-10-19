@@ -160,7 +160,13 @@ ln -sf "${PNPM_BIN_DIR}/pi" "${KEVIN_BIN_DIR}/pi"
 echo "  Linked ~/.kevin/bin/pi"
 
 link_with_backup "${DOTFILES_PI}/home/settings.json" "${PI_AGENT_DIR}/settings.json" "~/.pi/agent/settings.json"
-link_with_backup "${DOTFILES_PI}/home/AGENTS.md" "${PI_AGENT_DIR}/AGENTS.md" "~/.pi/agent/AGENTS.md"
+# Global instructions come from the shared-rules extension. Older installs
+# linked ~/.pi/agent/AGENTS.md to a file that was never committed.
+if [ -L "${PI_AGENT_DIR}/AGENTS.md" ] \
+  && [ "$(readlink "${PI_AGENT_DIR}/AGENTS.md")" = "${DOTFILES_PI}/home/AGENTS.md" ]; then
+  rm "${PI_AGENT_DIR}/AGENTS.md"
+  echo "  Removed stale ~/.pi/agent/AGENTS.md link"
+fi
 link_with_backup "${DOTFILES_PI}/home/presets.json" "${PI_AGENT_DIR}/presets.json" "~/.pi/agent/presets.json"
 copy_if_missing "${DOTFILES_PI}/home/models.json.default" "${PI_AGENT_DIR}/models.json" "~/.pi/agent/models.json"
 

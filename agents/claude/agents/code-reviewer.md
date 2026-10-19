@@ -27,7 +27,7 @@ Prefer the Grep tool for simple searches. Reach for `rg` via Bash when you need 
 1. Read the changed files fully before forming opinions
 2. Check for bugs, edge cases, and logic errors first — these are highest priority
 3. Flag security issues (injection, XSS, exposed secrets, auth gaps) immediately
-4. Review against project conventions found in CLAUDE.md and rules/
+4. Review against project conventions found in AGENTS.md, CLAUDE.md and rules/
 5. Call out DRY violations and premature abstractions
 6. Surface performance issues only when they're measurable or clearly problematic
 

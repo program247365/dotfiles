@@ -491,3 +491,14 @@
 ## 2026-10-19: Added mole to Brewfile
 - Brewfile: added `brew 'mole'` (tw93/Mole, Mac deep-clean/optimize CLI, in homebrew-core). Committed and pushed as ccdb2b9.
 - Installed mole 1.61.0; it provides both `mo` and `mole`.
+
+## 2026-10-19: Switched dotfiles project instructions to AGENTS.md
+- Claude Code 2.1.277 (Sep 2026) reads a repo's `AGENTS.md` natively when there's no `CLAUDE.md`/`CLAUDE.local.md` on the path (default "Project instructions" = `claude-md-or-agents-md`). User-level instructions are still `~/.claude/CLAUDE.md` only, so that stays.
+- New committed root `AGENTS.md` (layout, conventions, verify, worklog). Deliberately no root `CLAUDE.md`. Verified with `claude -p` from the root and from `zsh/` (2.1.304).
+- The old root `AGENTS.md` was a gitignored symlink to `agents/codex/project/AGENTS.md`, which was never committed. The bare `AGENTS.md` line in .gitignore matched every AGENTS.md in the repo. Removed that line, and removed the root link from `agents/codex/install.sh`.
+- Moved the "Dotfiles" section out of the global CLAUDE.md (pi also injects that file globally). Skills make-check-repo/local-ci no longer create a `@AGENTS.md` CLAUDE.md, and `project-init` scaffolds AGENTS.md.
+- New migration `2026-10-19-agents-md-project-instructions.zsh`: replaces a leftover symlink with the tracked file, warns about shadowing CLAUDE files, and runs `claude update` if older than 2.1.277. Tested in scratch clones; `git pull` over the old ignored symlink also works on its own.
+- Revisit: `~/.codex/AGENTS.md` and `~/.pi/agent/AGENTS.md` are still dangling (codex/home and pi/home AGENTS.md were never committed, for the same gitignore reason). Codex gets no global instructions today. guard-destructive.sh prints its block message to stdout, so Claude only sees "No stderr output".
+- Follow-up: fixed the revisit items. `agents/codex/install.sh` now generates `~/.codex/AGENTS.md` (marker line on top) from global CLAUDE.md + philosophy + rules minus tool-use.md, the same sources pi's shared-rules extension injects. Codex has no `@` imports, so this is a concatenated copy, refreshed on every `dot`. A hand-written file there gets backed up first. Verified with `codex exec` (0.163.0): it sees both the global rules and the project AGENTS.md.
+- pi/install.sh no longer links `~/.pi/agent/AGENTS.md` and removes the stale link. guard-destructive.sh writes its BLOCKED message to stderr, so Claude sees why a command was blocked.
+- Revisit: edits to the rules reach Codex only after the next `dot` or Codex installer run.
