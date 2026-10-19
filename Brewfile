@@ -38,6 +38,7 @@ cask 'illegalstudio/tap/lazyagent' # https://lazyagent.dev
 brew 'lsd'
 brew 'm-cli'
 brew 'mas'
+brew 'mole' # https://github.com/tw93/Mole - deep clean and optimize your Mac
 brew 'navi'
 brew 'noahgorstein/tap/jqp' #JQ playground: https://github.com/noahgorstein/jqp
 brew 'neovim'
