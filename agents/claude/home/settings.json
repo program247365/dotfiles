@@ -74,6 +74,17 @@
             "timeout": 5000
           }
         ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ ! -f '/Users/kevin/.claude/skills/impeccable/scripts/impeccable' ] || '/Users/kevin/.claude/skills/impeccable/scripts/impeccable' hook",
+            "timeout": 5,
+            "statusMessage": "Checking UI changes"
+          }
+        ]
       }
     ],
     "SessionStart": [
@@ -84,6 +95,28 @@
             "type": "command",
             "command": "bash '/Users/kevin/.claude/hooks/herdr-agent-state.sh' session",
             "timeout": 10
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ ! -f '/Users/kevin/.claude/skills/impeccable/scripts/impeccable' ] || '/Users/kevin/.claude/skills/impeccable/scripts/impeccable' hook",
+            "timeout": 5,
+            "statusMessage": "Preparing build session"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ ! -f '/Users/kevin/.claude/skills/impeccable/scripts/impeccable' ] || '/Users/kevin/.claude/skills/impeccable/scripts/impeccable' hook",
+            "timeout": 30,
+            "statusMessage": "Design deep pass"
           }
         ]
       }
@@ -190,5 +223,6 @@
         "mcp"
       ]
     }
-  }
+  },
+  "description": "Impeccable design detector: immediate-tier checks after Edit/Write on UI files, full-rule deep pass on Stop."
 }
