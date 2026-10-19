@@ -89,9 +89,6 @@ fi
 
 export PATH="$HOME/bin:$PATH"
 
-# mise - version manager
-eval "$(mise activate zsh)"
-
 export PORTLESS_TLD=localhost
 
 # pnpm
