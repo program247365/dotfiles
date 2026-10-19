@@ -154,7 +154,8 @@
     "datadog@claude-plugins-official": false,
     "cloudflare@cloudflare": false,
     "vercel@claude-plugins-official": true,
-    "warp@claude-code-warp": true
+    "warp@claude-code-warp": true,
+    "last30days@last30days-skill": true
   },
   "extraKnownMarketplaces": {
     "compound-engineering-plugin": {
@@ -173,6 +174,12 @@
       "source": {
         "source": "github",
         "repo": "warpdotdev/claude-code-warp"
+      }
+    },
+    "last30days-skill": {
+      "source": {
+        "source": "github",
+        "repo": "mvanhorn/last30days-skill"
       }
     }
   },
