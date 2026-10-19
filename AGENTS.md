@@ -26,6 +26,9 @@ don't add a `CLAUDE.md` at the root, or Claude stops reading this one.
 - Installers and migrations must be idempotent and safe on a fresh machine.
   A missing prerequisite should skip with a note, not fail.
 - Edit files in the repo, never through the symlinks in `$HOME`.
+- After editing `agents/claude/home/CLAUDE.md`, `agents/claude/rules/` or the
+  philosophy, run `agents/codex/generate-agents-md.sh`: Codex reads a
+  generated copy (see "How Instructions Load" in `agents/README.md`).
 - Machine-local state stays out of git (`*.local*`, tokens, `auth.json`).
 
 ## Verify
