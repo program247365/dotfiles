@@ -513,3 +513,10 @@
 - Mapped `-` in normal mode to `:Oil` through the plugin spec, opening the parent directory.
 - Validated the Lua spec with headless Neovim and checked whitespace with `git diff --check`.
 - Revisit: restart Neovim to use the mapping.
+
+## 2026-10-20: Warp config managed by dotfiles
+- Warp's quake window (Ctrl+`) and theme had to be set up by hand on the new Mac. Both live in ~/.warp/settings.toml (`[global_hotkey.dedicated_window]`, `[appearance.themes]`), which nothing in the repo managed.
+- Expanded warp/install.sh (the 2026-10-15 version only linked each theme file). It now symlinks settings.toml, themes/ and tab_configs/ from warp/, and adopts local copies on first run. A differing local file is backed up to `*.pre-dotfiles.<timestamp>` before linking, never overwritten. On the new Mac, ~/.warp/themes is a real dir of per-file links to the same YAML, so `diff -r` matches and it gets swapped for the dir link with no backup.
+- launch_configurations/ stays machine-local because it can name work projects and this repo is public.
+- Verified on Warp 0.2026.10.14: a Settings save (Cmd+= zoom) wrote through the symlink into warp/settings.toml with the link left in place. The reverse doesn't work: editing the repo copy (zoom back to 100) wasn't picked up by a running Warp, probably because macOS reports the change under ~/.dotfiles/warp/ and not ~/.warp/, where Warp watches.
+- Revisit: whether `touch -h ~/.warp/settings.toml` triggers a reload; whether a Settings-panel save writes Warp's in-memory values back over a pulled change; whether the new Mac picks up the linked file after install.
