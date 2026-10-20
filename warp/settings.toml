@@ -1,0 +1,119 @@
+[terminal]
+osc52_clipboard_access = "write_only"
+
+[terminal.input]
+alias_expansion_enabled = true
+honor_ps1 = false
+input_box_type_setting = "universal"
+
+[agents]
+cloud_conversation_storage_enabled = false
+
+[agents.warp_agent]
+is_any_ai_enabled = false
+
+[agents.warp_agent.input]
+nld_in_terminal_enabled = true
+
+[agents.execution_profiles]
+
+[agents.execution_profiles.default]
+apply_code_diffs = "agent_decides"
+ask_user_question = "always_ask"
+autosync_plans_to_warp_drive = true
+command_allowlist = []
+command_denylist = [
+  'bash(\s.*)?',
+  'fish(\s.*)?',
+  'pwsh(\s.*)?',
+  'sh(\s.*)?',
+  'zsh(\s.*)?',
+  'curl(\s.*)?',
+  'eval(\s.*)?',
+  'exec(\s.*)?',
+  'source(\s.*)?',
+  'wget(\s.*)?',
+  'dig(\s.*)?',
+  'nslookup(\s.*)?',
+  'host(\s.*)?',
+  'ssh(\s.*)?',
+  'scp(\s.*)?',
+  'rsync(\s.*)?',
+  'telnet(\s.*)?',
+  'rm(\s.*)?',
+]
+computer_use = "never"
+directory_allowlist = []
+execute_commands = "always_ask"
+mcp_allowlist = []
+mcp_denylist = []
+mcp_permissions = "agent_decides"
+name = "Default"
+read_files = "agent_decides"
+run_agents = "always_ask"
+web_search_enabled = true
+write_to_pty = "always_ask"
+
+[text_editing]
+vim_mode_enabled = true
+
+[appearance]
+
+[appearance.window]
+zoom_level = 100
+
+[appearance.text]
+font_size = 13.0
+notebook_font_size = 14.0
+
+[appearance.icon]
+app_icon = "comets"
+
+[appearance.panes]
+should_dim_inactive_panes = true
+
+[appearance.themes]
+theme = "dracula"
+
+[appearance.vertical_tabs]
+enabled = true
+
+[global_hotkey]
+
+[global_hotkey.dedicated_window]
+enabled = true
+
+[global_hotkey.dedicated_window.settings]
+active_pin_position = "top"
+hide_window_when_unfocused = true
+keybinding = "ctrl-`"
+
+[global_hotkey.dedicated_window.settings.pin_position_to_size_percentages]
+bottom = { height = 30, width = 100 }
+left = { height = 100, width = 40 }
+right = { height = 100, width = 40 }
+top = { height = 100, width = 100 }
+
+[global_hotkey.toggle_all_windows]
+enabled = false
+
+[notifications]
+
+[notifications.preferences]
+is_agent_task_completed_enabled = true
+is_long_running_enabled = true
+is_needs_attention_enabled = true
+is_password_prompt_enabled = true
+long_running_threshold = 30
+mode = "enabled"
+play_notification_sound = true
+
+[privacy]
+telemetry_enabled = true
+crash_reporting_enabled = true
+
+[account]
+is_settings_sync_enabled = true
+
+[accessibility]
+accessibility_verbosity = "verbose"
