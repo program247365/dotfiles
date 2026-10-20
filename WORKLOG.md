@@ -503,3 +503,13 @@
 - pi/install.sh no longer links `~/.pi/agent/AGENTS.md` and removes the stale link. guard-destructive.sh writes its BLOCKED message to stderr, so Claude sees why a command was blocked.
 - Revisit: edits to the rules reach Codex only after the next `dot` or Codex installer run.
 - Follow-up: moved the Codex generator into `agents/codex/generate-agents-md.sh`. The installer and the 2026-10-19 migration both call it, and it can be run by hand after editing rules. It recognizes the old install.sh marker, so existing copies regenerate without a backup. Documented loading per agent (global vs project, why Codex gets a generated copy, the upgrade path, how to check) in `agents/README.md` under "How Instructions Load". Root AGENTS.md tells agents to regenerate after editing rules.
+
+## 2026-10-20: Added Oil to LazyVim
+- Added `config/lua/plugins/oil.lua` with default options, mini.icons dependency, and `lazy = false`; the existing plugins import discovers it automatically.
+- Validated the spec with headless Neovim and ran `git diff --check`. Left the pre-existing lazy-lock.json changes untouched.
+- Revisit: open Neovim to install Oil, then use `:Oil`. Consider `/make-check-repo` to add the repo's missing `make check`.
+
+## 2026-10-20: Added Oil keyboard shortcut
+- Mapped `-` in normal mode to `:Oil` through the plugin spec, opening the parent directory.
+- Validated the Lua spec with headless Neovim and checked whitespace with `git diff --check`.
+- Revisit: restart Neovim to use the mapping.
