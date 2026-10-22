@@ -120,6 +120,17 @@
           }
         ]
       }
+    ],
+    "SubagentStart": [
+      {
+        "matcher": "tldraw-offline",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node '/Users/kevin/skills/tldraw-offline/inject-server-context.mjs' SubagentStart"
+          }
+        ]
+      }
     ]
   },
   "statusLine": {
@@ -155,7 +166,8 @@
     "cloudflare@cloudflare": false,
     "vercel@claude-plugins-official": true,
     "warp@claude-code-warp": true,
-    "last30days@last30days-skill": true
+    "last30days@last30days-skill": true,
+    "cc-plugin-you-should-know@builtin": true
   },
   "extraKnownMarketplaces": {
     "compound-engineering-plugin": {
