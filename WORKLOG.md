@@ -520,3 +520,10 @@
 - launch_configurations/ stays machine-local because it can name work projects and this repo is public.
 - Verified on Warp 0.2026.10.14: a Settings save (Cmd+= zoom) wrote through the symlink into warp/settings.toml with the link left in place. The reverse doesn't work: editing the repo copy (zoom back to 100) wasn't picked up by a running Warp, probably because macOS reports the change under ~/.dotfiles/warp/ and not ~/.warp/, where Warp watches.
 - Revisit: whether `touch -h ~/.warp/settings.toml` triggers a reload; whether a Settings-panel save writes Warp's in-memory values back over a pulled change; whether the new Mac picks up the linked file after install.
+
+## 2026-10-22: Pulled upstream, repaired agents symlink, adopted tldraw updates
+- Stash / pull --ff-only / pop was clean (impeccable 4.7.0, nvim lazy-lock, oil.lua). Committed the local leftovers as 2f5b48e: tldraw-offline SKILL.md and agent file (the tldraw installer writes through the skills symlink), a tldraw SubagentStart hook and a new plugin in settings.json, the heroku credential helper in gitconfig.
+- Decided: `model` in settings.json stays `opus`. The working tree had `claude-fable-5-1[1m]` from a `/model` switch; reverted that one line, kept the rest.
+- `~/.claude/agents` was a real dir again (tldraw installer replaced the symlink, same failure as the memory note), so only tldraw-offline was visible and the other 7 agents were not. Its tldraw-offline.md was newer than the repo's, so copied it in first, then relinked. The installer's adopt_and_link would have kept the older repo copy.
+- `~/.codex/AGENTS.md` was still the old symlink to the never-committed agents/codex/home/AGENTS.md; ran generate-agents-md.sh, which replaced it with the generated file. Deleted agents/codex/home, agents/codex/project and agents/pi/home/AGENTS.md (obsoleted 2026-10-19), and the skills CLI .trash dir (now gitignored).
+- Revisit: the tldraw installer will break the agents symlink again on its next update. Worth a migration or a check in agents/claude/install.sh that warns when ~/.claude/agents is a real dir. Not pushed yet.
