@@ -44,7 +44,19 @@ if command -v herdr >/dev/null 2>&1; then
   # whole herdr entry failed when the service start errored. Start it here.
   # `status server` exits 0 even when stopped; only --json says which.
   if herdr status server --json | grep -q '"running":true'; then
-    herdr server reload-config
+    # A server from an older build can't take a reload; restarting it exits
+    # every herdr pane, so that stays a manual step outside dot.
+    reload_output=$(herdr server reload-config 2>&1) || {
+      case "$reload_output" in
+        *protocol_mismatch*)
+          echo "  [note] herdr server is an older build than the CLI; from a plain shell run \`herdr server stop\`, then \`herdr\` (stopping exits herdr panes)"
+          ;;
+        *)
+          echo "$reload_output"
+          exit 1
+          ;;
+      esac
+    }
   else
     # The formula ships no service and herdr has no `server start`; the
     # server comes up the first time `herdr` launches.
