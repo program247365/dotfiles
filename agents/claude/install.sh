@@ -53,19 +53,30 @@ adopt_and_link() {
   if [ -e "$target" ]; then
     if [ -d "$target" ] && [ -d "$source" ]; then
       # Both are directories — merge contents (target fills gaps in source)
+      # A file that exists in both and differs is kept as <name>.local next
+      # to the dotfiles copy (e.g. the tldraw installer replaces ~/.claude/agents
+      # with a real dir holding a newer agent file), never silently dropped.
       local count=0
+      local conflicts=0
       while IFS= read -r -d '' file; do
         local rel="${file#"$target"/}"
         if [ ! -e "$source/$rel" ]; then
           mkdir -p "$source/$(dirname "$rel")"
           mv "$file" "$source/$rel"
           count=$((count + 1))
+        elif ! diff -q "$source/$rel" "$file" > /dev/null 2>&1; then
+          mv "$file" "$source/$rel.local"
+          echo "  [conflict] $label/$rel differs from dotfiles; local copy saved as $source/$rel.local"
+          conflicts=$((conflicts + 1))
         fi
       done < <(find "$target" -not -type d -print0 2>/dev/null)
       if [ "$count" -gt 0 ]; then
         echo "  [adopt] $label (merged $count file(s) into dotfiles)"
       else
         echo "  [adopt] $label (no new files to merge)"
+      fi
+      if [ "$conflicts" -gt 0 ]; then
+        echo "  [warn] $label was a real directory with $conflicts conflicting file(s); diff each *.local, then delete it"
       fi
       rm -rf "$target"
     elif [ -d "$target" ] && [ ! -e "$source" ]; then
