@@ -28,6 +28,15 @@
     "defaultMode": "auto",
     "additionalDirectories": [
       "/Users/kevin/.kevin/code/claude-code"
+    ],
+    "deny": [
+      "mcp__rooms__room_put",
+      "mcp__rooms__messages_post",
+      "mcp__rooms__close_turn",
+      "mcp__rooms__home_reset",
+      "mcp__rooms__room_create",
+      "mcp__rooms__coworker_turn",
+      "mcp__rooms__connectors_connect"
     ]
   },
   "model": "opus",
@@ -206,20 +215,20 @@
   "autoMode": {
     "allow": [
       "$defaults",
-      "Bash(qmd:*) in ~/.dotfiles — routine non-standard CLI used frequently in this project's own transcripts"
+      "Bash(qmd:*) in ~/.dotfiles \u2014 routine non-standard CLI used frequently in this project's own transcripts"
     ],
     "environment": [
       "### Org-wide",
       "**Organization**: None configured",
       "**Cloud provider(s)**: None configured",
-      "**Repository visibility**: PUBLIC — github.com/program247365/dotfiles (this repo's origin remote); any push here is publishing",
-      "**Internal sharing / snippet hosting**: None configured — treat public paste/gist services as outside the trust boundary",
+      "**Repository visibility**: PUBLIC \u2014 github.com/program247365/dotfiles (this repo's origin remote); any push here is publishing",
+      "**Internal sharing / snippet hosting**: None configured \u2014 treat public paste/gist services as outside the trust boundary",
       "**Secrets management**: None configured",
-      "**Default / protected branches**: main (default); no rulesets listed, no protected branches listed via gh — treat as unprotected",
+      "**Default / protected branches**: main (default); no rulesets listed, no protected branches listed via gh \u2014 treat as unprotected",
       "**CI/CD deploy targets**: None configured",
       "**Network posture**: None configured",
-      "**Host containment**: None configured — assume Claude Code runs on an ordinary developer machine with open internet",
-      "**Source control**: origin github.com/program247365/dotfiles.git (public, push allowed — this is the user's own fork/repo); upstream github.com/holman/dotfiles.git (fetch/pull reference only — treat as read-only upstream, not a push target)",
+      "**Host containment**: None configured \u2014 assume Claude Code runs on an ordinary developer machine with open internet",
+      "**Source control**: origin github.com/program247365/dotfiles.git (public, push allowed \u2014 this is the user's own fork/repo); upstream github.com/holman/dotfiles.git (fetch/pull reference only \u2014 treat as read-only upstream, not a push target)",
       "**Trusted internal domains**: None configured",
       "**Trusted cloud buckets**: None configured",
       "**Key internal services**: None configured",
@@ -227,12 +236,12 @@
       "**Sensitive data locations & audiences**: any file or store holding personal data, confidential business data, credentials, regulated data, or similarly sensitive material; preserve exact handles when known and share only with audiences cleared at the [named+specifics] bar",
       "**Data retention / declassification**: None configured",
       "**Sensitive remote targets**: any namespace, host, or container whose name carries `prod` or `production` as a whole word or name segment",
-      "**Protected deployment namespaces / environments**: None configured — fall back to the Sensitive remote targets heuristic",
+      "**Protected deployment namespaces / environments**: None configured \u2014 fall back to the Sensitive remote targets heuristic",
       "**Protected IaC scopes**: IAM, RBAC, networking, quota, and node-pool resources; anything whose name or tag carries `prod` or `production` as a whole word or name segment",
       "### User-specific",
       "**Primary use of Claude Code**: software development (personal dotfiles/config management)",
-      "**Trusted repo**: ~/.dotfiles (github.com/program247365/dotfiles, public) — origin is the user's own repo and push target; upstream (github.com/holman/dotfiles) is a reference-only remote, not a push destination; since the repo is public, only this repo's own work belongs in it — content ported from other checkouts or outside this session is not its own work",
-      "**Org-specific CLIs**: None configured — note bearcli, search, spark, qmd, mise, uv appear as routine non-standard CLIs in this project's own usage"
+      "**Trusted repo**: ~/.dotfiles (github.com/program247365/dotfiles, public) \u2014 origin is the user's own repo and push target; upstream (github.com/holman/dotfiles) is a reference-only remote, not a push destination; since the repo is public, only this repo's own work belongs in it \u2014 content ported from other checkouts or outside this session is not its own work",
+      "**Org-specific CLIs**: None configured \u2014 note bearcli, search, spark, qmd, mise, uv appear as routine non-standard CLIs in this project's own usage"
     ]
   },
   "mcpServers": {
