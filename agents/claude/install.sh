@@ -197,39 +197,71 @@ adopt_and_link \
   "$CLAUDE_DIR/rules" \
   "~/.claude/rules"
 
-adopt_and_link \
-  "$DOTFILES_CLAUDE/agents" \
-  "$CLAUDE_DIR/agents" \
-  "~/.claude/agents"
-
-# Global skills: available in all projects
-# Add global skills to agents/claude/home/skills/
-# On a new machine, adopt_and_link merges any locally-installed skills
-# (e.g. from ~/.claude/skills/) into dotfiles, then the prompt below
-# offers to commit them so they follow you across machines.
-adopt_and_link \
-  "$DOTFILES_CLAUDE/home/skills" \
-  "$CLAUDE_DIR/skills" \
-  "~/.claude/skills"
-
-# Check for new skills not yet tracked in git
-SKILLS_DIR="$DOTFILES_CLAUDE/home/skills"
-NEW_SKILLS=$(git -C "$DOTFILES_ROOT" ls-files --others --exclude-standard "$SKILLS_DIR" 2>/dev/null)
-if [ -n "$NEW_SKILLS" ]; then
-  echo ""
-  echo "  New skills found (not tracked in dotfiles):"
-  git -C "$DOTFILES_ROOT" ls-files --others --exclude-standard "$SKILLS_DIR" \
-    | sed 's|.*/skills/||' | cut -d/ -f1 | sort -u \
-    | while read -r skill; do echo "    - $skill"; done
-  printf "  Commit to dotfiles? (y/n) "
-  read -r answer
-  if [ "$answer" = "y" ] || [ "$answer" = "Y" ]; then
-    git -C "$DOTFILES_ROOT" add "$SKILLS_DIR"
-    git -C "$DOTFILES_ROOT" commit -m "feat(claude): track adopted skills from $(hostname -s)"
-    echo "  [commit] new skills tracked"
-  else
-    echo "  [skip] skills left untracked"
+# link_each: make dst_dir a real directory holding one symlink per entry of
+# src_dir. Other installers (npx skills, tldraw, Spark, claude.ai sync) add
+# their own entries to dst_dir, so they never write into this repo.
+link_each() {
+  local src_dir="$1" dst_dir="$2" label="$3" entry name
+  if [ -L "$dst_dir" ]; then
+    # Old layout: dst_dir was one link to src_dir. Entries git doesn't track
+    # came from other installers; move them out so they survive the switch.
+    rm "$dst_dir"
+    mkdir -p "$dst_dir"
+    for entry in "$src_dir"/*; do
+      [ -e "$entry" ] || continue
+      name="$(basename "$entry")"
+      if [ -z "$(git -C "$DOTFILES_ROOT" ls-files -- "$entry")" ]; then
+        mv "$entry" "$dst_dir/$name"
+        echo "  [move] $label/$name is not tracked; kept in $dst_dir"
+      fi
+    done
   fi
+  mkdir -p "$dst_dir"
+  for entry in "$src_dir"/*; do
+    [ -e "$entry" ] || continue
+    name="$(basename "$entry")"
+    adopt_and_link "$entry" "$dst_dir/$name" "$label/$name"
+  done
+}
+
+link_each "$DOTFILES_CLAUDE/agents" "$CLAUDE_DIR/agents" "~/.claude/agents"
+
+# Own skills: one link per directory in home/skills.
+link_each "$DOTFILES_CLAUDE/home/skills" "$CLAUDE_DIR/skills" "~/.claude/skills"
+
+# Third-party skills: skills.txt lists them. A skill installed for several
+# agents lives in ~/.agents/skills and only needs a link; anything else missing
+# is installed for Claude, which copies it into ~/.claude/skills.
+# -e is false for a broken link, so a broken one gets repaired too.
+SKILLS_MANIFEST="$DOTFILES_CLAUDE/skills.txt"
+skills_failed=()
+while read -r skill_source skill_name; do
+  case "$skill_source" in ''|'#'*) continue ;; esac
+  [ -e "$CLAUDE_DIR/skills/$skill_name" ] && continue
+  if [ -d "$HOME/.agents/skills/$skill_name" ]; then
+    ln -sfn "$HOME/.agents/skills/$skill_name" "$CLAUDE_DIR/skills/$skill_name"
+    echo "  [link] ~/.claude/skills/$skill_name"
+    continue
+  fi
+  if ! command -v npx > /dev/null 2>&1; then
+    echo "  [skip] $skill_name (npx not found; re-run dot once node is installed)"
+    continue
+  fi
+  echo "  [install] $skill_name from $skill_source"
+  npx -y skills@1.7.6 add "$skill_source" -g -s "$skill_name" -a claude-code -y < /dev/null > /dev/null 2>&1 || true
+  [ -e "$CLAUDE_DIR/skills/$skill_name" ] || skills_failed+=("$skill_name")
+done < "$SKILLS_MANIFEST"
+
+# Skills CLI installs that skills.txt doesn't list exist only on this machine.
+SKILLS_LOCK="$HOME/.agents/.skill-lock.json"
+if [ -f "$SKILLS_LOCK" ] && command -v python3 > /dev/null 2>&1; then
+  python3 -c 'import json, sys; print("\n".join(json.load(open(sys.argv[1]))["skills"]))' "$SKILLS_LOCK" |
+    while read -r name; do
+      [ -e "$CLAUDE_DIR/skills/$name" ] || continue
+      if ! awk -v n="$name" '$1 !~ /^#/ && $2 == n { found = 1 } END { exit !found }' "$SKILLS_MANIFEST"; then
+        echo "  [note] $name is installed but not in agents/claude/skills.txt, so other machines won't get it"
+      fi
+    done
 fi
 
 # Source shell.zsh in ~/.zshrc.local (idempotent)
@@ -239,6 +271,11 @@ if ! grep -qF "$SHELL_ZSH_SOURCE" "$HOME/.zshrc.local" 2>/dev/null; then
   echo "  Added shell.zsh source to ~/.zshrc.local"
 else
   echo "  [ok] shell.zsh sourced in ~/.zshrc.local"
+fi
+
+if [ ${#skills_failed[@]} -gt 0 ]; then
+  echo "  [fail] could not install: ${skills_failed[*]} (network? re-run dot)"
+  exit 1
 fi
 
 echo 'Done setting up Claude Code'
