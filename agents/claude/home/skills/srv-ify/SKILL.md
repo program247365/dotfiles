@@ -68,8 +68,17 @@ not inherit Terminal's Full Disk Access or Reminders grant. Identify the executa
 that performs each protected read (the server and a helper can be different
 binaries), verify that operation directly, and report the precise System Settings
 grant still needed. `/api/health` only proves the HTTP server is live. Never reset
-TCC or bypass consent. Keep localhost services bound to loopback; only use Tailscale
-Serve if the app's Host and CSRF protections support the proxy.
+TCC or bypass consent. Keep every service bound to loopback (Docker apps via
+`SRV_BIND_IP: 127.0.0.1` in `srv.yaml`). Tailnet reachability is defined only by
+srv's `script/tailscale-serve` allowlist: to expose an app, add its port there and
+to that file's table, set `url: https://{host}:<port>`, and run `make
+tailscale-serve` in the srv repo. Only do so if the app's Host and CSRF
+protections support the proxy; an app not listed there stays Mac-local.
+
+LaunchAgents get srv's fixed PATH (mise shims first, then `~/.kevin/bin`,
+Homebrew, system), not the installing shell's. Build native modules under the
+mise-pinned runtime so a `brew upgrade` of an incidental Homebrew runtime can't
+break them.
 
 Do not install a production LaunchAgent during a conversion test. After the app is
 ready, provide the exact `apps:` entry, required one-time TCC grants, local URL,

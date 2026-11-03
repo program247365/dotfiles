@@ -610,3 +610,8 @@
 ## 2026-11-03: Restore Practice Tracker's existing srv data
 - Imported a verified SQLite backup of the existing Practice Tracker checkout database into srv's persistent data directory. Kept the checkout source and a backup of the original empty srv database.
 - Confirmed the imported account, 84 pieces, and 13 practice sessions are present, restarted the service, and verified `/api/health` returns `ok`.
+
+## 2026-11-03: srv-ify skill: tailnet allowlist and fixed service PATH
+- srv-ify now points agents at srv's `script/tailscale-serve` as the only way to expose an app on the tailnet, and notes that LaunchAgents get srv's fixed PATH (mise shims first).
+- Why: a Codex session left Practice Tracker crash-looping on a Node ABI mismatch from a baked-in shell PATH, and exposure was ad hoc `tailscale serve` calls.
+- Revisit: none.
