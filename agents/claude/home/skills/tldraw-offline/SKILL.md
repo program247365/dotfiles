@@ -52,6 +52,7 @@ curl -s http://localhost:7236/readme
 - `GET /api/doc/:id/script-status`: inspect a locally owned document's watcher state for `script/**` edits and find `errorLogPath`.
 - `GET /api/doc/:id/scripts`: list the `/exec` snippets running in the document right now (id, start time, status, code preview) plus the board script's last run outcome. Ask before you write to a board you did not start.
 - `DELETE /api/doc/:id/snippets/:snippetId`: fire a snippet's abort signal, stopping the listeners, timers and animation loops it registered against `signal`. The `snippetId` comes back on the `/exec` response and from `/scripts`. Works on a snippet that already returned — that is the one still holding listeners — and the response's `aborted` reports only whether execution was interrupted. A snippet that ignores its signal runs to completion: this is a stop request, not a kill. It is also not an undo — edits the snippet already made stay on the canvas (a snippet that fails on its own IS rolled back), and its `/exec` call answers `success: false` with an error beginning `Snippet stopped:`.
+- `POST /api/doc/:id/reload`: reload a locally owned document's window when it crashed, hung, or shows "Something went wrong". Answers once the editor is back; the doc id is unchanged and unsaved edits survive.
 
 The code-taking POST endpoints accept raw JavaScript as the request body (`content-type: text/plain`) or a JSON body `{"code": "..."}`, and wrap the code in an async function so top-level `await` works. Prefer raw bodies for shell use.
 
@@ -219,7 +220,9 @@ Never edit `.tldraw` archive files directly while they are open, and never edit 
 
 ## Recovering from a closed or unresponsive target document
 
-If a request to your target `docId` comes back `"Window closed before responding"`, an error like `"Document not found"`, or times out with no response at all, that window is gone. Do not retry the same `docId`, and do not assume whatever `api.getDocs()` returns next is the same document — with more than one window open, the next call can silently resolve to a completely different, unrelated file.
+If an `/exec` or `/api/search` call on a locally owned `docId` fails because the renderer crashed, stopped responding, or timed out, or a screenshot shows "Something went wrong", the window is still open: `POST /api/doc/:id/reload` once, then retry the same `docId`. If it hung on your own edit, find the cause first (a loop in your snippet, or a board script reacting to it), or the retry hangs the window again. Unsaved edits come back with it. Only if the reload itself fails, treat the window as gone.
+
+If a request comes back `"Window closed before responding"` or `"Document not found"`, that window is gone. Do not retry the same `docId`, and do not assume whatever `api.getDocs()` returns next is the same document — with more than one window open, the next call can silently resolve to a completely different, unrelated file.
 
 - Call `api.getDocs()` fresh and match the result against the doc `name` (and `documentId` if you captured it) you were actually working on.
 - **Name matches** → safe to resume against the new `id` for that doc.
