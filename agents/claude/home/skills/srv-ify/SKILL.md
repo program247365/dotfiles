@@ -1,6 +1,6 @@
 ---
 name: srv-ify
-description: Prepare an existing application for Kevin's srv home server by adding the standard Docker Compose, startup, health, and persistent-data contract. Use when asked to srv-ify an app or make a repo installable from the home server's repo list.
+description: Prepare an existing application for Kevin's srv home server by adding the standard Docker Compose, startup, health, and persistent-data contract. Use when asked to srv-ify an app for the home server, including preparing a Docker repo or registering a local macOS service/job.
 ---
 
 Adapt the existing app; preserve its language, package manager, working development
@@ -15,9 +15,10 @@ exists, ask for the srv location or contract before inventing a schema.
 
 Inspect the target's instructions, current Docker/start commands, dependency
 lockfile, database initialization, workers, health endpoint, and required secrets.
-Determine whether it can run on Linux ARM64. macOS integrations (Bear, Messages,
-Reminders, AppleScript, etc.) need the contract's native service/job path; do not
-force them into Docker or claim a native app supports the plain Docker repo list.
+Determine whether it can run on Linux ARM64. macOS integrations (EventKit,
+Reminders, AppleScript, protected local databases, etc.) can be tracked as native
+LaunchAgent services/jobs. Do not assume Docker or Apple's Linux container runtime
+can access macOS frameworks. Do not force these apps into containers.
 
 ## Adapt a Docker app
 
@@ -52,8 +53,27 @@ that state persists. Check logs and clean up only resources created for this tes
 Never bring down an existing project or remove its volumes. Report unavailable
 checks rather than calling them passed.
 
-For native apps, verify install/start scripts and provide an explicit `apps:`
-entry instead. Avoid installing a production LaunchAgent during a conversion test.
+## Native macOS services
+
+Use the user's existing checkout via `path` in an explicit `apps:` entry; native
+services do not belong in the Docker-only `repos:` list. Set `kind: service` or
+`kind: job`, make `install` noninteractive/idempotent, keep `run` in the foreground,
+and add an HTTP readiness route where applicable. srv supplies `PORT`,
+`SRV_DATA_DIR`, `SRV_HOME`, `SRV_MANIFEST`, and `PATH` to LaunchAgents.
+
+Read the actual data path and TCC boundaries. Move durable SQLite/files under
+`SRV_DATA_DIR` with a consistent, integrity-checked backup before changing the
+path; retain the source copy until the managed app is verified. A LaunchAgent does
+not inherit Terminal's Full Disk Access or Reminders grant. Identify the executable
+that performs each protected read (the server and a helper can be different
+binaries), verify that operation directly, and report the precise System Settings
+grant still needed. `/api/health` only proves the HTTP server is live. Never reset
+TCC or bypass consent. Keep localhost services bound to loopback; only use Tailscale
+Serve if the app's Host and CSRF protections support the proxy.
+
+Do not install a production LaunchAgent during a conversion test. After the app is
+ready, provide the exact `apps:` entry, required one-time TCC grants, local URL,
+data migration result, and live deployment status.
 
 Document the supported srv startup/data/secret/health interface in the target's
 README and AGENTS.md, including remaining one-time setup. Return the exact repo

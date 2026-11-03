@@ -595,3 +595,9 @@
 - Preserved both branches’ appended worklog entries and retained the shared srv-ify skill and documentation.
 - Verified whitespace, absence of conflict markers, and the Codex skill symlink; no shell files or installers changed.
 - Revisit: the untracked synced skills directory remains outside this commit.
+
+
+## 2026-11-03: Document native macOS services in srv onboarding
+- Clarified that `repos:` is Docker-only and explicit `apps:` entries run existing local checkouts as native LaunchAgents/jobs. Documented environment, readiness, backup/migration, TCC/Full Disk Access verification, localhost exposure, and Tailscale Serve constraints in srv's README/contract/AGENTS and the shared `srv-ify` skill.
+- Updated for the native Triage service: its HTTP health endpoint does not establish Reminders access; permission belongs to the actual Bun/EventKit executables.
+- Revisit: grant the required TCC permissions to the srv-managed Triage process/helper and verify a real read-only Reminders request.
