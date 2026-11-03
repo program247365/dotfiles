@@ -601,3 +601,8 @@
 - Clarified that `repos:` is Docker-only and explicit `apps:` entries run existing local checkouts as native LaunchAgents/jobs. Documented environment, readiness, backup/migration, TCC/Full Disk Access verification, localhost exposure, and Tailscale Serve constraints in srv's README/contract/AGENTS and the shared `srv-ify` skill.
 - Updated for the native Triage service: its HTTP health endpoint does not establish Reminders access; permission belongs to the actual Bun/EventKit executables.
 - Revisit: grant the required TCC permissions to the srv-managed Triage process/helper and verify a real read-only Reminders request.
+
+## 2026-11-03: Start Practice Tracker through srv
+- Added a native LaunchAgent contract for Practice Tracker, including persistent SQLite/uploads/auth secret, startup migrations, health route, and playable uploads from srv data. Added the app to srv's live manifest and launched the srv Mac app.
+- Verified Practice Tracker is healthy on port 4650 and `srv.app` is running. srv's full check passed.
+- Revisit: Practice Tracker has an existing checkout database with one user, 84 pieces, and 13 sessions; the running srv instance has an empty database. The srv-ify skill requires explicit authorization before importing existing app data.
