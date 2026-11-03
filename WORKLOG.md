@@ -569,3 +569,12 @@
 - Decided: no adopt-into-repo. A source missing from the repo is a [skip]; a local change is a backup to diff. Adoption is how third-party files kept landing in git.
 - Verified: every case of link() under sh/bash/zsh in scratch; full script/install exit 0 with 54 [ok] and no link/relink/backup; no dangling links in any target dir. bootstrap's fresh-machine path wasn't run (interactive).
 - Revisit: search's config.json keeps its "local file is left alone" exception on purpose.
+
+## 2026-11-03: Option E (kit and notes-organize-tweets to own repos, pi local models deleted)
+- kit -> github.com/program247365/kit (private, 18 commits kept via `git subtree split`). New tools/kit/install.sh clones to ~/.kevin/code/kit (pull --ff-only after), links ~/.kevin/bin/kit. kit still reads $DOTFILES; dot still runs `kit index`. Its 16 tests pass from the new clone.
+- notes-organize-tweets -> github.com/program247365/notes-organize-tweets (private), reshaped as a skill: SKILL.md (was commands/notes-organize-tweets.md) + scripts/ (was agents/claude/tools/). The three hardcoded ~/.dotfiles paths are now script-relative. tools/notes-organize-tweets/install.sh clones, runs npm install in scripts/ (nothing installed the twitter-scraper dependency before), and links ~/.claude/skills/notes-organize-tweets.
+- Decided: notes-organize-tweets follows main with a pull, not a skills.txt pin. Pins are for reviewing other people's code; for actively edited own code a pin only adds a bump per fix. Kevin can ask for a pin instead.
+- Both new repos are private and cloned over SSH (skip with a note without a key), matching keeper-cli.
+- pi local models deleted: preflight, install-local-models, pi-local-ensure, lib/model_catalog, LOCAL_MODELS.md, models.json.default, --install-ollama, and the pipreflight/pimodels/piensure functions. Removed ollama/apfel from pi's enabledModels and the `~/.claude/commands` prompts entry. apfel stays in the Brewfile (added in April as its own CLI). ~/.pi/agent/models.json on this Mac keeps its local providers.
+- Verified: full script/install exit 0, 55 [ok], no dangling links; pi 1.5.0 runs; the skill loads in Claude; Python parses and the Node import resolves from the new clone. The tweet workflow itself wasn't run end to end.
+- Other Mac, after pulling: `rm ~/.claude/commands` (now a dangling link), then dot clones both repos.
