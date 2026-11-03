@@ -176,7 +176,8 @@
     "vercel@claude-plugins-official": true,
     "last30days@last30days-skill": true,
     "cc-plugin-you-should-know@builtin": true,
-    "warp@claude-code-warp": true
+    "warp@claude-code-warp": true,
+    "datadops@anthropic-plugin-directory": true
   },
   "extraKnownMarketplaces": {
     "compound-engineering-plugin": {
