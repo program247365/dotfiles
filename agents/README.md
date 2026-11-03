@@ -273,3 +273,11 @@ To ensure both agents always use the latest philosophy:
 - Skill not visible in Codex:
   - Confirm the skill folder contains `SKILL.md`.
   - Re-run `agents/codex/install.sh`.
+
+## Home-server app onboarding
+
+The shared `srv-ify` skill lives in `agents/claude/home/skills/srv-ify/`.
+Claude discovers it through its existing skills link; pi loads it through the
+claude-skills extension. `agents/codex/skills/srv-ify` links the same source,
+and the Codex installer makes it available globally. Use it from an app repo
+to adapt that app to the contract in the srv checkout (`docs/app-contract.md`).

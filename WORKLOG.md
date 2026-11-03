@@ -578,3 +578,20 @@
 - pi local models deleted: preflight, install-local-models, pi-local-ensure, lib/model_catalog, LOCAL_MODELS.md, models.json.default, --install-ollama, and the pipreflight/pimodels/piensure functions. Removed ollama/apfel from pi's enabledModels and the `~/.claude/commands` prompts entry. apfel stays in the Brewfile (added in April as its own CLI). ~/.pi/agent/models.json on this Mac keeps its local providers.
 - Verified: full script/install exit 0, 55 [ok], no dangling links; pi 1.5.0 runs; the skill loads in Claude; Python parses and the Node import resolves from the new clone. The tweet workflow itself wasn't run end to end.
 - Other Mac, after pulling: `rm ~/.claude/commands` (now a dangling link), then dot clones both repos.
+
+## 2026-11-03: Resumed srv dashboard finish review from Claude
+- Recovered session 66ffd7db-f2a4-4a21-afa4-e9b207b0d112 and continued the unfinished review in ~/.kevin/code/srv. Removed status-line dot separators that dangled on wrapping; stacked app actions at widths <=380px so both actions fit. Kept the existing system font as the continuation's design choice.
+- Validation: make check passed (format, lint, types, shell syntax, 12 tests, CLI/dashboard/Mac app builds). Headless Chrome checked 360px, 390px, and 1440px in light/dark: no element/page overflow, mobile actions 44px high. Captures are in /private/tmp/srv-resume-review.
+- Revisit: srv remains uncommitted and first-time setup has not run (~/server/apps.yaml absent, no dashboard on port 7777). Run script/setup from the srv repo when ready to change host power settings, install services, and configure Tailscale Serve. Prior session's scratch srvtest services still exist; this session only ran and stopped a temporary dashboard for review. Existing gitconfig/zshrc edits were left untouched.
+
+## 2026-11-03: Added srv URL-list deployment and shared srv-ify skill
+- Committed the initial srv app (5784faa), then added repo URL discovery, repo-owned srv.yaml, Compose readiness, shared environment, per-app locks, failure recovery, and exact onboarding documentation in ~/.kevin/code/srv.
+- Created agents/claude/home/skills/srv-ify/SKILL.md and a shared Codex source link; Claude and pi discover the canonical skill, and the Codex installer linked it globally. Validated its frontmatter and resolved links. The skill adapts existing apps while preserving native macOS exceptions, data, and authorization for live registration.
+- Researched existing alternatives: Komodo is a credible Docker deployment engine; Coolify/Dokploy target Linux, Dockge covers Compose management, Dagu covers native workflows. Kept the Docker contract portable and documented the comparison in srv/docs/alternatives.md.
+- Verification: srv make check (16 tests and all builds), plus real OrbStack/temporary LaunchAgent validation of list addition -> automatic clone/build/start, idempotent repeat sync, status/logs, and persistent data through restart. Temporary test services/containers/image cleaned up. The shared skill validator passed using an existing cached PyYAML package.
+- Revisit: production srv setup is still pending. Use srv-ify on the first real app, then explicitly register it when ready. Existing gitconfig/zshrc edits remain outside this task.
+
+## 2026-11-03: Resolved srv-ify rebase conflict
+- Preserved both branches’ appended worklog entries and retained the shared srv-ify skill and documentation.
+- Verified whitespace, absence of conflict markers, and the Codex skill symlink; no shell files or installers changed.
+- Revisit: the untracked synced skills directory remains outside this commit.
