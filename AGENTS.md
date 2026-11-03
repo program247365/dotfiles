@@ -34,6 +34,11 @@ don't add a `CLAUDE.md` at the root, or Claude stops reading this one.
   philosophy, run `agents/codex/generate-agents-md.sh`: Codex reads a
   generated copy (see "How Instructions Load" in `agents/README.md`).
 - Machine-local state stays out of git (`*.local*`, tokens, `auth.json`).
+- Third-party skills are pinned to reviewed commits in `agents/claude/skills.txt`.
+  Never run `npx skills update`: it moves skills past their pins. To upgrade
+  one, review upstream's changes, change its commit in skills.txt, delete
+  `~/.claude/skills/<name>`, and run `dot`. Add a new one the same way: add a
+  pinned line, then run `dot`.
 
 ## Verify
 
