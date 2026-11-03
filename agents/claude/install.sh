@@ -22,7 +22,6 @@ fi
 # SOFTWARE_ENGINEERING.md is linked by agents/philosophy/install.sh.
 link "$DOTFILES_CLAUDE/home/CLAUDE.md" "$CLAUDE_DIR/CLAUDE.md"
 link "$DOTFILES_CLAUDE/home/settings.json" "$CLAUDE_DIR/settings.json"
-link "$DOTFILES_CLAUDE/commands" "$CLAUDE_DIR/commands"
 link "$DOTFILES_CLAUDE/statusline.sh" "$CLAUDE_DIR/statusline.sh"
 link "$DOTFILES_CLAUDE/rules" "$CLAUDE_DIR/rules"
 # Project-scoped config (settings.local.json, hooks), active only in this repo.

@@ -167,7 +167,7 @@ QMD returns docids (`#abc123`), scores, titles, and snippets. The `path` field i
 
 ## Enrich Saved Tweets Workflow
 
-Use this when the user asks to enrich, process, or title their saved tweet notes. The full per-note enrichment lives in the `notes-organize-tweets` slash command — invoke it for the idempotent pipeline. The high-level flow:
+Use this when the user asks to enrich, process, or title their saved tweet notes. The full per-note enrichment lives in the `notes-organize-tweets` skill (its own repo, installed by dot) — invoke it for the idempotent pipeline. The high-level flow:
 
 1. **Audit** existing tweet notes via `bearcli search "x.com" --format json --fields all,content,attachments,tags`. Classify each note's needs (`image`, `body`, `inbox_tag`, `extra_tags`).
 2. **Playwright** fetch tweet content + screenshot for notes needing `image` or `body`.
