@@ -11,7 +11,8 @@ don't add a `CLAUDE.md` at the root, or Claude stops reading this one.
   `install.zsh`/`set-defaults.zsh` never.
 - `*/install.sh`: run by `script/install` (sorted, failures collected).
   `mise/` and `node/` run first.
-- `*.symlink` files are linked into `$HOME` by `script/bootstrap`.
+- `*/*.symlink` files are linked into `$HOME` as dotfiles by `script/install`
+  (`zsh/zshrc.symlink` -> `~/.zshrc`).
 - `migrations/YYYY-MM-DD-*.zsh`: run on every `dot`. There is no "already
   ran" record, so each one must guard itself. They are for one-time
   transitions only: "keep X installed/linked" belongs in an installer. Delete
@@ -30,6 +31,9 @@ don't add a `CLAUDE.md` at the root, or Claude stops reading this one.
 - Installers and migrations must be idempotent and safe on a fresh machine.
   A missing prerequisite should skip with a note, not fail.
 - Edit files in the repo, never through the symlinks in `$HOME`.
+- Create links only with `link SOURCE TARGET` from `script/link.sh` (source it
+  first). It never prompts: a differing target is moved to
+  `TARGET.pre-dotfiles.<time>`, so nothing is lost. No bare `ln -s` in installers.
 - After editing `agents/claude/home/CLAUDE.md`, `agents/claude/rules/` or the
   philosophy, run `agents/codex/generate-agents-md.sh`: Codex reads a
   generated copy (see "How Instructions Load" in `agents/README.md`).

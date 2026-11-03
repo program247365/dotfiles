@@ -17,9 +17,8 @@ if [ ! -x "$BUNDLED" ]; then
   exit 0
 fi
 
-mkdir -p "$BIN_DIR"
-ln -sf "$BUNDLED" "$LINK"
-echo "Linked $LINK -> $BUNDLED"
+. "$HOME/.dotfiles/script/link.sh"
+link "$BUNDLED" "$LINK"
 
 if [ -e "$BIN_DIR/bcli" ]; then
   rm -f "$BIN_DIR/bcli"

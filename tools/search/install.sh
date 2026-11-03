@@ -98,11 +98,11 @@ fi
 # Config is committed in the search repo and shared across machines via
 # symlink. A pre-existing regular file (local divergence) is left alone.
 CONFIG_DIR="$HOME/.config/search"
-mkdir -p "$CONFIG_DIR"
 if [ -f "$CONFIG_DIR/config.json" ] && [ ! -L "$CONFIG_DIR/config.json" ]; then
   echo "  Note: $CONFIG_DIR/config.json is a local file, not linking (repo copy: $REPO_DIR/config.json)"
 else
-  ln -sf "$REPO_DIR/config.json" "$CONFIG_DIR/config.json"
+  . "$HOME/.dotfiles/script/link.sh"
+  link "$REPO_DIR/config.json" "$CONFIG_DIR/config.json"
 fi
 
 echo "Done setting up search ($("$BIN_DIR/search" --version))"

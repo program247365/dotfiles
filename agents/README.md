@@ -162,8 +162,6 @@ is safe to re-run:
 - `~/.claude/skills/<name>` -> `~/.dotfiles/agents/claude/home/skills/<name>` (one link per own skill)
 - third-party skills listed in `agents/claude/skills.txt` (see below)
 - `~/.dotfiles/.claude` -> `~/.dotfiles/agents/claude/project`
-- `~/.claude/SOFTWARE_ENGINEERING.md` -> `~/.dotfiles/agents/philosophy/SOFTWARE_ENGINEERING.md`
-- `~/.dotfiles/SOFTWARE_ENGINEERING.md` -> `~/.dotfiles/agents/philosophy/SOFTWARE_ENGINEERING.md`
 
 This keeps all Claude configuration in version control. Global settings (permissions, plugins, hooks) are symlinked directly — changes made interactively by Claude Code are tracked automatically.
 
@@ -191,14 +189,13 @@ synced skills (`synced/`). Those stay machine-local and never land in git.
 `agents/codex/install.sh` manages:
 
 - `~/.codex/AGENTS.md`: generated, not linked, by `generate-agents-md.sh`. See [Why Codex is different](#why-codex-is-different).
-- `~/.codex/SOFTWARE_ENGINEERING.md` -> `~/.dotfiles/agents/philosophy/SOFTWARE_ENGINEERING.md`
 - `~/.codex/skills/<skill-name>` -> `~/.dotfiles/agents/codex/skills/<skill-name>` (for each local skill directory)
 
 Installer behavior:
 
 - Creates missing `~/.codex` and `~/.codex/skills` directories.
 - Is idempotent (safe to rerun).
-- Backs up existing non-symlink files before replacing them (`.bak.<timestamp>`).
+- Links through `script/link.sh` (see the repo's AGENTS.md): a differing local file is saved as `*.pre-dotfiles.<timestamp>`.
 
 ## Pi Setup
 
@@ -287,7 +284,7 @@ To ensure both agents always use the latest philosophy:
 - Broken symlink after moving dotfiles:
   - Re-run relevant installer script.
 - Local file was replaced by installer:
-  - Restore from generated backup (`*.bak.<timestamp>`).
+  - Restore from its backup (`*.pre-dotfiles.<timestamp>`, or `*.bak.<timestamp>` from older installs).
 - Skill not visible in Codex:
   - Confirm the skill folder contains `SKILL.md`.
   - Re-run `agents/codex/install.sh`.
