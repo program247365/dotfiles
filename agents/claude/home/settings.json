@@ -165,7 +165,6 @@
     "plugin-dev@claude-code-plugins": false,
     "pr-review-toolkit@claude-code-plugins": false,
     "ralph-wiggum@claude-code-plugins": false,
-    "security-guidance@claude-code-plugins": true,
     "compound-engineering@compound-engineering-plugin": false,
     "swift-lsp@claude-plugins-official": false,
     "skill-creator@claude-plugins-official": false,
