@@ -31,3 +31,4 @@ vercel-labs/agent-browser#79d8dfe34c99cd91c8dfd78e38a8bc1c19c2d4b0 electron
 pbakaus/impeccable#aeeb3d8c30b5f95aeeb3e893b0f1a308af8fdb8f impeccable
 vercel-labs/skills#66a7b901aad3b30f541f646199ff0df3050b764b find-skills
 omer-metin/skills-for-antigravity#e8dcf4e8737921a10088bd5c9eb65e81f74c051f threejs-3d-graphics
+herdrdev/herdr#51b7064ef0a02642393bab1d2eea0f4dbd8414d2 herdr
