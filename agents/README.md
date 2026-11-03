@@ -22,7 +22,6 @@ agents/
 │   │   ├── settings.json
 │   │   └── skills/
 │   ├── agents/
-│   ├── commands/
 │   ├── hooks/
 │   ├── rules/
 │   └── project/
@@ -155,7 +154,6 @@ is safe to re-run:
 
 - `~/.claude/CLAUDE.md` -> `~/.dotfiles/agents/claude/home/CLAUDE.md`
 - `~/.claude/settings.json` -> `~/.dotfiles/agents/claude/home/settings.json`
-- `~/.claude/commands` -> `~/.dotfiles/agents/claude/commands`
 - `~/.claude/statusline.sh` -> `~/.dotfiles/agents/claude/statusline.sh`
 - `~/.claude/rules` -> `~/.dotfiles/agents/claude/rules`
 - `~/.claude/agents/<name>.md` -> `~/.dotfiles/agents/claude/agents/<name>.md` (one link per file)

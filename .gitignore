@@ -5,9 +5,6 @@ zsh/zshrc.local.symlink
 __pycache__/
 .claude
 /SOFTWARE_ENGINEERING.md
-.config/notes-organize-tweets/
-agents/claude/tools/node_modules/
-agents/claude/tools/package-lock.json
 agents/claude/project/scheduled_tasks.lock
 
 # herdr-ticket-campaign: repo reference files hold company-internal conventions
