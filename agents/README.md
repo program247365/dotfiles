@@ -34,14 +34,11 @@ agents/
 │       └── README.md
 ├── pi/
 │   ├── install.sh
-│   ├── system-preflight-check.sh
-│   ├── install-local-models.sh
 │   ├── README.md
-│   ├── LOCAL_MODELS.md
-│   ├── lib/
 │   └── home/
 │       ├── settings.json
-│       ├── models.json.default
+│       ├── presets.json
+│       ├── extensions/
 │       └── auth.json.example
 └── philosophy/
     ├── install.sh
@@ -201,25 +198,15 @@ Installer behavior:
 
 - `~/.pi/agent/settings.json` -> `~/.dotfiles/agents/pi/home/settings.json`
 - Global instructions: none on disk. The `shared-rules` extension injects the global sources into the system prompt. See [How Instructions Load](#how-instructions-load).
-- `~/.pi/agent/models.json` -> copied from `~/.dotfiles/agents/pi/home/models.json.default` only if missing
+- `~/.pi/agent/presets.json` -> `~/.dotfiles/agents/pi/home/presets.json`
 - `~/.kevin/bin/pi` -> symlinked to the global `pnpm` install of `@earendil-works/pi-coding-agent`
 
 Installer behavior:
 
 - Uses `pnpm add -g @earendil-works/pi-coding-agent`.
-- Optionally installs Ollama with `sh ~/.dotfiles/agents/pi/install.sh --install-ollama`.
-- When `--install-ollama` is used, it also ensures the Ollama API is running before the installer exits.
 - Creates missing `~/.pi/agent`.
-- Leaves existing machine-local `models.json` untouched after first seed.
-- Adds Pi local-model helper scripts under `agents/pi/`.
 
-Local-model workflow:
-
-- Run `~/.dotfiles/agents/pi/system-preflight-check.sh` to inspect the current machine.
-- Run `~/.dotfiles/agents/pi/install-local-models.sh --recommended` to optionally pull the recommended Ollama models.
-- Run `sh ~/.dotfiles/agents/pi/install.sh --install-ollama` if you want the base Pi setup to provision and start Ollama in one step.
-- Use `piensure <model>` to pull an Ollama model on demand before launching Pi.
-- See `agents/pi/LOCAL_MODELS.md` for memory, CPU, and `apfel` notes.
+Local models (Ollama, LM Studio) are not set up by dotfiles; add providers to the machine-local `~/.pi/agent/models.json` if you want them.
 
 ## Add a Codex Skill
 
