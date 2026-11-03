@@ -606,3 +606,7 @@
 - Added a native LaunchAgent contract for Practice Tracker, including persistent SQLite/uploads/auth secret, startup migrations, health route, and playable uploads from srv data. Added the app to srv's live manifest and launched the srv Mac app.
 - Verified Practice Tracker is healthy on port 4650 and `srv.app` is running. srv's full check passed.
 - Revisit: Practice Tracker has an existing checkout database with one user, 84 pieces, and 13 sessions; the running srv instance has an empty database. The srv-ify skill requires explicit authorization before importing existing app data.
+
+## 2026-11-03: Restore Practice Tracker's existing srv data
+- Imported a verified SQLite backup of the existing Practice Tracker checkout database into srv's persistent data directory. Kept the checkout source and a backup of the original empty srv database.
+- Confirmed the imported account, 84 pieces, and 13 practice sessions are present, restarted the service, and verified `/api/health` returns `ok`.
