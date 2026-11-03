@@ -24,7 +24,7 @@ On the first run, a picker asks which Brewfile entries to install on this machin
 
 ## Migrations
 
-The `/migrations` folder contains dated scripts for handling configuration changes and updates when setting up on new machines or after major changes.
+The `/migrations` folder contains dated scripts for one-time transitions (moving a tool to a new install method, replacing an old layout). Anything that must stay true on every machine belongs in a topic's `install.sh` instead. A migration is deleted once every machine has run it.
 
 Migration scripts are named with the format: `YYYY-MM-DD-description.zsh`
 
@@ -34,7 +34,7 @@ Migrations are automatically run when you use the `dot` command. You can also ru
 
 ```zsh
 # Run a specific migration
-~/.dotfiles/migrations/2025-08-20-lazyvim-setup.zsh
+~/.dotfiles/migrations/2026-10-19-agents-md-project-instructions.zsh
 
 # Run all migrations (done automatically by dot command)
 for script in ~/.dotfiles/migrations/*.zsh; do

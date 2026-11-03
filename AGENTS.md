@@ -13,7 +13,9 @@ don't add a `CLAUDE.md` at the root, or Claude stops reading this one.
   `mise/` and `node/` run first.
 - `*.symlink` files are linked into `$HOME` by `script/bootstrap`.
 - `migrations/YYYY-MM-DD-*.zsh`: run on every `dot`. There is no "already
-  ran" record, so each one must guard itself.
+  ran" record, so each one must guard itself. They are for one-time
+  transitions only: "keep X installed/linked" belongs in an installer. Delete
+  a migration once every machine has run it, and note that in WORKLOG.md.
 - `Brewfile`: everything Homebrew, cask and `mas` installs.
 - `agents/`: agent config, installed by symlink. See `agents/README.md`.
   - `agents/philosophy/SOFTWARE_ENGINEERING.md` is the canonical philosophy.
