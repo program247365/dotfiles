@@ -1,27 +1,31 @@
-# Third-party Claude skills: "<github owner/repo> <skill name>" per line.
-# agents/claude/install.sh installs any missing from ~/.agents/skills with the
-# skills CLI and links each into ~/.claude/skills. Your own skills live in
-# home/skills/ instead. To track a new one: `npx skills add <repo> -g -s <name>`,
-# then add its line here.
-jeffallan/claude-skills architecture-designer
-mattpocock/skills design-an-interface
-mattpocock/skills diagnose
-mattpocock/skills edit-article
-mattpocock/skills grill-me
-mattpocock/skills grill-with-docs
-mattpocock/skills handoff
-mattpocock/skills improve-codebase-architecture
-mattpocock/skills prototype
-mattpocock/skills qa
-mattpocock/skills request-refactor-plan
-mattpocock/skills review
-mattpocock/skills tdd
-mattpocock/skills to-issues
-mattpocock/skills to-prd
-mattpocock/skills triage
-mattpocock/skills writing-beats
-mattpocock/skills writing-fragments
-mattpocock/skills writing-shape
-mattpocock/skills zoom-out
-vercel-labs/agent-browser electron
-pbakaus/impeccable impeccable
+# Third-party Claude skills, one "<owner/repo>#<commit> <skill name>" per line.
+# agents/claude/install.sh links any that are missing from ~/.agents/skills or
+# installs them at the pinned commit with the skills CLI. Your own skills live
+# in home/skills/ instead.
+#
+# Pins are the versions you reviewed. Don't run `npx skills update`, because it
+# moves skills past their pins. To upgrade, read upstream's diff, change the
+# commit here, delete ~/.claude/skills/<name>, and run dot. To track a new
+# skill, add its line here and run dot.
+jeffallan/claude-skills#efebc44c90ae6eb3b36ff1c53802a765418481b9 architecture-designer
+mattpocock/skills#3e3ca9b9fa007614c65fab70469127b25841881d design-an-interface
+mattpocock/skills#7afa86d3a5dd96edde06ffa014e16c64e733681e diagnose
+mattpocock/skills#62f43a18177be6ec82da242e59ffbc490a4c22ea edit-article
+mattpocock/skills#62f43a18177be6ec82da242e59ffbc490a4c22ea grill-me
+mattpocock/skills#e3b90b5238f38cdea5996e16861dcae28ef52eda grill-with-docs
+mattpocock/skills#d54c497aa94400a496d3f2c38be10fa5f284c5a9 handoff
+mattpocock/skills#a36584e09eaee067c425938fd66bc7ccddf089e2 improve-codebase-architecture
+mattpocock/skills#f304057d61d3df3c9fd992ac2b6e3833cb9325fb prototype
+mattpocock/skills#62f43a18177be6ec82da242e59ffbc490a4c22ea qa
+mattpocock/skills#62f43a18177be6ec82da242e59ffbc490a4c22ea request-refactor-plan
+mattpocock/skills#9fecab929abb904c68ce3366a1781df31ab22832 review
+mattpocock/skills#7afa86d3a5dd96edde06ffa014e16c64e733681e tdd
+mattpocock/skills#ff3ee1dda50d636b4e25b1ba269d25d6d5784164 to-issues
+mattpocock/skills#aaf2453fbdfe7a15c07f11d861224f34ab4b53cb to-prd
+mattpocock/skills#179a14e721034706ffce7abae75b877c922b4ae8 triage
+mattpocock/skills#9f2e0bd0ea776eb6372eb81fa8a4a47814a8404a writing-beats
+mattpocock/skills#9f2e0bd0ea776eb6372eb81fa8a4a47814a8404a writing-fragments
+mattpocock/skills#ff3ee1dda50d636b4e25b1ba269d25d6d5784164 writing-shape
+mattpocock/skills#7afa86d3a5dd96edde06ffa014e16c64e733681e zoom-out
+vercel-labs/agent-browser#79d8dfe34c99cd91c8dfd78e38a8bc1c19c2d4b0 electron
+pbakaus/impeccable#aeeb3d8c30b5f95aeeb3e893b0f1a308af8fdb8f impeccable

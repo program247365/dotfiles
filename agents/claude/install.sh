@@ -252,14 +252,24 @@ while read -r skill_source skill_name; do
   [ -e "$CLAUDE_DIR/skills/$skill_name" ] || skills_failed+=("$skill_name")
 done < "$SKILLS_MANIFEST"
 
-# Skills CLI installs that skills.txt doesn't list exist only on this machine.
+# Compare what's installed (the skills CLI's lock) with skills.txt: a skill
+# missing from the list exists only on this machine, and one installed at a
+# different commit than its pin needs a reinstall. Older installs recorded no
+# commit, so they can't be checked.
 SKILLS_LOCK="$HOME/.agents/.skill-lock.json"
 if [ -f "$SKILLS_LOCK" ] && command -v python3 > /dev/null 2>&1; then
-  python3 -c 'import json, sys; print("\n".join(json.load(open(sys.argv[1]))["skills"]))' "$SKILLS_LOCK" |
-    while read -r name; do
+  python3 -c '
+import json, sys
+for name, entry in json.load(open(sys.argv[1]))["skills"].items():
+    print(name, entry.get("ref") or "-")
+' "$SKILLS_LOCK" |
+    while read -r name installed_ref; do
       [ -e "$CLAUDE_DIR/skills/$name" ] || continue
-      if ! awk -v n="$name" '$1 !~ /^#/ && $2 == n { found = 1 } END { exit !found }' "$SKILLS_MANIFEST"; then
+      pinned_source="$(awk -v n="$name" '$1 !~ /^#/ && $2 == n { print $1 }' "$SKILLS_MANIFEST")"
+      if [ -z "$pinned_source" ]; then
         echo "  [note] $name is installed but not in agents/claude/skills.txt, so other machines won't get it"
+      elif [ "$installed_ref" != "-" ] && [ "$installed_ref" != "${pinned_source#*#}" ]; then
+        echo "  [note] $name is installed at ${installed_ref:0:7}, pinned at $(echo "${pinned_source#*#}" | cut -c1-7); delete ~/.claude/skills/$name, then run dot"
       fi
     done
 fi
