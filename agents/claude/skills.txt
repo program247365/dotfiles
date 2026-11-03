@@ -29,3 +29,5 @@ mattpocock/skills#ff3ee1dda50d636b4e25b1ba269d25d6d5784164 writing-shape
 mattpocock/skills#7afa86d3a5dd96edde06ffa014e16c64e733681e zoom-out
 vercel-labs/agent-browser#79d8dfe34c99cd91c8dfd78e38a8bc1c19c2d4b0 electron
 pbakaus/impeccable#aeeb3d8c30b5f95aeeb3e893b0f1a308af8fdb8f impeccable
+vercel-labs/skills#66a7b901aad3b30f541f646199ff0df3050b764b find-skills
+omer-metin/skills-for-antigravity#e8dcf4e8737921a10088bd5c9eb65e81f74c051f threejs-3d-graphics
