@@ -81,20 +81,25 @@ echo "  Wrote $BIN_DIR/qmd (runs $QMD_ENTRY under $BREW_NODE)"
 echo "Syncing Bear notes to $MIRROR_DIR..."
 bun "$SYNC_SCRIPT"
 
-# Old fork installs registered a `type: bear` collection with no path;
-# stock qmd can't use it. Re-register against the mirror directory.
-qmd collection remove bear >/dev/null 2>&1 || true
-qmd collection add "$MIRROR_DIR" --name bear --mask '**/*.md'
-qmd collection update-cmd bear "bun $SYNC_SCRIPT"
+# Register the collection only when it's missing or wrong. Re-adding it
+# re-indexes every note and orphans embedding chunks. Old fork installs left a
+# `type: bear` collection with no path, which stock qmd can't use.
+collection="$(qmd collection show bear 2>/dev/null || true)"
+if echo "$collection" | grep -qxF "  Path:     $MIRROR_DIR" &&
+   echo "$collection" | grep -qxF "  Update:   bun $SYNC_SCRIPT"; then
+  echo "  [ok] qmd collection 'bear'"
+else
+  qmd collection remove bear >/dev/null 2>&1 || true
+  qmd collection add "$MIRROR_DIR" --name bear --mask '**/*.md'
+  qmd collection update-cmd bear "bun $SYNC_SCRIPT"
+fi
 
 # Human-written summary qmd feeds into search relevance (re-add overwrites)
 qmd context add "qmd://bear/" "Kevin's personal Bear notes: project logs and worklogs, saved tweets and articles, writing drafts, meeting notes, recipes, family and kids' sports notes, code snippets, and reference material saved since ~2017."
 
-echo "Indexing Bear notes..."
-qmd update
-
-echo "Generating embeddings..."
-qmd embed
+# Indexing (`qmd update` + `qmd embed`) is not run here: it was most of dot's
+# runtime. The daily agent below runs it, and so does any search against an
+# index older than 7 days. Run `search update qmd` to index right away.
 
 # --- Daily sync (launchd) ---
 # Primary freshness path: `search update qmd` at 5:00 AM (launchd runs it on
