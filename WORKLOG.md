@@ -536,3 +536,12 @@
 - Decided: `model` is now `fable`, reversing the 2026-10-22 "stays opus" decision. Kevin chose this when asked.
 - Revisit: not pushed. Claude Code rewrites settings.json on every save, so expect more key-order noise; committing the normalized form should keep future diffs small.
 - Follow-up: reversed again, `model` stays `opus` (revert commit, nothing had been pushed). Expect the fable line to reappear after any `/model` switch; leave it out of commits.
+
+## 2026-11-03: Simplification pass (dead docs, migrations, qmd off dot)
+- Deleted finished plans (`docs/plans`, `docs/superpowers`, kept in git history) and LazyVim's unused `config/lua/plugins/example.lua`.
+- Migrations: deleted the two superseded ones (claude-skills-setup, claude-code-npm-migration). The lazyvim one only ensured a link, so it became `config/install.sh`. Kept 2026-09-04 (native claude installer) and 2026-10-19 (AGENTS.md) until both Macs have run them.
+- New rule in AGENTS.md/README: migrations are for one-time transitions only; "keep X linked/installed" goes in an installer; delete a migration once every machine has run it.
+- `tools/qmd/install.sh` no longer runs `qmd update`/`qmd embed` (most of dot's runtime). Indexing is covered by the `com.kevin.qmd-sync` launchd agent (5:00 AM, `search update qmd`, log shows daily runs) and the >7d search-time backstop. Installer re-run took 21s.
+- Decided: keep agents/ in this repo for now (see the separate-repo discussion). Do option A (third-party skills from a lock file, not vendored) in place first.
+- Revisit: qmd/install.sh still removes and re-adds the `bear` collection on every run (re-indexes 5907 docs; vectors survive). That was a one-time fix for old fork installs; guard it. 2693 orphaned embedding chunks: `qmd cleanup`. Not committed.
+- Follow-up: guarded the qmd collection re-registration. It only removes and re-adds `bear` when `qmd collection show bear` lacks the expected Path/Update lines (missing, wrong path, or an old fork's path-less collection). A re-run now prints `[ok]` and indexes nothing; the branch logic was checked against fake outputs. Committed as four commits (docs, migrations, qmd, worklog), not pushed.
