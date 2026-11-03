@@ -19,7 +19,9 @@ don't add a `CLAUDE.md` at the root, or Claude stops reading this one.
 - `Brewfile`: everything Homebrew, cask and `mas` installs.
 - `agents/`: agent config, installed by symlink. See `agents/README.md`.
   - `agents/philosophy/SOFTWARE_ENGINEERING.md` is the canonical philosophy.
-  - `agents/claude/home/` is `~/.claude/` (CLAUDE.md, settings.json, skills).
+  - `agents/claude/home/` is `~/.claude/` (CLAUDE.md, settings.json, own
+    skills). Third-party skills are listed in `agents/claude/skills.txt` and
+    installed by `dot`, never committed.
   - `agents/claude/rules/` is `~/.claude/rules/`; pi loads it too.
   - `agents/claude/project/` is this repo's `.claude/` (settings.local.json).
 

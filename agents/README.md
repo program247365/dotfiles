@@ -16,9 +16,11 @@ agents/
 ├── claude/
 │   ├── install.sh
 │   ├── statusline.sh
+│   ├── skills.txt
 │   ├── home/
 │   │   ├── CLAUDE.md
-│   │   └── settings.json
+│   │   ├── settings.json
+│   │   └── skills/
 │   ├── agents/
 │   ├── commands/
 │   ├── hooks/
@@ -156,12 +158,29 @@ is safe to re-run:
 - `~/.claude/commands` -> `~/.dotfiles/agents/claude/commands`
 - `~/.claude/statusline.sh` -> `~/.dotfiles/agents/claude/statusline.sh`
 - `~/.claude/rules` -> `~/.dotfiles/agents/claude/rules`
-- `~/.claude/agents` -> `~/.dotfiles/agents/claude/agents`
+- `~/.claude/agents/<name>.md` -> `~/.dotfiles/agents/claude/agents/<name>.md` (one link per file)
+- `~/.claude/skills/<name>` -> `~/.dotfiles/agents/claude/home/skills/<name>` (one link per own skill)
+- third-party skills listed in `agents/claude/skills.txt` (see below)
 - `~/.dotfiles/.claude` -> `~/.dotfiles/agents/claude/project`
 - `~/.claude/SOFTWARE_ENGINEERING.md` -> `~/.dotfiles/agents/philosophy/SOFTWARE_ENGINEERING.md`
 - `~/.dotfiles/SOFTWARE_ENGINEERING.md` -> `~/.dotfiles/agents/philosophy/SOFTWARE_ENGINEERING.md`
 
 This keeps all Claude configuration in version control. Global settings (permissions, plugins, hooks) are symlinked directly — changes made interactively by Claude Code are tracked automatically.
+
+### Skills and subagents
+
+`~/.claude/skills` and `~/.claude/agents` are real directories holding links,
+not links to this repo. Other installers write into them freely: the skills
+CLI, the tldraw and Spark apps (tldraw-offline, use-spark), and claude.ai's
+synced skills (`synced/`). Those stay machine-local and never land in git.
+
+- **Your own skill:** add `agents/claude/home/skills/<name>/SKILL.md`, then run
+  the installer to link it.
+- **Someone else's skill:** `npx skills add <owner/repo> -g -s <name>`, then add
+  `<owner/repo> <name>` to `agents/claude/skills.txt`. On every machine, `dot`
+  links or installs whatever on that list is missing. The installer prints a
+  `[note]` for an installed skill that isn't on the list.
+- `npx skills update -g` updates third-party skills in place.
 
 ## Codex Setup
 

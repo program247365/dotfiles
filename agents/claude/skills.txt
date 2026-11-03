@@ -1,0 +1,27 @@
+# Third-party Claude skills: "<github owner/repo> <skill name>" per line.
+# agents/claude/install.sh installs any missing from ~/.agents/skills with the
+# skills CLI and links each into ~/.claude/skills. Your own skills live in
+# home/skills/ instead. To track a new one: `npx skills add <repo> -g -s <name>`,
+# then add its line here.
+jeffallan/claude-skills architecture-designer
+mattpocock/skills design-an-interface
+mattpocock/skills diagnose
+mattpocock/skills edit-article
+mattpocock/skills grill-me
+mattpocock/skills grill-with-docs
+mattpocock/skills handoff
+mattpocock/skills improve-codebase-architecture
+mattpocock/skills prototype
+mattpocock/skills qa
+mattpocock/skills request-refactor-plan
+mattpocock/skills review
+mattpocock/skills tdd
+mattpocock/skills to-issues
+mattpocock/skills to-prd
+mattpocock/skills triage
+mattpocock/skills writing-beats
+mattpocock/skills writing-fragments
+mattpocock/skills writing-shape
+mattpocock/skills zoom-out
+vercel-labs/agent-browser electron
+pbakaus/impeccable impeccable
