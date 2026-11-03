@@ -46,29 +46,7 @@ SHELL_ZSH_SOURCE="source \"$DOTFILES_ROOT/agents/shell.zsh\""
 mkdir -p "${PI_AGENT_DIR}"
 mkdir -p "${KEVIN_BIN_DIR}"
 
-link_with_backup() {
-  local source="$1"
-  local target="$2"
-  local label="$3"
-  local current_target=""
-  local backup=""
-
-  if [ -L "${target}" ]; then
-    current_target="$(readlink "${target}")"
-    if [ "${current_target}" = "${source}" ]; then
-      echo "  ${label} already linked"
-      return
-    fi
-    rm "${target}"
-  elif [ -e "${target}" ]; then
-    backup="${target}.bak.$(date +%Y%m%d%H%M%S)"
-    mv "${target}" "${backup}"
-    echo "  Backed up existing ${label} to ${backup}"
-  fi
-
-  ln -s "${source}" "${target}"
-  echo "  Linked ${label}"
-}
+. "${DOTFILES_ROOT}/script/link.sh"
 
 copy_if_missing() {
   local source="$1"
@@ -156,10 +134,9 @@ if [ ! -x "${PNPM_BIN_DIR}/pi" ]; then
   exit 1
 fi
 
-ln -sf "${PNPM_BIN_DIR}/pi" "${KEVIN_BIN_DIR}/pi"
-echo "  Linked ~/.kevin/bin/pi"
+link "${PNPM_BIN_DIR}/pi" "${KEVIN_BIN_DIR}/pi"
 
-link_with_backup "${DOTFILES_PI}/home/settings.json" "${PI_AGENT_DIR}/settings.json" "~/.pi/agent/settings.json"
+link "${DOTFILES_PI}/home/settings.json" "${PI_AGENT_DIR}/settings.json"
 # Global instructions come from the shared-rules extension. Older installs
 # linked ~/.pi/agent/AGENTS.md to a file that was never committed.
 if [ -L "${PI_AGENT_DIR}/AGENTS.md" ] \
@@ -167,7 +144,7 @@ if [ -L "${PI_AGENT_DIR}/AGENTS.md" ] \
   rm "${PI_AGENT_DIR}/AGENTS.md"
   echo "  Removed stale ~/.pi/agent/AGENTS.md link"
 fi
-link_with_backup "${DOTFILES_PI}/home/presets.json" "${PI_AGENT_DIR}/presets.json" "~/.pi/agent/presets.json"
+link "${DOTFILES_PI}/home/presets.json" "${PI_AGENT_DIR}/presets.json"
 copy_if_missing "${DOTFILES_PI}/home/models.json.default" "${PI_AGENT_DIR}/models.json" "~/.pi/agent/models.json"
 
 if ! grep -qF "${SHELL_ZSH_SOURCE}" "${HOME}/.zshrc.local" 2>/dev/null; then

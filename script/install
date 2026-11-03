@@ -11,6 +11,13 @@ export PATH="$HOME/.local/share/mise/shims:$PATH"
 failed=()
 run() { sh -c "$1" || failed+=("$1"); }
 
+# *.symlink files become dotfiles in $HOME (zsh/zshrc.symlink -> ~/.zshrc).
+. ./script/link.sh
+for symlink in */*.symlink; do
+  name="$(basename "$symlink" .symlink)"
+  link "$PWD/$symlink" "$HOME/.$name"
+done
+
 run ./mise/install.sh
 run ./node/install.sh
 
