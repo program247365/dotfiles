@@ -39,7 +39,7 @@
       "/Users/kevin/.kevin/code/claude-code"
     ]
   },
-  "model": "fable",
+  "model": "opus",
   "skillOverrides": {
     "architecture-designer": "off",
     "brainstorming": "off",
