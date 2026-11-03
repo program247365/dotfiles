@@ -51,7 +51,6 @@ No `make check` yet. Before calling a change done:
 - `bash -n` / `zsh -n` every shell file you touched.
 - Re-run the installer you touched and confirm its links resolve
   (`ls -l` the targets; no dangling symlinks).
-- `kit/test.sh` if you touched `kit/`.
 
 ## WORKLOG.md
 
