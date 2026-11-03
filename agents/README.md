@@ -176,11 +176,15 @@ synced skills (`synced/`). Those stay machine-local and never land in git.
 
 - **Your own skill:** add `agents/claude/home/skills/<name>/SKILL.md`, then run
   the installer to link it.
-- **Someone else's skill:** `npx skills add <owner/repo> -g -s <name>`, then add
-  `<owner/repo> <name>` to `agents/claude/skills.txt`. On every machine, `dot`
-  links or installs whatever on that list is missing. The installer prints a
-  `[note]` for an installed skill that isn't on the list.
-- `npx skills update -g` updates third-party skills in place.
+- **Someone else's skill:** add `<owner/repo>#<commit> <name>` to
+  `agents/claude/skills.txt`, then run `dot`. On every machine, `dot` links or
+  installs whatever on that list is missing, at the pinned commit. The pin is
+  the version you reviewed; a fresh machine gets exactly that.
+- **Upgrading:** don't use `npx skills update`, which moves skills past their
+  pins. Read upstream's diff, change the commit in skills.txt, delete
+  `~/.claude/skills/<name>`, and run `dot`.
+- The installer prints a `[note]` for an installed skill that isn't on the
+  list, or one installed at a different commit than its pin.
 
 ## Codex Setup
 
