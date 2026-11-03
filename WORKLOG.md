@@ -535,3 +535,4 @@
 - The settings.json split was done by writing intermediate copies of the file and committing each, since `git add -p` is interactive. The intermediate versions were checked to round-trip back to the working copy.
 - Decided: `model` is now `fable`, reversing the 2026-10-22 "stays opus" decision. Kevin chose this when asked.
 - Revisit: not pushed. Claude Code rewrites settings.json on every save, so expect more key-order noise; committing the normalized form should keep future diffs small.
+- Follow-up: reversed again, `model` stays `opus` (revert commit, nothing had been pushed). Expect the fable line to reappear after any `/model` switch; leave it out of commits.
