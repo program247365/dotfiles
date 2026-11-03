@@ -59,19 +59,42 @@ no lint at all) — then propose it and ask before adding the dependency.
 - Non-mutating and idempotent: `check` never rewrites files. A `fix` target
   (format + lint --fix) is fine if the tools support it.
 - Exit non-zero on any failure. No `|| true`, no `-` prefixes.
+- Bare `make` runs `help`, never `check`: set `.DEFAULT_GOAL := help`. `help`
+  prints every target, read from `## description` comments on the target line
+  so the list can't drift. Every target gets a `##` comment, including ones
+  that were already there. If an existing Makefile's default target does
+  something real (e.g. `all` builds), ask before changing the default.
+- Repo has something you can open or run (web UI, dashboard, dev server, TUI,
+  docs site) → give it its own target (`serve`, `dev`, `docs`) next to `help`.
+  Delegate to the repo's existing launch command; make the port overridable
+  (`PORT ?= ...`). Smoke-test that it starts and responds; it is not a gate
+  and never part of `check`.
 
 ```make
-.PHONY: check fmt-check lint typecheck test build fix
+.DEFAULT_GOAL := help
+.PHONY: help check fmt-check lint typecheck test build fix
 
-check: fmt-check lint typecheck test build
+help: ## Show available commands
+	@grep -E '^[a-zA-Z_-]+:.*## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*## "}; {printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2}'
 
-fmt-check: ; bun run format:check
-lint:      ; bun run lint
-typecheck: ; bun run tsc --noEmit
-test:      ; bun run test
-build:     ; bun run build
+check: fmt-check lint typecheck test build ## Run every gate (local CI)
 
-fix:
+fmt-check: ## Check formatting
+	bun run format:check
+
+lint: ## Lint
+	bun run lint
+
+typecheck: ## Typecheck
+	bun run tsc --noEmit
+
+test: ## Run tests
+	bun run test
+
+build: ## Production build
+	bun run build
+
+fix: ## Auto-format and apply lint fixes
 	bun run format
 	bun run lint --fix
 ```
@@ -124,6 +147,8 @@ unless asked.
 ## Common mistakes
 
 - `check` that formats or fixes files — CI would never do that.
+- Bare `make` running `check` (or anything) instead of `help`, or a target
+  missing its `##` comment so `help` doesn't list it.
 - Inventing gates the repo has no config for, instead of proposing them.
 - Calling it done without a green run.
 - Drifting from CI: a gate CI runs that `check` skips silently.
