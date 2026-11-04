@@ -86,12 +86,13 @@ into `~/server/bin/srv-<name>` and the plist launches that, so the app shows as
 hand-write a `com.srv.*` plist or point one at `/bin/zsh -c`; register through
 `apps.yaml` and `srv sync`.
 
-Do not install a production LaunchAgent during a conversion test. A scratch
-`SRV_HOME` does not isolate launchd: plists still land in the real
-`~/Library/LaunchAgents` and show up in Login Items. Boot out and delete every
-test label you created (`launchctl bootout gui/$(id -u)/com.srv.<test>`, then
-remove its plist) and confirm `launchctl list | grep com.srv.` shows only real
-apps before handing back. After the app is
+Do not install a production LaunchAgent during a conversion test. For an
+end-to-end `srv sync` test, set a scratch `SRV_HOME`, `SRV_MANIFEST`, and
+`SRV_LAUNCH_AGENTS=$SRV_HOME/LaunchAgents`. Without the last one, test plists land
+in the real `~/Library/LaunchAgents`, reload at every login, and show up in Login
+Items. The jobs still load into the live launchd session, so boot out every test
+label you created (`launchctl bootout gui/$(id -u)/com.srv.<test>`) and confirm
+`launchctl list | grep com.srv.` shows only real apps before handing back. After the app is
 ready, provide the exact `apps:` entry, required one-time TCC grants, local URL,
 data migration result, and live deployment status.
 

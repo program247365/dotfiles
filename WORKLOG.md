@@ -618,3 +618,6 @@
 
 ## 2026-11-04: srv-ify skill knows about named launchers
 - srv-ify SKILL.md: jobs appear in Login Items as `srv-<name>` via srv's generated launcher; never hand-write `com.srv.*` plists or `/bin/zsh -c`. Added cleanup steps for test LaunchAgents, since a scratch SRV_HOME doesn't isolate launchd (leaked srvtest-* agents were found and removed).
+
+## 2026-11-04: srv-ify e2e tests set SRV_LAUNCH_AGENTS
+- srv-ify SKILL.md now tells agents to set SRV_LAUNCH_AGENTS=$SRV_HOME/LaunchAgents for scratch `srv sync` tests (new in srv), and still to boot out test labels.
