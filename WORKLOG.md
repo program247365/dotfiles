@@ -615,3 +615,6 @@
 - srv-ify now points agents at srv's `script/tailscale-serve` as the only way to expose an app on the tailnet, and notes that LaunchAgents get srv's fixed PATH (mise shims first).
 - Why: a Codex session left Practice Tracker crash-looping on a Node ABI mismatch from a baked-in shell PATH, and exposure was ad hoc `tailscale serve` calls.
 - Revisit: none.
+
+## 2026-11-04: srv-ify skill knows about named launchers
+- srv-ify SKILL.md: jobs appear in Login Items as `srv-<name>` via srv's generated launcher; never hand-write `com.srv.*` plists or `/bin/zsh -c`. Added cleanup steps for test LaunchAgents, since a scratch SRV_HOME doesn't isolate launchd (leaked srvtest-* agents were found and removed).

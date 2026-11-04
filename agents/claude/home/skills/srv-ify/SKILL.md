@@ -80,7 +80,18 @@ Homebrew, system), not the installing shell's. Build native modules under the
 mise-pinned runtime so a `brew upgrade` of an incidental Homebrew runtime can't
 break them.
 
-Do not install a production LaunchAgent during a conversion test. After the app is
+srv names each job's executable for System Settings > Login Items: it writes `run`
+into `~/server/bin/srv-<name>` and the plist launches that, so the app shows as
+`srv-<name>` instead of "zsh". Pick an app `name` that reads well there, and never
+hand-write a `com.srv.*` plist or point one at `/bin/zsh -c`; register through
+`apps.yaml` and `srv sync`.
+
+Do not install a production LaunchAgent during a conversion test. A scratch
+`SRV_HOME` does not isolate launchd: plists still land in the real
+`~/Library/LaunchAgents` and show up in Login Items. Boot out and delete every
+test label you created (`launchctl bootout gui/$(id -u)/com.srv.<test>`, then
+remove its plist) and confirm `launchctl list | grep com.srv.` shows only real
+apps before handing back. After the app is
 ready, provide the exact `apps:` entry, required one-time TCC grants, local URL,
 data migration result, and live deployment status.
 
