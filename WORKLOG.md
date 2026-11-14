@@ -578,3 +578,9 @@
 - pi local models deleted: preflight, install-local-models, pi-local-ensure, lib/model_catalog, LOCAL_MODELS.md, models.json.default, --install-ollama, and the pipreflight/pimodels/piensure functions. Removed ollama/apfel from pi's enabledModels and the `~/.claude/commands` prompts entry. apfel stays in the Brewfile (added in April as its own CLI). ~/.pi/agent/models.json on this Mac keeps its local providers.
 - Verified: full script/install exit 0, 55 [ok], no dangling links; pi 1.5.0 runs; the skill loads in Claude; Python parses and the Node import resolves from the new clone. The tweet workflow itself wasn't run end to end.
 - Other Mac, after pulling: `rm ~/.claude/commands` (now a dangling link), then dot clones both repos.
+
+## 2026-11-14: pull main, split local changes into commits
+- Rebased unpushed `make-check-repo` commit onto origin/main (41 commits behind).
+- Stash pop conflicted: kept upstream settings.json plus local `opus[1m]` model; took local lazy-lock (matches installed plugins).
+- Committed lazy-lock and the model change separately.
+- Revisit: `~/.claude/skills` is still a symlink to the repo, so `synced/` and the old `agents/claude/tools/node_modules` show as untracked (upstream dropped their ignores). Run the installer to move to the real-dir layout, then delete the leftovers.
