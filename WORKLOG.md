@@ -584,3 +584,7 @@
 - Stash pop conflicted: kept upstream settings.json plus local `opus[1m]` model; took local lazy-lock (matches installed plugins).
 - Committed lazy-lock and the model change separately.
 - Revisit: `~/.claude/skills` is still a symlink to the repo, so `synced/` and the old `agents/claude/tools/node_modules` show as untracked (upstream dropped their ignores). Run the installer to move to the real-dir layout, then delete the leftovers.
+
+## 2026-11-14: migrate to real-dir skills layout on this machine
+- Ran agents/claude/install.sh: ~/.claude/skills and ~/.claude/agents are now real dirs of links; claude.ai `synced/` moved there intact; pinned third-party skills installed from skills.txt.
+- Deleted leftover untracked agents/claude/tools/ (old notes-organize-tweets node_modules). Working tree clean.
