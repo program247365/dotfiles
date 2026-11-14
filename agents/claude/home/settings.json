@@ -39,7 +39,7 @@
       "/Users/kevin/.kevin/code/claude-code"
     ]
   },
-  "model": "opus",
+  "model": "opus[1m]",
   "skillOverrides": {
     "architecture-designer": "off",
     "brainstorming": "off",
