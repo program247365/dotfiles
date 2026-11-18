@@ -588,3 +588,8 @@
 ## 2026-11-14: migrate to real-dir skills layout on this machine
 - Ran agents/claude/install.sh: ~/.claude/skills and ~/.claude/agents are now real dirs of links; claude.ai `synced/` moved there intact; pinned third-party skills installed from skills.txt.
 - Deleted leftover untracked agents/claude/tools/ (old notes-organize-tweets node_modules). Working tree clean.
+
+## 2026-11-18: Moved a project-specific skill out of dotfiles
+- A skill and its worklog entries that belong to one personal project moved into that project's repo as a project-local skill. Dotfiles history was rewritten with git filter-repo (paths removed, WORKLOG/README sections stripped, emptied commits pruned) and force-pushed.
+- Why: project-specific agent config belongs with the project, not in public dotfiles.
+- Revisit: the other Mac's main still has the old history. After checking it has no unpushed work, fetch and hard-reset it to origin/main.
