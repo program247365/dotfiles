@@ -57,8 +57,8 @@
 - `search update index` rebuilds the FTS5 index (~35s, per-source progress
   on stderr); it also auto-runs when the index is missing or >7d stale, and
   a daily launchd daemon (com.kevin.search-index, 05:30) keeps it fresh.
-- `search restart` restarts the web/server launchd daemon (com.kevin.search)
-  — needed after installing a new search version, since the long-lived
+- `search restart` restarts the web server via `srv restart search` (it runs
+  as srv's native service "search") — needed after installing a new search version, since the long-lived
   server keeps running old code until restarted.
 - `search discovery` is browsing, not lookup — a rabbit-hole walk over the
   same corpus for "surface something forgotten/related," no query needed.
