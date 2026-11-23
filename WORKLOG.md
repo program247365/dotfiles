@@ -593,3 +593,14 @@
 - A skill and its worklog entries that belong to one personal project moved into that project's repo as a project-local skill. Dotfiles history was rewritten with git filter-repo (paths removed, WORKLOG/README sections stripped, emptied commits pruned) and force-pushed.
 - Why: project-specific agent config belongs with the project, not in public dotfiles.
 - Revisit: the other Mac's main still has the old history. After checking it has no unpushed work, fetch and hard-reset it to origin/main.
+
+## 2026-11-23: keep agent transcripts; install agentd
+- What changed
+  - `agents/claude/home/settings.json`: `cleanupPeriodDays: 36500`. The default (30) was deleting Claude Code transcripts.
+  - Brewfile: `program247365/tap/agentd` (public: github.com/program247365/agentd; pulls in dolt). New `agentd/install.sh` runs `agentd service install` (idempotent; skips if agentd isn't installed).
+  - rules/search.md: agentd archive and the agent-memory source.
+- What we decided and why
+  - A large number, not 0, for cleanupPeriodDays: 0 has meant "delete aggressively" in some versions.
+  - agentd's machine name is fixed on first run (v0.2.1), so upgrade every Mac to 0.2.1 before renaming one.
+- What to revisit next time
+  - Rerun `agents/codex/generate-agents-md.sh` after pulling, so Codex sees the search rule change.

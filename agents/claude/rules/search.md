@@ -57,6 +57,18 @@
 - `search update index` rebuilds the FTS5 index (~35s, per-source progress
   on stderr); it also auto-runs when the index is missing or >7d stale, and
   a daily launchd daemon (com.kevin.search-index, 05:30) keeps it fresh.
+- Agent sessions outlive their transcripts through **agentd** (its own CLI,
+  github.com/program247365/agentd, installed via the tap): it archives every
+  claude/codex/pi transcript (tool calls and output included) and the agents'
+  memory into Dolt, redacts secrets into a local vault, syncs between Macs,
+  and serves a browser on 127.0.0.1:3850. `agentd verify` is the PASS/FAIL
+  health check; `agentd secrets` counts secrets (never values); `agentd
+  reveal <id>` prints one, on the Mac that recorded it. search indexes
+  agentd's archive for sessions deleted here or recorded on other Macs (refs
+  `agentd:<machine>:<kind>:<path>`), and its web UI has an ARCHIVE section.
+- The `memory` source searches agent memory: Claude auto-memory
+  (~/.claude/projects/*/memory) and Codex memories; pi has none. Use
+  `search --source memory <q>` for "what did an agent remember about X".
 - `search restart` restarts the web server through whatever supervises it
   on this Mac — needed after installing a new search version, since the long-lived
   server keeps running old code until restarted.
