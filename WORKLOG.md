@@ -604,3 +604,12 @@
   - agentd's machine name is fixed on first run (v0.2.1), so upgrade every Mac to 0.2.1 before renaming one.
 - What to revisit next time
   - Rerun `agents/codex/generate-agents-md.sh` after pulling, so Codex sees the search rule change.
+
+## 2026-11-23: this Mac moved onto the rewritten history
+- What changed
+  - Local main reset to origin/main (the 2026-11-18 rewrite). The old local history is kept on branch `pre-rewrite-backup`; only new, non-private changes were replayed (c98a14e).
+  - Removed the dangling ~/.claude/skills link left behind by the skill that moved out of dotfiles.
+- What we decided and why
+  - Pushing the old local commits would have restored content the rewrite removed. Dotfiles is public: no notes about private repos or servers here.
+- What to revisit next time
+  - Delete `pre-rewrite-backup` once nothing more is needed from it.
