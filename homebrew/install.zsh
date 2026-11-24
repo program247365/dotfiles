@@ -59,4 +59,13 @@ else
   brew bundle --file="$DOTFILES_ROOT/Brewfile"
 fi
 
+# Brews only this machine wants (never in git): pair with a skip-file entry
+# to swap one Brewfile entry for another, e.g. a formula for a cask.
+LOCAL_BREWFILE="${DOTFILES_BREW_LOCAL:-$HOME/.config/dotfiles/Brewfile.local}"
+if [ -s "$LOCAL_BREWFILE" ]
+then
+  echo "  adding this machine's own brews from $LOCAL_BREWFILE"
+  brew bundle --file="$LOCAL_BREWFILE"
+fi
+
 exit 0

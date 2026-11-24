@@ -17,7 +17,10 @@ don't add a `CLAUDE.md` at the root, or Claude stops reading this one.
   ran" record, so each one must guard itself. They are for one-time
   transitions only: "keep X installed/linked" belongs in an installer. Delete
   a migration once every machine has run it, and note that in WORKLOG.md.
-- `Brewfile`: everything Homebrew, cask and `mas` installs.
+- `Brewfile`: everything Homebrew, cask and `mas` installs. Per machine, and
+  never in git: `~/.config/dotfiles/brew-skip` drops entries,
+  `~/.config/dotfiles/Brewfile.local` adds them. Keep host names out of the
+  Brewfile (this repo is public).
 - `agents/`: agent config, installed by symlink. See `agents/README.md`.
   - `agents/philosophy/SOFTWARE_ENGINEERING.md` is the canonical philosophy.
   - `agents/claude/home/` is `~/.claude/` (CLAUDE.md, settings.json, own
