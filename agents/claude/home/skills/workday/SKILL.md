@@ -2,7 +2,7 @@
 name: workday
 description: |
   Daily and weekly planning rituals. Reviews Bear notes, Linear issues, and
-  organizes #work/_today. Modes: day-start, day-end, week-start, week-end.
+  organizes the work `_today` tag. Modes: day-start, day-end, week-start, week-end.
 ---
 
 # Workday Skill
@@ -32,12 +32,13 @@ If no argument is given, infer from day-of-week and time:
 
 ## Conventions
 
+- **Work tag:** `$WORK_TAG` below is the root Bear tag for work notes. It is not kept in this repo: set it first in every shell with `WORK_TAG=$(cat ~/.config/workday/tag)`, and stop and ask if that file is missing.
 - **Tag taxonomy:**
-  - `#work/_today` — active/current items (working set)
-  - `#work/journal` — archived daily/weekly entries and completed work
-  - More specific tags (e.g. `#work/agents-experience`) take priority over `journal` when they exist
+  - `#$WORK_TAG/_today` — active/current items (working set)
+  - `#$WORK_TAG/journal` — archived daily/weekly entries and completed work
+  - More specific tags (e.g. `#$WORK_TAG/agents-experience`) take priority over `journal` when they exist
 - **Note naming:** `YYYYMMDD - <Type>` (e.g. `20260302 - Week Plan`, `20260303 - Day Start`)
-- **Date filtering:** prefer Bear's inline operators — `@today`, `@yesterday`, `@last7days`, `@date(>YYYY-MM-DD)`. Combine with tags: `bearcli search "#work @last7days" --format json`. No more post-processing in Python for date windows.
+- **Date filtering:** prefer Bear's inline operators — `@today`, `@yesterday`, `@last7days`, `@date(>YYYY-MM-DD)`. Combine with tags: `bearcli search "#$WORK_TAG @last7days" --format json`. No more post-processing in Python for date windows.
 
 ## Shared Steps
 
@@ -47,15 +48,15 @@ For most modes, a single `bearcli search` query returns the right window directl
 
 ```bash
 # Last week's work notes — bodies included
-bearcli search "#work @last7days" --format json \
+bearcli search "#$WORK_TAG @last7days" --format json \
   --fields id,title,tags,modified,content > /tmp/bear_last_week.json
 
 # Today's working set — metadata only (bodies fetched on demand)
-bearcli search "#work/_today" --format json --fields id,title,tags,modified \
+bearcli search "#$WORK_TAG/_today" --format json --fields id,title,tags,modified \
   > /tmp/bear_today.json
 
 # Specific window (use for week-start when @last7days doesn't align)
-bearcli search "#work @date(>2026-04-21) @date(<2026-04-29)" --format json \
+bearcli search "#$WORK_TAG @date(>2026-04-21) @date(<2026-04-29)" --format json \
   --fields id,title,tags,modified,content
 ```
 
@@ -86,11 +87,11 @@ bearcli show NOTE_ID --format json --fields all,content  # full metadata + body
 To move a note from `_today` to `journal` (or another tag), use the dedicated tag commands — they don't disturb the body or modification date:
 
 ```bash
-bearcli tags remove NOTE_ID work/_today
-bearcli tags add    NOTE_ID work/journal
+bearcli tags remove NOTE_ID $WORK_TAG/_today
+bearcli tags add    NOTE_ID $WORK_TAG/journal
 ```
 
-If a note already has a more specific subtag (e.g. `work/agents-experience`), just remove `_today` and skip the `journal` add.
+If a note already has a more specific subtag (e.g. `$WORK_TAG/agents-experience`), just remove `_today` and skip the `journal` add.
 
 ## Mode: `week-start`
 
@@ -100,29 +101,29 @@ If a note already has a more specific subtag (e.g. `work/agents-experience`), ju
 
 1. **Gather last week's data in one search** (include bodies, no follow-up cat loop):
    ```bash
-   bearcli search "#work @last7days" --format json \
+   bearcli search "#$WORK_TAG @last7days" --format json \
      --fields id,title,tags,modified,content > /tmp/bear_last_week.json
    ```
    Plus: Linear issues assigned to me — completed last week and currently active.
 
-2. **Create "Week Review" note** tagged `#work/journal`:
+2. **Create "Week Review" note** tagged `#$WORK_TAG/journal`:
    - Title: `Week Review: <date range>`
    - Sections: Completed (Linear table), Key Work (grouped by theme), Context
    - Be specific about what was shipped, not vague summaries
 
-3. **Create "Week Plan" note** tagged `#work/_today`, then `bearcli open` it:
+3. **Create "Week Plan" note** tagged `#$WORK_TAG/_today`, then `bearcli open` it:
    - Title: `YYYYMMDD - Week Plan`
    - Sections: Active Linear issues (grouped by status/priority), Carryover items, Priorities (numbered)
    - Pull priority context from Slack messages if present in notes
-   - Optional: `bearcli pin add NEW_ID work` to surface it at the top of the tag list
+   - Optional: `bearcli pin add NEW_ID $WORK_TAG` to surface it at the top of the tag list
 
 4. **Retag old `_today` notes:**
-   - Read all notes currently tagged `#work/_today`
+   - Read all notes currently tagged `#$WORK_TAG/_today`
    - For each that looks like last week's work (completed tickets, investigations, explorations):
      - If it has a more specific work subtag → remove `_today`, keep specific tag
      - Otherwise → replace `_today` with `journal`
    - Keep notes that are genuinely ongoing (ideas lists, active conversations, open investigations)
-   - When unsure, default to `#work/journal`
+   - When unsure, default to `#$WORK_TAG/journal`
 
 5. **Present summary** to user: what was created, what was retagged, what was kept
 
@@ -133,11 +134,11 @@ If a note already has a more specific subtag (e.g. `work/agents-experience`), ju
 **Steps:**
 
 1. **Gather today's context:**
-   - Current `#work/_today` notes (the working set)
+   - Current `#$WORK_TAG/_today` notes (the working set)
    - Linear issues assigned to me, active (In Progress, Todo, In Review)
    - Any notes modified yesterday that might need follow-up
 
-2. **Create "Day Start" note** tagged `#work/_today`, then `bearcli open NEW_ID`:
+2. **Create "Day Start" note** tagged `#$WORK_TAG/_today`, then `bearcli open NEW_ID`:
    - Title: `YYYYMMDD - Day Start`
    - Sections: Focus (top 3 priorities for today), Active Issues, Carry Forward
    - Keep it short — this is a checklist, not an essay
@@ -151,11 +152,11 @@ If a note already has a more specific subtag (e.g. `work/agents-experience`), ju
 **Steps:**
 
 1. **Gather today's activity:**
-   - Notes modified today tagged `#work`
+   - Notes modified today tagged `#$WORK_TAG`
    - Linear issues completed today (compare against morning state if day-start note exists)
    - Git log for today if in a repo: `git log --oneline --after="YYYY-MM-DDT00:00" --author="kevin"`
 
-2. **Append to or create journal entry** tagged `#work/journal`:
+2. **Append to or create journal entry** tagged `#$WORK_TAG/journal`:
    - Title: `YYYYMMDD - Day End`
    - Sections: Done (what shipped), In Progress (what's mid-flight), Tomorrow (what to pick up)
 
@@ -170,11 +171,11 @@ If a note already has a more specific subtag (e.g. `work/agents-experience`), ju
 **Steps:**
 
 1. **Gather the full week:**
-   - All `#work/journal` entries from this week
+   - All `#$WORK_TAG/journal` entries from this week
    - Linear issues completed this week
    - PRs authored/reviewed this week (if in a repo with `gh`)
 
-2. **Create "Week Review" note** tagged `#work/journal`:
+2. **Create "Week Review" note** tagged `#$WORK_TAG/journal`:
    - Title: `Week Review: <date range>`
    - Sections: Completed (Linear table), Key Themes, Demo Draft (a paragraph summarizing the week for standup/demo), Brag Items
 

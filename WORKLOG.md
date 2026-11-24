@@ -87,16 +87,16 @@
 - What to revisit next time
   - Push search repo 4f9feea (and Kevin's sources/Makefile work) when ready.
 
-## 2026-08-10: OOO meeting catch-up — work summaries into a Bear note
+## 2026-08-10: OOO meeting catch-up — meeting summaries into a Bear note
 
 - Confirmed OOO window Jul 30–Aug 9 (last recording + last commit Jul 29; back Aug 10).
-- Found NO work recordings exist for that window (own capture off, no teammate
-  captures visible; work's own Aug 6 brief confirms the transcription gap).
+- Found NO meeting recordings exist for that window (own capture off, no teammate
+  captures visible; the recorder's own Aug 6 brief confirms the transcription gap).
 - Reconstructed gists from daily personal brief emails (Spark IDs 5122–5192) and
   calendar recaps; wrote Bear note 71297200-58CD-4D11-ACEC-A51758B5A596
-  ("OOO Catch-up: Jul 30 – Aug 9, 2026", #work/_today).
-- Learned: work MCP `list meetings` only returns own captures; meeting URLs are
-  app.work.com/meetings/<id>; brief emails wrap all links in SendGrid trackers
+  ("OOO Catch-up: Jul 30 – Aug 9, 2026", the work `_today` tag).
+- Learned: the meeting recorder's MCP `list meetings` only returns own captures; meeting URLs are
+  on its web app under /meetings/<id>; brief emails wrap all links in SendGrid trackers
   (underlying URLs unrecoverable without following redirects).
 
 ## 2026-08-11: Tweet notes enrichment run (/notes-organize-tweets)
